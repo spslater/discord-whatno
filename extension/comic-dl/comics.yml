@@ -1,0 +1,8 @@
+-
+  dirs: "DumbingOfAge/"
+  url: "https://www.dumbingofage.com/2020/comic/book-10/03-when-it-crumbles/unaccounted/"
+  nxt: 
+    - tag: 'div'
+      id: 'comic-foot'
+    - tag: 'a'
+      class: 'navi navi-next'
