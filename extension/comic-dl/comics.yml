@@ -1,6 +1,8 @@
 -
   dirs: "DumbingOfAge/"
-  url: "https://www.dumbingofage.com/2020/comic/book-10/03-when-it-crumbles/unaccounted/"
+  name: "Dumbing of Age"
+  url: "https://www.dumbingofage.com/2010/comic/book-1/01-move-in-day/home/"
+  alt: True
   nxt: 
     - tag: 'div'
       id: 'comic-foot'
