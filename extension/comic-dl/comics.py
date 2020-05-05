@@ -10,6 +10,8 @@ from PIL import Image, ImageFont, ImageDraw
 from textwrap import fill
 from time import sleep
 
+COMICS = "~/media/reading/comics/"
+
 def getNext(soup, nxtList):
 	soup = soup
 	for nxt in nxtList:
@@ -29,7 +31,7 @@ def addAltToImage(inName, outName, altRaw):
 
 	font = ImageFont.truetype('./font/Ubuntu-R.ttf', 16)
 	drawFont = ImageDraw.Draw(Image.new('RGB', (c_width, c_height*2), (255, 255, 255)))
-	alt = fill(altRaw, width=(int((c_width-20)/8)))
+	alt = fill(altRaw, width=(int((c_width-20)/11)))
 	alt_width, alt_height = drawFont.textsize(alt, font=font)
 
 	height = c_height+10+alt_height+10
@@ -59,8 +61,9 @@ with open('./comics.yml') as yml:
 	comics = load(yml.read(), Loader=Loader)
 
 for comic in comics:
-	url = comic['url']
-	loc = comic['dirs'] if ('dirs' in comic) else (urlparse(url).netloc.split('.')[-2] + '/')
+	cur = comic['cur'] if ('cur' in comic) else False
+	url = comic['home'] if (cur and 'home' in comic) else comic['url']
+	loc = comic['loc'] if ('loc' in comic) else (urlparse(url).netloc.split('.')[-2] + '/')
 	name = comic['name'] if ('name' in comic) else loc[:-1]
 	getAlt = comic['alt'] if ('alt' in comic) else False
 	nxtList = comic['nxt']
@@ -81,27 +84,30 @@ for comic in comics:
 			elif imgTag.get('title', False):
 				alt = imgTag['title']
 
-		try:
-			nxt = getNext(soup, nxtList)
-		except:
-			break
-
 		_, ext = path.splitext(img)
 		if ext.lower() != '.png':
 			url = nxt
 			continue
 
-		parts = url.split('/')
-		book = parts[-4].split('-')[1].zfill(2)
-		arc = parts[-3].split('-')[0].zfill(2)
+		if cur:
+			parts = getNext(soup, comic['book']).split('/')
+			book = parts[-3].split('-')[1].zfill(2)
+			arcs = parts[-2].split('-')
+		else:
+			parts = url.split('/')
+			book = parts[-4].split('-')[1].zfill(2)
+			arcs = parts[-3].split('-')
+		arc = arcs[0].zfill(2)
+		arcName = '-'.join(arcs[1:])
 		strip = img.split('/')[-1]
 		dirs = loc + book + arc + '/'
+		imgName = loc[:-1] + '_' + book + arc + '_' + arcName + '_' + strip
 
 		if not path.isdir(dirs):
 			makedirs(dirs)
 
-		saveRaw = dirs + "raw_" + book + arc + '_' + strip
-		saveAs = dirs + book + arc + '_' + strip
+		saveRaw = dirs + "raw_" + imgName
+		saveAs = dirs + imgName
 
 		print(saveAs)
 		if getAlt and alt:
@@ -115,6 +121,15 @@ for comic in comics:
 			print('\tDownloading with no alt')
 			download(img, saveAs)
 
+		zip_cmd = 'cd ' + dirs + ' && zip -ur ' + COMICS + '"' + name + '/' + name + ' - ' + book + arc + '.cbz" ' + imgName + ' > /dev/null 2>&1'
+		print('\tAdding to cbz')
+		system(zip_cmd)
+
+		try:
+			nxt = getNext(soup, nxtList)
+		except:
+			break
+
 		url = nxt
 		if curCount == maxCount:
 			curCount = 0
@@ -122,5 +137,3 @@ for comic in comics:
 			sleep(30)
 		else:
 			curCount += 1
-
-	system('bash ./combine.sh ' + loc[:-1] + ' "' + name + '"')
