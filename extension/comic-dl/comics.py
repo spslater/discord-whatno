@@ -51,6 +51,18 @@ def download(img, saveAs, retries=5):
 			urlretrieve(img, saveAs)
 			break
 		except Exception as e:
+			print('\t' + type(e).__name__ + ' exception occured. Waiting for ' + dur + ' seconds to try again. Remaining atempts: ' + str(retries-x-1))
+			sleep(dur)
+			dur *= dur
+			if x == retries:
+				raise e
+
+def getText(url, retries=10):
+	dur = 2
+	for x in range(1, retries+1):
+		try:
+			return get(url).text
+		except Exception as e:
 			print('\t' + type(ex).__name__ + ' exception occured. Waiting for ' + dur + ' seconds to try again. Remaining atempts: ' + str(retries-x-1))
 			sleep(dur)
 			dur *= dur
@@ -67,12 +79,20 @@ for comic in comics:
 	name = comic['name'] if ('name' in comic) else loc[:-1]
 	getAlt = comic['alt'] if ('alt' in comic) else False
 	nxtList = comic['nxt']
+	
+	lastComic = False
 
 	curCount = 0
 	maxCount = 25
 
 	while True:
-		soup = bs(get(url).text, 'html.parser')
+		print('Getting soup for ' + url)
+		soup = bs(getText(url), 'html.parser')
+
+		try:
+			nxt = getNext(soup, nxtList)
+		except:
+			lastComic = True
 
 		imgTag = soup.find(id='comic').find('img')
 
@@ -121,13 +141,13 @@ for comic in comics:
 			print('\tDownloading with no alt')
 			download(img, saveAs)
 
-		zip_cmd = 'cd ' + dirs + ' && zip -ur ' + COMICS + '"' + name + '/' + name + ' - ' + book + arc + '.cbz" ' + imgName + ' > /dev/null 2>&1'
+		zip_cmd = 'cd ' + dirs + ' && zip -ur ' + COMICS + '"' + name + '/' + name + ' - ' + book + arc + '.cbz" ' + imgName + ' > /dev/null'
+		zip_all = 'cd ' + dirs + ' && zip -ur ' + COMICS + '"' + name + '/' + name + '.cbz" ' + imgName + ' > /dev/null'
 		print('\tAdding to cbz')
 		system(zip_cmd)
+		system(zip_all)
 
-		try:
-			nxt = getNext(soup, nxtList)
-		except:
+		if lastComic:
 			break
 
 		url = nxt
