@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from os import makedirs, path, remove, system, path
+from os import makedirs, path, remove, system, path, chdir
 from bs4 import BeautifulSoup as bs
 from requests import get
 from urllib.request import urlretrieve
@@ -69,91 +69,98 @@ def getText(url, retries=10):
 			if x == retries:
 				raise e
 
-with open('./comics.yml') as yml:
-	comics = load(yml.read(), Loader=Loader)
+def main():
+	chdir('/home/uniontown/projects/comics')
 
-for comic in comics:
-	cur = comic['cur'] if ('cur' in comic) else False
-	url = comic['home'] if (cur and 'home' in comic) else comic['url']
-	loc = comic['loc'] if ('loc' in comic) else (urlparse(url).netloc.split('.')[-2] + '/')
-	name = comic['name'] if ('name' in comic) else loc[:-1]
-	getAlt = comic['alt'] if ('alt' in comic) else False
-	nxtList = comic['nxt']
-	
-	lastComic = False
+	with open('./comics.yml') as yml:
+		comics = load(yml.read(), Loader=Loader)
 
-	curCount = 0
-	maxCount = 25
+	for comic in comics:
+		cur = comic['cur'] if ('cur' in comic) else False
+		url = comic['home'] if (cur and 'home' in comic) else comic['url']
+		loc = comic['loc'] if ('loc' in comic) else (urlparse(url).netloc.split('.')[-2] + '/')
+		name = comic['name'] if ('name' in comic) else loc[:-1]
+		getAlt = comic['alt'] if ('alt' in comic) else False
+		nxtList = comic['nxt']
+		
+		lastComic = False
 
-	while True:
-		print('Getting soup for ' + url)
-		soup = bs(getText(url), 'html.parser')
+		curCount = 0
+		maxCount = 25
 
-		try:
-			nxt = getNext(soup, nxtList)
-		except:
-			lastComic = True
+		while True:
+			print('Getting soup for ' + url)
+			soup = bs(getText(url), 'html.parser')
 
-		imgTag = soup.find(id='comic').find('img')
+			try:
+				nxt = getNext(soup, nxtList)
+			except:
+				lastComic = True
 
-		img = imgTag['src']
-		alt = None
-		if getAlt:
-			if imgTag.get('alt', False):
-				alt = imgTag['alt']
-			elif imgTag.get('title', False):
-				alt = imgTag['title']
+			imgTag = soup.find(id='comic').find('img')
 
-		_, ext = path.splitext(img)
-		if ext.lower() != '.png':
+			img = imgTag['src']
+			alt = None
+			if getAlt:
+				if imgTag.get('alt', False):
+					alt = imgTag['alt']
+				elif imgTag.get('title', False):
+					alt = imgTag['title']
+
+			_, ext = path.splitext(img)
+			if ext.lower() != '.png':
+				url = nxt
+				continue
+
+			if cur:
+				parts = getNext(soup, comic['book']).split('/')
+				book = parts[-3].split('-')[1].zfill(2)
+				arcs = parts[-2].split('-')
+			else:
+				parts = url.split('/')
+				book = parts[-4].split('-')[1].zfill(2)
+				arcs = parts[-3].split('-')
+			arc = arcs[0].zfill(2)
+			arcName = '-'.join(arcs[1:])
+			strip = img.split('/')[-1]
+			dirs = loc + book + arc + '/'
+			imgName = loc[:-1] + '_' + book + arc + '_' + arcName + '_' + strip
+
+			if not path.isdir(dirs):
+				makedirs(dirs)
+
+			saveRaw = dirs + "raw_" + imgName
+			saveAs = dirs + imgName
+
+			print(saveAs)
+			if getAlt and alt:
+				print('\tDownloading')
+				download(img, saveRaw)
+				print('\tAdding Alt Text')
+				addAltToImage(saveRaw, saveAs, alt)
+				print('\tRemoving raw')
+				remove(saveRaw)
+			else:
+				print('\tDownloading with no alt')
+				download(img, saveAs)
+
+			zip_cmd = 'cd ' + dirs + ' && zip -ur ' + COMICS + '"' + name + '/' + name + ' - ' + book + arc + '.cbz" ' + imgName + ' > /dev/null'
+			zip_all = 'cd ' + dirs + ' && zip -ur ' + COMICS + '"' + name + '/' + name + '.cbz" ' + imgName + ' > /dev/null'
+			print('\tAdding to cbz')
+			system(zip_cmd)
+			system(zip_all)
+			print('\tDone')
+
+			if lastComic:
+				break
+
 			url = nxt
-			continue
+			if curCount == maxCount:
+				curCount = 0
+				print("Sleeping for 30 secs.")
+				sleep(30)
+			else:
+				curCount += 1
 
-		if cur:
-			parts = getNext(soup, comic['book']).split('/')
-			book = parts[-3].split('-')[1].zfill(2)
-			arcs = parts[-2].split('-')
-		else:
-			parts = url.split('/')
-			book = parts[-4].split('-')[1].zfill(2)
-			arcs = parts[-3].split('-')
-		arc = arcs[0].zfill(2)
-		arcName = '-'.join(arcs[1:])
-		strip = img.split('/')[-1]
-		dirs = loc + book + arc + '/'
-		imgName = loc[:-1] + '_' + book + arc + '_' + arcName + '_' + strip
-
-		if not path.isdir(dirs):
-			makedirs(dirs)
-
-		saveRaw = dirs + "raw_" + imgName
-		saveAs = dirs + imgName
-
-		print(saveAs)
-		if getAlt and alt:
-			print('\tDownloading')
-			download(img, saveRaw)
-			print('\tAdding Alt Text')
-			addAltToImage(saveRaw, saveAs, alt)
-			print('\tRemoving raw')
-			remove(saveRaw)
-		else:
-			print('\tDownloading with no alt')
-			download(img, saveAs)
-
-		zip_cmd = 'cd ' + dirs + ' && zip -ur ' + COMICS + '"' + name + '/' + name + ' - ' + book + arc + '.cbz" ' + imgName + ' > /dev/null'
-		zip_all = 'cd ' + dirs + ' && zip -ur ' + COMICS + '"' + name + '/' + name + '.cbz" ' + imgName + ' > /dev/null'
-		print('\tAdding to cbz')
-		system(zip_cmd)
-		system(zip_all)
-
-		if lastComic:
-			break
-
-		url = nxt
-		if curCount == maxCount:
-			curCount = 0
-			print("Sleeping for 30 secs.")
-			sleep(30)
-		else:
-			curCount += 1
+if __name__ == "__main__":
+	main()
