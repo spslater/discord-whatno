@@ -1,0 +1,7 @@
+-
+  url: "https://sundaekids.com/comics/page/15/"
+  loc: "SundaeKids/"
+  name: "Sundae Kids"
+  nxt: 
+    - tag: 'a'
+      class: 'previouspostslink'
