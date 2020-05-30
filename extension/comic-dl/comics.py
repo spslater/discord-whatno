@@ -10,7 +10,7 @@ from PIL import Image, ImageFont, ImageDraw
 from textwrap import fill
 from time import sleep
 
-COMICS = "~/media/reading/comics/"
+COMICS = "~/media/reading/webcomics/"
 
 def getNext(soup, nxtList):
 	soup = soup
