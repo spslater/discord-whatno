@@ -147,22 +147,17 @@ def addArc(db, img, fullname):
 
 	return row
 
-def addComic(db, img, arc, fulltitle):
+def addComic(db, img, arc, fulltitle, url):
 	titleRelease = img.split('_')[3]
 	title = '.'.join('-'.join(titleRelease.split('-')[3:]).split('.')[:-1])
 	release = '-'.join(titleRelease.split('-')[0:3])
-	url = re.sub('category', release[0:4], arc[2], count=1) + title + '/'
 
 	db.execute('SELECT * FROM Comic WHERE release = ?', (release,))
 	row = db.fetchone()
 
 	if not row:
 		logging.debug('Inserting new comic: ' + fulltitle)
-		try:
-			db.execute('INSERT INTO Comic VALUES (?,?,?,?,?)', (release, fulltitle, img, url, arc[0]))
-		except:
-			url = url[:-2] + '-2' + url[-1]
-			db.execute('INSERT INTO Comic VALUES (?,?,?,?,?)', (release, fulltitle, img, url, arc[0]))
+		db.execute('INSERT INTO Comic VALUES (?,?,?,?,?)', (release, fulltitle, img, url, arc[0]))
 		db.execute('SELECT * FROM Comic WHERE release = ?', (release,))
 		row = db.fetchone()
 
@@ -274,7 +269,7 @@ def main():
 
 		logging.info('Saving Comic to Database')
 		comicTitle = getTitle(soup)
-		comicRow = addComic(db, imgName, arcRow, comicTitle)
+		comicRow = addComic(db, imgName, arcRow, comicTitle, url)
 
 		logging.info('Saving Tags to Database')
 		for tag in getTags(soup):

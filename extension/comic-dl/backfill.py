@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
-from os import makedirs, path, chdir
+from os import path, chdir
 from bs4 import BeautifulSoup as bs
 from requests import get
 from urllib.parse import urlparse
 from yaml import load, Loader
 from time import sleep
-from tinydb import TinyDB, where
+from sqlite3 import connect
+import re
 
 COMICS = "~/media/reading/webcomics/"
 
@@ -29,13 +30,6 @@ def getTags(soup):
 	for tag in tags:
 		tagList.append(tag.text)
 	return tagList
-	
-def saveTags(imgName, tags, db):
-	for tag in tags:
-		db.table('tags').insert({'img': imgName, 'tag': tag})
-
-def addAltToDatabase(imgName, alt, db):
-	db.table('alts').insert({'img': imgName, 'alt': alt})
 
 def getText(url, retries=10):
 	dur = 2
@@ -48,6 +42,30 @@ def getText(url, retries=10):
 			dur *= dur
 			if x == retries:
 				raise e
+
+def getTitle(soup):
+	return soup.find('h2', {'class': 'post-title'}).find('a').text
+
+def getArc(soup):
+	full = soup.find('li', {'class': 'storyline-root'}).find('a').text
+	val = full.split(' - ')
+	if len(val) == 1:
+		val = full.split(' – ')
+	return val[1]
+
+def addArc(db, img, fullname):
+	num = img.split('_')[1]
+
+	db.execute('UPDATE Arc SET name=? WHERE number = ?', (fullname, num))
+	db.execute('SELECT * FROM Arc WHERE number = ?', (num,))
+	return db.fetchone()
+
+def addComic(db, img, fulltitle):
+	release = '-'.join(img.split('_')[3].split('-')[0:3])
+
+	db.execute('UPDATE Comic SET title = ? WHERE release = ?', (fulltitle, release))
+	db.execute('SELECT * FROM Comic WHERE release = ?', (release,))
+	return db.fetchone()
 
 def main():
 	chdir('/home/uniontown/projects/comics')
@@ -64,7 +82,8 @@ def main():
 		nxtList = comic['nxt']
 		dbName = loc + comic['db']
 
-		db = TinyDB(dbName)
+		conn = connect(dbName)
+		db = conn.cursor()
 		
 		lastComic = False
 
@@ -106,17 +125,18 @@ def main():
 			arc = arcs[0].zfill(2)
 			arcName = '-'.join(arcs[1:])
 			strip = img.split('/')[-1]
+			dirs = loc + book + arc + '/'
 			imgName = loc[:-1] + '_' + book + arc + '_' + arcName + '_' + strip
 
-			print('Saveing Tags to Database')
-			tags = getTags(soup)
-			saveTags(imgName, tags, db)
-
-			if getAlt and alt:
-				print('Saveing Alt to database')
-				addAltToDatabase(imgName, alt, db)
-
+			print('\tUpdating Arc in Database')
+			arcName = getArc(soup)
+			arcRow = addArc(db, imgName, arcName)
+			print('\tUpdating Comic in Database')
+			comicTitle = getTitle(soup)
+			comicRow = addComic(db, imgName, comicTitle)
 			print('\tDone')
+
+			conn.commit()
 
 			if lastComic:
 				break
@@ -128,6 +148,8 @@ def main():
 				sleep(30)
 			else:
 				curCount += 1
+
+		conn.close()
 
 if __name__ == "__main__":
 	main()
