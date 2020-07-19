@@ -9,7 +9,8 @@ from yaml import load, Loader
 from PIL import Image, ImageFont, ImageDraw
 from textwrap import fill
 from time import sleep
-from tinydb import TinyDB, where
+from sqlite3 import connect
+import re
 
 COMICS = "~/media/reading/webcomics/"
 
@@ -32,13 +33,6 @@ def getTags(soup):
 	for tag in tags:
 		tagList.append(tag.text)
 	return tagList
-	
-def saveTags(imgName, tags, db):
-	for tag in tags:
-		db.table('tags').insert({'img': imgName, 'tag': tag})
-
-def addAltToDatabase(imgName, alt, db):
-	db.table('alts').insert({'img': imgName, 'alt': alt})
 
 def addAltToImage(inName, outName, altRaw):
 	comic = Image.open(inName).convert("RGBA")
@@ -84,6 +78,64 @@ def getText(url, retries=10):
 			if x == retries:
 				raise e
 
+def addArc(db, img):
+	data = img.split('_')
+	num = data[1]
+	name = data[2]
+	url =   'https://www.dumbingofage.com/category/comic/book-' + (num[1] if num[0] == '0' else num) + '/' + num[2:3] + '-' + name + '/'
+
+	db.execute('SELECT * FROM Arc WHERE number=?', (num,))
+	row = db.fetchone()
+
+	if not row:
+		db.execute('INSERT INTO Arc VALUES (?,?,?)', (num, name, url))
+		db.execute('SELECT * FROM Arc WHERE number=?', (num,))
+		row = db.fetchone()
+
+	return row
+
+def addComic(db, img, arc):
+	titleRelease = img.split('_')[3]
+	title = '.'.join('-'.join(titleRelease.split('-')[3:]).split('.')[:-1])
+	release = '-'.join(titleRelease.split('-')[0:3])
+	url = re.sub('category', release[0:4], arc[2], count=1) + title + '/'
+
+	db.execute('SELECT * FROM Comic WHERE release=?', (release,))
+	row = db.fetchone()
+
+	if not row:
+		try:
+			db.execute('INSERT INTO Comic VALUES (?,?,?,?,?)', (release, title, img, url, arc[0]))
+		except:
+			url = url[:-2] + '-2' + url[-1]
+			db.execute('INSERT INTO Comic VALUES (?,?,?,?,?)', (release, title, img, url, arc[0]))
+		db.execute('SELECT * FROM Comic WHERE release=?', (release,))
+		row = db.fetchone()
+
+	return row
+
+def addAlt(db, comic, alt):
+	db.execute('SELECT * FROM Alt WHERE comicId=?', (comic[0],))
+	row = db.fetchone()
+
+	if not row:
+		db.execute('INSERT INTO Alt VALUES (?,?)', (comic[0], alt))
+		db.execute('SELECT * FROM Alt WHERE comicId=?', (comic[0],))
+		row = db.fetchone()
+
+	return row
+
+def addTag(db, comic, tag):
+	db.execute('SELECT * FROM Tag WHERE comicId=? AND tag=?', (comic[0], tag))
+	row = db.fetchone()
+
+	if not row:
+		db.execute('INSERT INTO Tag VALUES (?,?)', (comic[0], tag))
+		db.execute('SELECT * FROM Tag WHERE comicId=? AND tag=?', (comic[0], tag))
+		row = db.fetchone()
+
+	return row
+
 def main():
 	chdir('/home/uniontown/projects/comics')
 
@@ -99,7 +151,8 @@ def main():
 		nxtList = comic['nxt']
 		dbName = loc + comic['db']
 
-		db = TinyDB(dbName)
+		conn = connect(dbName)
+		db = conn.cursor()
 		
 		lastComic = False
 
@@ -144,9 +197,15 @@ def main():
 			dirs = loc + book + arc + '/'
 			imgName = loc[:-1] + '_' + book + arc + '_' + arcName + '_' + strip
 
-			print('\tSaveing Tags to Database')
-			tags = getTags(soup)
-			saveTags(imgName, tags, db)
+			print('\tSaving Arc to Database')
+			arcRow = addArc(db, imgName)
+
+			print('\tSaving Comic to Database')
+			comicRow = addComic(db, imgName, arcRow)
+
+			print('\tSaving Tags to Database')
+			for tag in getTags(soup):
+				addTag(db, comicRow, tag)
 
 			if not path.isdir(dirs):
 				makedirs(dirs)
@@ -159,8 +218,8 @@ def main():
 				download(img, saveRaw)
 				print('\tAdding Alt Text')
 				addAltToImage(saveRaw, saveAs, alt)
-				print('Saveing Alt to database')
-				addAltToDatabase(imgName, alt, db)
+				print('\tSaving Alt to Database')
+				addAlt(db, comicRow, alt)
 				print('\tRemoving raw')
 				remove(saveRaw)
 			else:
@@ -174,6 +233,8 @@ def main():
 			system(zip_all)
 			print('\tDone')
 
+			conn.commit()
+
 			if lastComic:
 				break
 
@@ -184,6 +245,8 @@ def main():
 				sleep(30)
 			else:
 				curCount += 1
+
+		conn.close()
 
 if __name__ == "__main__":
 	main()
