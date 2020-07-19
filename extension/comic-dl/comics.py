@@ -28,7 +28,7 @@ def getNext(soup, nxtList):
 
 def getTags(soup):
 	tagList = []
-	tags = soup.find('div', {'class':'post-comic'}).find('div', {'class':'post-tags'}).find_all('a')
+	tags = soup.find('div', {'class':'post-tags'}).find_all('a')
 	for tag in tags:
 		tagList.append(tag.text)
 	return tagList
@@ -107,7 +107,7 @@ def main():
 		maxCount = 25
 
 		while True:
-			print('Getting soup for ' + url)
+			print('\tGetting soup for ' + url)
 			soup = bs(getText(url), 'html.parser')
 
 			try:
@@ -144,6 +144,7 @@ def main():
 			dirs = loc + book + arc + '/'
 			imgName = loc[:-1] + '_' + book + arc + '_' + arcName + '_' + strip
 
+			print('\tSaveing Tags to Database')
 			tags = getTags(soup)
 			saveTags(imgName, tags, db)
 
@@ -153,12 +154,12 @@ def main():
 			saveRaw = dirs + "raw_" + imgName
 			saveAs = dirs + imgName
 
-			print(saveAs)
 			if getAlt and alt:
 				print('\tDownloading')
 				download(img, saveRaw)
 				print('\tAdding Alt Text')
 				addAltToImage(saveRaw, saveAs, alt)
+				print('Saveing Alt to database')
 				addAltToDatabase(imgName, alt, db)
 				print('\tRemoving raw')
 				remove(saveRaw)
