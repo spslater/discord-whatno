@@ -133,7 +133,7 @@ def addArc(db, img, fullname):
 	data = img.split('_')
 	num = data[1]
 	name = data[2]
-	url = 'https://www.dumbingofage.com/category/comic/book-' + (num[1] if num[0] == '0' else num) + '/' + num[2:4] + '-' + name + '/'
+	url = 'https://www.dumbingofage.com/category/comic/book-' + (num[1] if num[0] == '0' else num[0:2]) + '/' + num[2:4] + '-' + name + '/'
 
 	db.execute('SELECT * FROM Arc WHERE number = ?', (num,))
 	row = db.fetchone()
