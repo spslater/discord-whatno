@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from os import makedirs, path, remove, system, chdir
-from sys import argv
+from sys import argv, stdout
 from textwrap import fill
 from time import sleep
 from urllib.parse import urlparse
@@ -13,10 +13,10 @@ import re
 from bs4 import BeautifulSoup as bs
 from PIL import Image, ImageFont, ImageDraw
 from requests import get
-from sqlite3 import connect
+from sqlite3 import connect, Cursor
 from yaml import load, Loader
 
-def createTables(db : sqlite3.Cursor):
+def createTables(db : Cursor):
 	 db.executescript("""
 			CREATE TABLE Arc(
 				number PRIMARY KEY,
@@ -127,8 +127,7 @@ def getTitle(soup):
 	return soup.find('h2', {'class': 'post-title'}).find('a').text
 
 def getArc(soup):
-		full = soup.find('li', {'class': 'storyline-root'}).find('a').text
-		return full.split(' - ')[1]	
+		return soup.find('li', {'class': 'storyline-root'}).find('a').text[5:]
 
 def addArc(db, img, fullname):
 	data = img.split('_')
@@ -212,10 +211,18 @@ def main():
 	getAlt = comic['alt'] if ('alt' in comic) else False
 	nxtList = comic['nxt']
 	dbName = loc + (comic['db'] if ('db' in comic) else (name + '.db'))
-	output = loc + (comic['log'] if ('log' in comic) else 'output.log')
+	output = loc + (comic['log'] if ('log' in comic) else (name + '.log'))
 	loglevel = getLevel(comic['level']) if ('level' in comic) else logging.INFO
 
-	logging.basicConfig(format='%(asctime)s\t[%(levelname)s]\t%(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=log.INFO, filename=output)
+	logging.basicConfig(
+		format='%(asctime)s\t[%(levelname)s]\t%(message)s', 
+		datefmt='%Y-%m-%d %H:%M:%S', 
+		level=loglevel, 
+		handlers=[
+			logging.FileHandler(output),
+			logging.StreamHandler(stdout)
+		]
+	)
 
 	conn = connect(dbName)
 	db = conn.cursor()
@@ -314,6 +321,7 @@ def main():
 		else:
 			curCount += 1
 
+	logging.info('Completed Comic')
 	conn.close()
 
 if __name__ == "__main__":

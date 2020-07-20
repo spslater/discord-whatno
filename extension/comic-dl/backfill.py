@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
 
-from os import path, chdir
-from bs4 import BeautifulSoup as bs
-from requests import get
-from urllib.parse import urlparse
-from yaml import load, Loader
+from os import makedirs, path, remove, system, chdir
+from sys import argv, stdout
+from textwrap import fill
 from time import sleep
-from sqlite3 import connect
+from urllib.parse import urlparse
+from urllib.request import urlretrieve
+
+import logging
 import re
 
-COMICS = "~/media/reading/webcomics/"
+from bs4 import BeautifulSoup as bs
+from PIL import Image, ImageFont, ImageDraw
+from requests import get
+from sqlite3 import connect
+from yaml import load, Loader
 
 def getNext(soup, nxtList):
 	soup = soup
@@ -37,119 +42,141 @@ def getText(url, retries=10):
 		try:
 			return get(url).text
 		except Exception as e:
-			print('\t' + type(ex).__name__ + ' exception occured. Waiting for ' + dur + ' seconds to try again. Remaining atempts: ' + str(retries-x-1))
+			logging.warning(type(ex).__name__ + ' exception occured. Waiting for ' + dur + ' seconds to try again. Remaining atempts: ' + str(retries-x-1))
 			sleep(dur)
 			dur *= dur
 			if x == retries:
+				logging.exception(e)
 				raise e
 
 def getTitle(soup):
 	return soup.find('h2', {'class': 'post-title'}).find('a').text
 
 def getArc(soup):
-	full = soup.find('li', {'class': 'storyline-root'}).find('a').text
-	val = full.split(' - ')
-	if len(val) == 1:
-		val = full.split(' – ')
-	return val[1]
+		return soup.find('li', {'class': 'storyline-root'}).find('a').text[5:]
 
 def addArc(db, img, fullname):
-	num = img.split('_')[1]
+	data = img.split('_')
+	num = data[1]
+	name = data[2]
+	url = 'https://www.dumbingofage.com/category/comic/book-' + (num[1] if num[0] == '0' else num) + '/' + num[2:4] + '-' + name + '/'
 
-	db.execute('UPDATE Arc SET name=? WHERE number = ?', (fullname, num))
+	db.execute('UPDATE Arc SET url = ? WHERE number = ?', (url, num))
 	db.execute('SELECT * FROM Arc WHERE number = ?', (num,))
-	return db.fetchone()
+	row = db.fetchone()
 
-def addComic(db, img, fulltitle):
+	return row
+
+def addComic(db, img, arc, fulltitle, url):
 	release = '-'.join(img.split('_')[3].split('-')[0:3])
 
-	db.execute('UPDATE Comic SET title = ? WHERE release = ?', (fulltitle, release))
+	db.execute('UPDATE Comic SET url = ? WHERE release = ?', (url, release))
 	db.execute('SELECT * FROM Comic WHERE release = ?', (release,))
-	return db.fetchone()
+	row = db.fetchone()
+
+	return row
+
+def getLevel(level):
+	if level == 'DEBUG':
+		return logging.DEBUG
+	elif level == 'INFO':
+		return logging.INFO
+	elif level == 'WARN':
+		return logging.WARNING
+	elif level == 'ERROR':
+		return logging.ERROR
 
 def main():
-	chdir('/home/uniontown/projects/comics')
+	workdir = argv[1]
+	savedir = argv[2]
+
+	chdir(workdir)
 
 	with open('./backfill.yml') as yml:
-		comics = load(yml.read(), Loader=Loader)
+		comic = load(yml.read(), Loader=Loader)
 
-	for comic in comics:
-		cur = comic['cur'] if ('cur' in comic) else False
-		url = comic['home'] if (cur and 'home' in comic) else comic['url']
-		loc = comic['loc'] if ('loc' in comic) else (urlparse(url).netloc.split('.')[-2] + '/')
-		name = comic['name'] if ('name' in comic) else loc[:-1]
-		getAlt = comic['alt'] if ('alt' in comic) else False
-		nxtList = comic['nxt']
-		dbName = loc + comic['db']
+	cur = comic['cur'] if ('cur' in comic) else False
+	url = comic['home'] if (cur and 'home' in comic) else comic['url']
+	loc = comic['loc'] if ('loc' in comic) else (urlparse(url).netloc.split('.')[-2] + '/')
+	name = comic['name'] if ('name' in comic) else loc[:-1]
+	getAlt = comic['alt'] if ('alt' in comic) else False
+	nxtList = comic['nxt']
+	dbName = loc + (comic['db'] if ('db' in comic) else (name + '.db'))
+	output = loc + (comic['log'] if ('log' in comic) else (path.basename(__file__) + '.log'))
+	loglevel = getLevel(comic['level']) if ('level' in comic) else logging.INFO
 
-		conn = connect(dbName)
-		db = conn.cursor()
-		
-		lastComic = False
+	logging.basicConfig(format='%(asctime)s\t[%(levelname)s]\t%(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=loglevel, filename=output)
 
-		curCount = 0
-		maxCount = 25
+	conn = connect(dbName)
+	db = conn.cursor()
+	
+	lastComic = False
 
-		while True:
-			print('Getting soup for ' + url)
-			soup = bs(getText(url), 'html.parser')
+	curCount = 0
+	maxCount = 25
 
-			try:
-				nxt = getNext(soup, nxtList)
-			except:
-				lastComic = True
+	while True:
+		logging.info('Getting soup for ' + url)
+		soup = bs(getText(url), 'html.parser')
 
-			imgTag = soup.find(id='comic').find('img')
+		try:
+			nxt = getNext(soup, nxtList)
+		except:
+			lastComic = True
 
-			img = imgTag['src']
-			alt = None
-			if getAlt:
-				if imgTag.get('alt', False):
-					alt = imgTag['alt']
-				elif imgTag.get('title', False):
-					alt = imgTag['title']
+		imgTag = soup.find(id='comic').find('img')
 
-			_, ext = path.splitext(img)
-			if ext.lower() != '.png':
-				url = nxt
-				continue
+		img = imgTag['src']
+		alt = None
+		if getAlt:
+			if imgTag.get('alt', False):
+				alt = imgTag['alt']
+			elif imgTag.get('title', False):
+				alt = imgTag['title']
 
-			if cur:
-				parts = getNext(soup, comic['book']).split('/')
-				book = parts[-3].split('-')[1].zfill(2)
-				arcs = parts[-2].split('-')
-			else:
-				parts = url.split('/')
-				book = parts[-4].split('-')[1].zfill(2)
-				arcs = parts[-3].split('-')
-			arc = arcs[0].zfill(2)
-			arcName = '-'.join(arcs[1:])
-			strip = img.split('/')[-1]
-			dirs = loc + book + arc + '/'
-			imgName = loc[:-1] + '_' + book + arc + '_' + arcName + '_' + strip
-
-			print('\tUpdating Arc in Database')
-			arcName = getArc(soup)
-			arcRow = addArc(db, imgName, arcName)
-			print('\tUpdating Comic in Database')
-			comicTitle = getTitle(soup)
-			comicRow = addComic(db, imgName, comicTitle)
-			print('\tDone')
-
-			conn.commit()
-
-			if lastComic:
-				break
-
+		_, ext = path.splitext(img)
+		if ext.lower() != '.png':
 			url = nxt
-			if curCount == maxCount:
-				curCount = 0
-				print("Sleeping for 30 secs.")
-				sleep(30)
-			else:
-				curCount += 1
+			continue
 
-		conn.close()
+		if cur:
+			parts = getNext(soup, comic['book']).split('/')
+			book = parts[-3].split('-')[1].zfill(2)
+			arcs = parts[-2].split('-')
+		else:
+			parts = url.split('/')
+			book = parts[-4].split('-')[1].zfill(2)
+			arcs = parts[-3].split('-')
+		arc = arcs[0].zfill(2)
+		arcName = '-'.join(arcs[1:])
+		strip = img.split('/')[-1]
+		dirs = loc + book + arc + '/'
+		imgName = loc[:-1] + '_' + book + arc + '_' + arcName + '_' + strip
+
+		logging.info('Updating Arc in Database')
+		fullArcName = getArc(soup)
+		arcRow = addArc(db, imgName, fullArcName)
+
+		logging.info('Updating Comic in Database')
+		comicTitle = getTitle(soup)
+		comicRow = addComic(db, imgName, arcRow, comicTitle, url)
+
+		logging.info('Done')
+
+		conn.commit()
+
+		if lastComic:
+			break
+
+		url = nxt
+		if curCount == maxCount:
+			curCount = 0
+			logging.debug("Sleeping for 10 secs.")
+			sleep(10)
+		else:
+			curCount += 1
+
+	conn.close()
 
 if __name__ == "__main__":
 	main()
