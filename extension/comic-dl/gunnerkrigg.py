@@ -22,7 +22,6 @@ def getChapter(soup, num):
 
 # Chapter 77: The Thousand Eyes
 def getChapterInfo(chp):
-	print(chp)
 	val = chp.text.split(':')
 	if len(val) == 1:
 		return '061', val[0]
@@ -42,7 +41,7 @@ def download(img, saveAs, retries=5):
 			urlretrieve(img, saveAs)
 			break
 		except Exception as e:
-			logging.warning(type(e).__name__ + ' exception occured. Waiting for ' + dur + ' seconds to try again. Remaining atempts: ' + str(retries-x-1))
+			logging.warning(type(e).__name__ + ' exception occured. Waiting for ' + str(dur) + ' seconds to try again. Remaining atempts: ' + str(retries-x-1))
 			sleep(dur)
 			dur *= dur
 			if x == retries:
@@ -55,7 +54,7 @@ def getText(url, retries=10):
 		try:
 			return get(url).text
 		except Exception as e:
-			logging.warning(type(ex).__name__ + ' exception occured. Waiting for ' + dur + ' seconds to try again. Remaining atempts: ' + str(retries-x-1))
+			logging.warning(type(e).__name__ + ' exception occured. Waiting for ' + str(dur) + ' seconds to try again. Remaining atempts: ' + str(retries-x-1))
 			sleep(dur)
 			dur *= dur
 			if x == retries:
@@ -79,7 +78,7 @@ def main():
 	chdir(workdir)
 
 	cur = False
-	url = 'https://www.gunnerkrigg.com/' if cur else 'https://www.gunnerkrigg.com/?p=1'
+	url = 'https://www.gunnerkrigg.com/' if cur else 'https://www.gunnerkrigg.com/?p=930'
 	base = 'https://www.gunnerkrigg.com/'
 	loc = 'Gunnerkrigg/'
 	name = 'Gunnerkrigg'
@@ -99,7 +98,7 @@ def main():
 	lastComic = False
 
 	curCount = 0
-	maxCount = 100
+	maxCount = 25
 
 	while True:
 		logging.info('Getting soup for ' + url)
@@ -143,7 +142,7 @@ def main():
 		url = nxt
 		if curCount == maxCount:
 			curCount = 0
-			logging.debug("Sleeping for 3 secs.")
+			logging.info("Sleeping for 3 secs.")
 			sleep(3)
 		else:
 			curCount += 1
