@@ -16,3 +16,8 @@ nxt:
     id: 'comic-foot'
   - tag: 'a'
     class: 'navi navi-next'
+prev: 
+  - tag: 'div'
+    id: 'comic-foot'
+  - tag: 'a'
+    class: 'navi navi-prev'

@@ -1,0 +1,809 @@
+2020-07-21 22:33:40	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=1
+2020-07-21 22:34:08	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=1
+2020-07-21 22:34:08	[INFO]	Downloading Image: Gunnerkrigg/1 - The Shadow and the Robot/Gunnerkrigg_11.jpg
+2020-07-21 22:36:27	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=1
+2020-07-21 22:36:28	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001001.jpg
+2020-07-21 22:36:28	[INFO]	Adding to cbz
+2020-07-21 22:36:28	[INFO]	cd Gunnerkrigg/001 - The Shadow and the Robot/ && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001001.jpg > /dev/null
+2020-07-21 22:36:28	[INFO]	cd Gunnerkrigg/001 - The Shadow and the Robot/ && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001001.jpg > /dev/null
+2020-07-21 22:36:28	[INFO]	Done
+2020-07-21 22:36:28	[INFO]	Completed Comic
+2020-07-21 22:37:11	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=1
+2020-07-21 22:37:11	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-001.jpg
+2020-07-21 22:37:11	[INFO]	Adding to cbz
+2020-07-21 22:37:11	[INFO]	cd Gunnerkrigg/001 - The Shadow and the Robot/ && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001-001.jpg > /dev/null
+2020-07-21 22:37:11	[INFO]	cd Gunnerkrigg/001 - The Shadow and the Robot/ && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001-001.jpg > /dev/null
+2020-07-21 22:37:11	[INFO]	Done
+2020-07-21 22:37:11	[INFO]	Completed Comic
+2020-07-21 22:38:35	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=1
+2020-07-21 22:38:35	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-001.jpg
+2020-07-21 22:38:35	[INFO]	Adding to cbz
+2020-07-21 22:38:35	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001-001.jpg > /dev/null
+2020-07-21 22:38:35	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001-001.jpg > /dev/null
+2020-07-21 22:38:35	[INFO]	Done
+2020-07-21 22:38:35	[INFO]	Completed Comic
+2020-07-21 22:39:29	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=1
+2020-07-21 22:39:29	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-001.jpg
+2020-07-21 22:39:29	[INFO]	Adding to cbz
+2020-07-21 22:39:29	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001-001.jpg > /dev/null
+2020-07-21 22:39:29	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001-001.jpg > /dev/null
+2020-07-21 22:39:29	[INFO]	Done
+2020-07-21 22:39:29	[INFO]	Completed Comic
+2020-07-21 22:39:50	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=1
+2020-07-21 22:39:51	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-001.jpg
+2020-07-21 22:39:51	[INFO]	Adding to cbz
+2020-07-21 22:39:51	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001-001.jpg > /dev/null
+2020-07-21 22:39:51	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001-001.jpg > /dev/null
+2020-07-21 22:39:51	[INFO]	Done
+2020-07-21 22:39:51	[INFO]	Completed Comic
+2020-07-21 22:40:28	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=1
+2020-07-21 22:40:28	[ERROR]	name 'nxtList' is not defined
+Traceback (most recent call last):
+  File "./gunnerkrigg.py", line 109, in main
+    nxt = getNext(soup, nxtList)
+NameError: name 'nxtList' is not defined
+2020-07-21 22:40:28	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-001.jpg
+2020-07-21 22:40:28	[INFO]	Adding to cbz
+2020-07-21 22:40:28	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001-001.jpg > /dev/null
+2020-07-21 22:40:28	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001-001.jpg > /dev/null
+2020-07-21 22:40:28	[INFO]	Done
+2020-07-21 22:40:28	[INFO]	Completed Comic
+2020-07-21 22:40:48	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=1
+2020-07-21 22:40:49	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-001.jpg
+2020-07-21 22:40:49	[INFO]	Adding to cbz
+2020-07-21 22:40:49	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001-001.jpg > /dev/null
+2020-07-21 22:40:49	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001-001.jpg > /dev/null
+2020-07-21 22:40:49	[INFO]	Done
+2020-07-21 22:40:49	[INFO]	Getting soup for ?p=2
+2020-07-21 22:41:11	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=1
+2020-07-21 22:41:12	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-001.jpg
+2020-07-21 22:41:12	[INFO]	Adding to cbz
+2020-07-21 22:41:12	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001-001.jpg > /dev/null
+2020-07-21 22:41:12	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001-001.jpg > /dev/null
+2020-07-21 22:41:12	[INFO]	Done
+2020-07-21 22:41:12	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=2
+2020-07-21 22:41:12	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-002.jpg
+2020-07-21 22:41:12	[INFO]	Adding to cbz
+2020-07-21 22:41:12	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001-002.jpg > /dev/null
+2020-07-21 22:41:12	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001-002.jpg > /dev/null
+2020-07-21 22:41:12	[INFO]	Done
+2020-07-21 22:41:12	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=3
+2020-07-21 22:41:12	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-003.jpg
+2020-07-21 22:41:12	[INFO]	Adding to cbz
+2020-07-21 22:41:12	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001-003.jpg > /dev/null
+2020-07-21 22:41:12	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001-003.jpg > /dev/null
+2020-07-21 22:41:12	[INFO]	Done
+2020-07-21 22:41:12	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=4
+2020-07-21 22:41:13	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-004.jpg
+2020-07-21 22:41:13	[INFO]	Adding to cbz
+2020-07-21 22:41:13	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001-004.jpg > /dev/null
+2020-07-21 22:41:13	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001-004.jpg > /dev/null
+2020-07-21 22:41:13	[INFO]	Done
+2020-07-21 22:41:13	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=5
+2020-07-21 22:41:13	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-005.jpg
+2020-07-21 22:41:13	[INFO]	Adding to cbz
+2020-07-21 22:41:13	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001-005.jpg > /dev/null
+2020-07-21 22:41:13	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001-005.jpg > /dev/null
+2020-07-21 22:41:13	[INFO]	Done
+2020-07-21 22:41:13	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=6
+2020-07-21 22:41:13	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-006.jpg
+2020-07-21 22:41:13	[INFO]	Adding to cbz
+2020-07-21 22:41:13	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001-006.jpg > /dev/null
+2020-07-21 22:41:13	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001-006.jpg > /dev/null
+2020-07-21 22:41:13	[INFO]	Done
+2020-07-21 22:41:13	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=7
+2020-07-21 22:41:14	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-007.jpg
+2020-07-21 22:41:14	[INFO]	Adding to cbz
+2020-07-21 22:41:14	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001-007.jpg > /dev/null
+2020-07-21 22:41:14	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001-007.jpg > /dev/null
+2020-07-21 22:41:14	[INFO]	Done
+2020-07-21 22:41:14	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=8
+2020-07-21 22:41:15	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-008.jpg
+2020-07-21 22:41:15	[INFO]	Adding to cbz
+2020-07-21 22:41:15	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001-008.jpg > /dev/null
+2020-07-21 22:41:15	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001-008.jpg > /dev/null
+2020-07-21 22:41:15	[INFO]	Done
+2020-07-21 22:41:15	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=9
+2020-07-21 22:41:15	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-009.jpg
+2020-07-21 22:41:15	[INFO]	Adding to cbz
+2020-07-21 22:41:15	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001-009.jpg > /dev/null
+2020-07-21 22:41:15	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001-009.jpg > /dev/null
+2020-07-21 22:41:15	[INFO]	Done
+2020-07-21 22:41:15	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=10
+2020-07-21 22:41:16	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-010.jpg
+2020-07-21 22:41:16	[INFO]	Adding to cbz
+2020-07-21 22:41:16	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001-010.jpg > /dev/null
+2020-07-21 22:41:16	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001-010.jpg > /dev/null
+2020-07-21 22:41:16	[INFO]	Done
+2020-07-21 22:41:16	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=11
+2020-07-21 22:41:16	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-011.jpg
+2020-07-21 22:41:16	[INFO]	Adding to cbz
+2020-07-21 22:41:16	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001-011.jpg > /dev/null
+2020-07-21 22:41:16	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001-011.jpg > /dev/null
+2020-07-21 22:41:16	[INFO]	Done
+2020-07-21 22:41:16	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=12
+2020-07-21 22:41:17	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-012.jpg
+2020-07-21 22:41:17	[INFO]	Adding to cbz
+2020-07-21 22:41:17	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001-012.jpg > /dev/null
+2020-07-21 22:41:17	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001-012.jpg > /dev/null
+2020-07-21 22:41:17	[INFO]	Done
+2020-07-21 22:41:17	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=13
+2020-07-21 22:41:18	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-013.jpg
+2020-07-21 22:41:18	[INFO]	Adding to cbz
+2020-07-21 22:41:18	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001-013.jpg > /dev/null
+2020-07-21 22:41:18	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001-013.jpg > /dev/null
+2020-07-21 22:41:18	[INFO]	Done
+2020-07-21 22:41:18	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=14
+2020-07-21 22:41:19	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-014.jpg
+2020-07-21 22:41:19	[INFO]	Adding to cbz
+2020-07-21 22:41:19	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001-014.jpg > /dev/null
+2020-07-21 22:41:19	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001-014.jpg > /dev/null
+2020-07-21 22:41:19	[INFO]	Done
+2020-07-21 22:41:19	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=15
+2020-07-21 22:41:20	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-015.jpg
+2020-07-21 22:41:20	[INFO]	Adding to cbz
+2020-07-21 22:41:20	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001-015.jpg > /dev/null
+2020-07-21 22:41:20	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001-015.jpg > /dev/null
+2020-07-21 22:41:20	[INFO]	Done
+2020-07-21 22:41:20	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=16
+2020-07-21 22:41:20	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-016.jpg
+2020-07-21 22:41:20	[INFO]	Adding to cbz
+2020-07-21 22:41:20	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 001 - The Shadow and the Robot.cbz" Gunnerkrigg_001-016.jpg > /dev/null
+2020-07-21 22:41:20	[INFO]	cd "Gunnerkrigg/001 - The Shadow and the Robot/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_001-016.jpg > /dev/null
+2020-07-21 22:41:20	[INFO]	Done
+2020-07-21 22:41:20	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=17
+2020-07-21 22:41:20	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-001.jpg
+2020-07-21 22:41:20	[INFO]	Adding to cbz
+2020-07-21 22:41:20	[INFO]	cd "Gunnerkrigg/002 - Schoolyard Myths/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 002 - Schoolyard Myths.cbz" Gunnerkrigg_002-001.jpg > /dev/null
+2020-07-21 22:41:20	[INFO]	cd "Gunnerkrigg/002 - Schoolyard Myths/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_002-001.jpg > /dev/null
+2020-07-21 22:41:20	[INFO]	Done
+2020-07-21 22:41:20	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=18
+2020-07-21 22:41:21	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-002.jpg
+2020-07-21 22:41:21	[INFO]	Adding to cbz
+2020-07-21 22:41:21	[INFO]	cd "Gunnerkrigg/002 - Schoolyard Myths/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 002 - Schoolyard Myths.cbz" Gunnerkrigg_002-002.jpg > /dev/null
+2020-07-21 22:41:21	[INFO]	cd "Gunnerkrigg/002 - Schoolyard Myths/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_002-002.jpg > /dev/null
+2020-07-21 22:41:21	[INFO]	Done
+2020-07-21 22:41:21	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=19
+2020-07-21 22:41:21	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-003.jpg
+2020-07-21 22:41:21	[INFO]	Adding to cbz
+2020-07-21 22:41:21	[INFO]	cd "Gunnerkrigg/002 - Schoolyard Myths/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 002 - Schoolyard Myths.cbz" Gunnerkrigg_002-003.jpg > /dev/null
+2020-07-21 22:41:21	[INFO]	cd "Gunnerkrigg/002 - Schoolyard Myths/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_002-003.jpg > /dev/null
+2020-07-21 22:41:21	[INFO]	Done
+2020-07-21 22:41:21	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=20
+2020-07-21 22:41:21	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-004.jpg
+2020-07-21 22:41:21	[INFO]	Adding to cbz
+2020-07-21 22:41:21	[INFO]	cd "Gunnerkrigg/002 - Schoolyard Myths/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 002 - Schoolyard Myths.cbz" Gunnerkrigg_002-004.jpg > /dev/null
+2020-07-21 22:41:21	[INFO]	cd "Gunnerkrigg/002 - Schoolyard Myths/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_002-004.jpg > /dev/null
+2020-07-21 22:41:21	[INFO]	Done
+2020-07-21 22:41:21	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=21
+2020-07-21 22:41:22	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-005.jpg
+2020-07-21 22:41:22	[INFO]	Adding to cbz
+2020-07-21 22:41:22	[INFO]	cd "Gunnerkrigg/002 - Schoolyard Myths/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 002 - Schoolyard Myths.cbz" Gunnerkrigg_002-005.jpg > /dev/null
+2020-07-21 22:41:22	[INFO]	cd "Gunnerkrigg/002 - Schoolyard Myths/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_002-005.jpg > /dev/null
+2020-07-21 22:41:22	[INFO]	Done
+2020-07-21 22:41:22	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=22
+2020-07-21 22:41:22	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-006.jpg
+2020-07-21 22:41:22	[INFO]	Adding to cbz
+2020-07-21 22:41:22	[INFO]	cd "Gunnerkrigg/002 - Schoolyard Myths/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 002 - Schoolyard Myths.cbz" Gunnerkrigg_002-006.jpg > /dev/null
+2020-07-21 22:41:22	[INFO]	cd "Gunnerkrigg/002 - Schoolyard Myths/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_002-006.jpg > /dev/null
+2020-07-21 22:41:22	[INFO]	Done
+2020-07-21 22:41:22	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=23
+2020-07-21 22:41:22	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-007.jpg
+2020-07-21 22:41:22	[INFO]	Adding to cbz
+2020-07-21 22:41:22	[INFO]	cd "Gunnerkrigg/002 - Schoolyard Myths/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 002 - Schoolyard Myths.cbz" Gunnerkrigg_002-007.jpg > /dev/null
+2020-07-21 22:41:22	[INFO]	cd "Gunnerkrigg/002 - Schoolyard Myths/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_002-007.jpg > /dev/null
+2020-07-21 22:41:22	[INFO]	Done
+2020-07-21 22:41:22	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=24
+2020-07-21 22:41:23	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-008.jpg
+2020-07-21 22:41:23	[INFO]	Adding to cbz
+2020-07-21 22:41:23	[INFO]	cd "Gunnerkrigg/002 - Schoolyard Myths/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 002 - Schoolyard Myths.cbz" Gunnerkrigg_002-008.jpg > /dev/null
+2020-07-21 22:41:23	[INFO]	cd "Gunnerkrigg/002 - Schoolyard Myths/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_002-008.jpg > /dev/null
+2020-07-21 22:41:23	[INFO]	Done
+2020-07-21 22:41:23	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=25
+2020-07-21 22:41:23	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-009.jpg
+2020-07-21 22:41:23	[INFO]	Adding to cbz
+2020-07-21 22:41:23	[INFO]	cd "Gunnerkrigg/002 - Schoolyard Myths/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg - 002 - Schoolyard Myths.cbz" Gunnerkrigg_002-009.jpg > /dev/null
+2020-07-21 22:41:23	[INFO]	cd "Gunnerkrigg/002 - Schoolyard Myths/" && zip -ur /home/uniontown/media/reading/webcomics/"Gunnerkrigg/Gunnerkrigg.cbz" Gunnerkrigg_002-009.jpg > /dev/null
+2020-07-21 22:41:23	[INFO]	Done
+2020-07-21 22:41:23	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=26
+2020-07-21 22:42:49	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=1
+2020-07-21 22:42:50	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-001.jpg
+2020-07-21 22:42:50	[INFO]	Adding to cbz
+2020-07-21 22:42:50	[INFO]	Done
+2020-07-21 22:42:50	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=2
+2020-07-21 22:42:50	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-002.jpg
+2020-07-21 22:42:51	[INFO]	Adding to cbz
+2020-07-21 22:42:51	[INFO]	Done
+2020-07-21 22:42:51	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=3
+2020-07-21 22:42:51	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-003.jpg
+2020-07-21 22:42:52	[INFO]	Adding to cbz
+2020-07-21 22:42:52	[INFO]	Done
+2020-07-21 22:42:52	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=4
+2020-07-21 22:42:52	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-004.jpg
+2020-07-21 22:42:53	[INFO]	Adding to cbz
+2020-07-21 22:42:53	[INFO]	Done
+2020-07-21 22:42:53	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=5
+2020-07-21 22:42:53	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-005.jpg
+2020-07-21 22:42:54	[INFO]	Adding to cbz
+2020-07-21 22:42:54	[INFO]	Done
+2020-07-21 22:42:54	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=6
+2020-07-21 22:42:54	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-006.jpg
+2020-07-21 22:42:54	[INFO]	Adding to cbz
+2020-07-21 22:42:54	[INFO]	Done
+2020-07-21 22:42:54	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=7
+2020-07-21 22:42:55	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-007.jpg
+2020-07-21 22:42:55	[INFO]	Adding to cbz
+2020-07-21 22:42:55	[INFO]	Done
+2020-07-21 22:42:55	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=8
+2020-07-21 22:42:56	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-008.jpg
+2020-07-21 22:42:56	[INFO]	Adding to cbz
+2020-07-21 22:42:56	[INFO]	Done
+2020-07-21 22:42:56	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=9
+2020-07-21 22:42:57	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-009.jpg
+2020-07-21 22:42:57	[INFO]	Adding to cbz
+2020-07-21 22:42:57	[INFO]	Done
+2020-07-21 22:42:57	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=10
+2020-07-21 22:42:57	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-010.jpg
+2020-07-21 22:42:58	[INFO]	Adding to cbz
+2020-07-21 22:42:58	[INFO]	Done
+2020-07-21 22:42:58	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=11
+2020-07-21 22:42:58	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-011.jpg
+2020-07-21 22:42:59	[INFO]	Adding to cbz
+2020-07-21 22:42:59	[INFO]	Done
+2020-07-21 22:42:59	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=12
+2020-07-21 22:43:00	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-012.jpg
+2020-07-21 22:43:01	[INFO]	Adding to cbz
+2020-07-21 22:43:01	[INFO]	Done
+2020-07-21 22:43:01	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=13
+2020-07-21 22:43:01	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-013.jpg
+2020-07-21 22:43:01	[INFO]	Adding to cbz
+2020-07-21 22:43:01	[INFO]	Done
+2020-07-21 22:43:01	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=14
+2020-07-21 22:43:02	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-014.jpg
+2020-07-21 22:43:02	[INFO]	Adding to cbz
+2020-07-21 22:43:02	[INFO]	Done
+2020-07-21 22:43:02	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=15
+2020-07-21 22:43:03	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-015.jpg
+2020-07-21 22:43:03	[INFO]	Adding to cbz
+2020-07-21 22:43:03	[INFO]	Done
+2020-07-21 22:43:03	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=16
+2020-07-21 22:43:03	[INFO]	Downloading Image: Gunnerkrigg/001 - The Shadow and the Robot/Gunnerkrigg_001-016.jpg
+2020-07-21 22:43:04	[INFO]	Adding to cbz
+2020-07-21 22:43:04	[INFO]	Done
+2020-07-21 22:43:04	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=17
+2020-07-21 22:43:04	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-001.jpg
+2020-07-21 22:43:05	[INFO]	Adding to cbz
+2020-07-21 22:43:05	[INFO]	Done
+2020-07-21 22:43:05	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=18
+2020-07-21 22:43:05	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-002.jpg
+2020-07-21 22:43:06	[INFO]	Adding to cbz
+2020-07-21 22:43:06	[INFO]	Done
+2020-07-21 22:43:06	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=19
+2020-07-21 22:43:06	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-003.jpg
+2020-07-21 22:43:07	[INFO]	Adding to cbz
+2020-07-21 22:43:07	[INFO]	Done
+2020-07-21 22:43:07	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=20
+2020-07-21 22:43:07	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-004.jpg
+2020-07-21 22:43:08	[INFO]	Adding to cbz
+2020-07-21 22:43:08	[INFO]	Done
+2020-07-21 22:43:08	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=21
+2020-07-21 22:43:08	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-005.jpg
+2020-07-21 22:43:08	[INFO]	Adding to cbz
+2020-07-21 22:43:08	[INFO]	Done
+2020-07-21 22:43:08	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=22
+2020-07-21 22:43:09	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-006.jpg
+2020-07-21 22:43:09	[INFO]	Adding to cbz
+2020-07-21 22:43:09	[INFO]	Done
+2020-07-21 22:43:09	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=23
+2020-07-21 22:43:10	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-007.jpg
+2020-07-21 22:43:10	[INFO]	Adding to cbz
+2020-07-21 22:43:10	[INFO]	Done
+2020-07-21 22:43:10	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=24
+2020-07-21 22:43:11	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-008.jpg
+2020-07-21 22:43:11	[INFO]	Adding to cbz
+2020-07-21 22:43:11	[INFO]	Done
+2020-07-21 22:43:11	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=25
+2020-07-21 22:43:12	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-009.jpg
+2020-07-21 22:43:13	[INFO]	Adding to cbz
+2020-07-21 22:43:13	[INFO]	Done
+2020-07-21 22:43:13	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=26
+2020-07-21 22:43:13	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-010.jpg
+2020-07-21 22:43:14	[INFO]	Adding to cbz
+2020-07-21 22:43:14	[INFO]	Done
+2020-07-21 22:43:14	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=27
+2020-07-21 22:43:14	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-011.jpg
+2020-07-21 22:43:15	[INFO]	Adding to cbz
+2020-07-21 22:43:15	[INFO]	Done
+2020-07-21 22:43:15	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=28
+2020-07-21 22:43:15	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-012.jpg
+2020-07-21 22:43:16	[INFO]	Adding to cbz
+2020-07-21 22:43:16	[INFO]	Done
+2020-07-21 22:43:16	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=29
+2020-07-21 22:43:17	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-013.jpg
+2020-07-21 22:43:17	[INFO]	Adding to cbz
+2020-07-21 22:43:17	[INFO]	Done
+2020-07-21 22:43:17	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=30
+2020-07-21 22:43:18	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-014.jpg
+2020-07-21 22:43:18	[INFO]	Adding to cbz
+2020-07-21 22:43:18	[INFO]	Done
+2020-07-21 22:43:18	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=31
+2020-07-21 22:43:19	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-015.jpg
+2020-07-21 22:43:19	[INFO]	Adding to cbz
+2020-07-21 22:43:19	[INFO]	Done
+2020-07-21 22:43:19	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=32
+2020-07-21 22:43:21	[INFO]	Downloading Image: Gunnerkrigg/002 - Schoolyard Myths/Gunnerkrigg_002-016.jpg
+2020-07-21 22:43:21	[INFO]	Adding to cbz
+2020-07-21 22:43:21	[INFO]	Done
+2020-07-21 22:43:21	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=33
+2020-07-21 22:43:21	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-001.jpg
+2020-07-21 22:43:22	[INFO]	Adding to cbz
+2020-07-21 22:43:22	[INFO]	Done
+2020-07-21 22:43:22	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=34
+2020-07-21 22:43:22	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-002.jpg
+2020-07-21 22:43:23	[INFO]	Adding to cbz
+2020-07-21 22:43:23	[INFO]	Done
+2020-07-21 22:43:23	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=35
+2020-07-21 22:43:23	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-003.jpg
+2020-07-21 22:43:24	[INFO]	Adding to cbz
+2020-07-21 22:43:24	[INFO]	Done
+2020-07-21 22:43:24	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=36
+2020-07-21 22:43:24	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-004.jpg
+2020-07-21 22:43:24	[INFO]	Adding to cbz
+2020-07-21 22:43:25	[INFO]	Done
+2020-07-21 22:43:25	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=37
+2020-07-21 22:43:25	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-005.jpg
+2020-07-21 22:43:25	[INFO]	Adding to cbz
+2020-07-21 22:43:25	[INFO]	Done
+2020-07-21 22:43:25	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=38
+2020-07-21 22:43:26	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-006.jpg
+2020-07-21 22:43:26	[INFO]	Adding to cbz
+2020-07-21 22:43:26	[INFO]	Done
+2020-07-21 22:43:26	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=39
+2020-07-21 22:43:28	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-007.jpg
+2020-07-21 22:43:29	[INFO]	Adding to cbz
+2020-07-21 22:43:29	[INFO]	Done
+2020-07-21 22:43:29	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=40
+2020-07-21 22:43:30	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-008.jpg
+2020-07-21 22:43:31	[INFO]	Adding to cbz
+2020-07-21 22:43:31	[INFO]	Done
+2020-07-21 22:43:31	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=41
+2020-07-21 22:43:32	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-009.jpg
+2020-07-21 22:43:33	[INFO]	Adding to cbz
+2020-07-21 22:43:33	[INFO]	Done
+2020-07-21 22:43:33	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=42
+2020-07-21 22:43:33	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-010.jpg
+2020-07-21 22:43:33	[INFO]	Adding to cbz
+2020-07-21 22:43:33	[INFO]	Done
+2020-07-21 22:43:33	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=43
+2020-07-21 22:43:34	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-011.jpg
+2020-07-21 22:43:34	[INFO]	Adding to cbz
+2020-07-21 22:43:34	[INFO]	Done
+2020-07-21 22:43:34	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=44
+2020-07-21 22:43:35	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-012.jpg
+2020-07-21 22:43:35	[INFO]	Adding to cbz
+2020-07-21 22:43:35	[INFO]	Done
+2020-07-21 22:43:35	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=45
+2020-07-21 22:43:36	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-013.jpg
+2020-07-21 22:43:36	[INFO]	Adding to cbz
+2020-07-21 22:43:36	[INFO]	Done
+2020-07-21 22:43:36	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=46
+2020-07-21 22:43:37	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-014.jpg
+2020-07-21 22:43:37	[INFO]	Adding to cbz
+2020-07-21 22:43:37	[INFO]	Done
+2020-07-21 22:43:37	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=47
+2020-07-21 22:43:38	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-015.jpg
+2020-07-21 22:43:38	[INFO]	Adding to cbz
+2020-07-21 22:43:38	[INFO]	Done
+2020-07-21 22:43:38	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=48
+2020-07-21 22:43:39	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-016.jpg
+2020-07-21 22:43:39	[INFO]	Adding to cbz
+2020-07-21 22:43:39	[INFO]	Done
+2020-07-21 22:43:39	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=49
+2020-07-21 22:43:39	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-017.jpg
+2020-07-21 22:43:40	[INFO]	Adding to cbz
+2020-07-21 22:43:40	[INFO]	Done
+2020-07-21 22:43:40	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=50
+2020-07-21 22:43:40	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-018.jpg
+2020-07-21 22:43:41	[INFO]	Adding to cbz
+2020-07-21 22:43:41	[INFO]	Done
+2020-07-21 22:43:41	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=51
+2020-07-21 22:43:41	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-019.jpg
+2020-07-21 22:43:42	[INFO]	Adding to cbz
+2020-07-21 22:43:42	[INFO]	Done
+2020-07-21 22:43:42	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=52
+2020-07-21 22:43:42	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-020.jpg
+2020-07-21 22:43:43	[INFO]	Adding to cbz
+2020-07-21 22:43:43	[INFO]	Done
+2020-07-21 22:43:43	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=53
+2020-07-21 22:43:43	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-021.jpg
+2020-07-21 22:43:44	[INFO]	Adding to cbz
+2020-07-21 22:43:44	[INFO]	Done
+2020-07-21 22:43:44	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=54
+2020-07-21 22:43:44	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-022.jpg
+2020-07-21 22:43:45	[INFO]	Adding to cbz
+2020-07-21 22:43:45	[INFO]	Done
+2020-07-21 22:43:45	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=55
+2020-07-21 22:43:45	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-023.jpg
+2020-07-21 22:43:45	[INFO]	Adding to cbz
+2020-07-21 22:43:46	[INFO]	Done
+2020-07-21 22:43:46	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=56
+2020-07-21 22:43:46	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-024.jpg
+2020-07-21 22:43:46	[INFO]	Adding to cbz
+2020-07-21 22:43:46	[INFO]	Done
+2020-07-21 22:43:47	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=57
+2020-07-21 22:43:47	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-025.jpg
+2020-07-21 22:43:47	[INFO]	Adding to cbz
+2020-07-21 22:43:47	[INFO]	Done
+2020-07-21 22:43:47	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=58
+2020-07-21 22:43:48	[INFO]	Downloading Image: Gunnerkrigg/003 - Reynardine/Gunnerkrigg_003-026.jpg
+2020-07-21 22:43:48	[INFO]	Adding to cbz
+2020-07-21 22:43:48	[INFO]	Done
+2020-07-21 22:43:48	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=59
+2020-07-21 22:43:49	[INFO]	Downloading Image: Gunnerkrigg/004 - Not Very Scary/Gunnerkrigg_004-001.jpg
+2020-07-21 22:43:49	[INFO]	Adding to cbz
+2020-07-21 22:43:49	[INFO]	Done
+2020-07-21 22:43:49	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=60
+2020-07-21 22:43:51	[INFO]	Downloading Image: Gunnerkrigg/004 - Not Very Scary/Gunnerkrigg_004-002.jpg
+2020-07-21 22:43:51	[INFO]	Adding to cbz
+2020-07-21 22:43:51	[INFO]	Done
+2020-07-21 22:43:51	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=61
+2020-07-21 22:43:51	[INFO]	Downloading Image: Gunnerkrigg/004 - Not Very Scary/Gunnerkrigg_004-003.jpg
+2020-07-21 22:43:52	[INFO]	Adding to cbz
+2020-07-21 22:43:52	[INFO]	Done
+2020-07-21 22:43:52	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=62
+2020-07-21 22:43:52	[INFO]	Downloading Image: Gunnerkrigg/004 - Not Very Scary/Gunnerkrigg_004-004.jpg
+2020-07-21 22:43:53	[INFO]	Adding to cbz
+2020-07-21 22:43:53	[INFO]	Done
+2020-07-21 22:43:53	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=63
+2020-07-21 22:43:54	[INFO]	Downloading Image: Gunnerkrigg/004 - Not Very Scary/Gunnerkrigg_004-005.jpg
+2020-07-21 22:43:55	[INFO]	Adding to cbz
+2020-07-21 22:43:55	[INFO]	Done
+2020-07-21 22:43:55	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=64
+2020-07-21 22:43:55	[INFO]	Downloading Image: Gunnerkrigg/004 - Not Very Scary/Gunnerkrigg_004-006.jpg
+2020-07-21 22:43:56	[INFO]	Adding to cbz
+2020-07-21 22:43:56	[INFO]	Done
+2020-07-21 22:43:56	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=65
+2020-07-21 22:43:56	[INFO]	Downloading Image: Gunnerkrigg/004 - Not Very Scary/Gunnerkrigg_004-007.jpg
+2020-07-21 22:43:56	[INFO]	Adding to cbz
+2020-07-21 22:43:56	[INFO]	Done
+2020-07-21 22:43:56	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=66
+2020-07-21 22:43:57	[INFO]	Downloading Image: Gunnerkrigg/004 - Not Very Scary/Gunnerkrigg_004-008.jpg
+2020-07-21 22:43:57	[INFO]	Adding to cbz
+2020-07-21 22:43:57	[INFO]	Done
+2020-07-21 22:43:57	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=67
+2020-07-21 22:43:58	[INFO]	Downloading Image: Gunnerkrigg/004 - Not Very Scary/Gunnerkrigg_004-009.jpg
+2020-07-21 22:43:58	[INFO]	Adding to cbz
+2020-07-21 22:43:58	[INFO]	Done
+2020-07-21 22:43:58	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=68
+2020-07-21 22:43:59	[INFO]	Downloading Image: Gunnerkrigg/004 - Not Very Scary/Gunnerkrigg_004-010.jpg
+2020-07-21 22:43:59	[INFO]	Adding to cbz
+2020-07-21 22:43:59	[INFO]	Done
+2020-07-21 22:43:59	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=69
+2020-07-21 22:44:00	[INFO]	Downloading Image: Gunnerkrigg/005 - Two Strange Girls/Gunnerkrigg_005-001.jpg
+2020-07-21 22:44:00	[INFO]	Adding to cbz
+2020-07-21 22:44:00	[INFO]	Done
+2020-07-21 22:44:00	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=70
+2020-07-21 22:44:00	[INFO]	Downloading Image: Gunnerkrigg/005 - Two Strange Girls/Gunnerkrigg_005-002.jpg
+2020-07-21 22:44:01	[INFO]	Adding to cbz
+2020-07-21 22:44:01	[INFO]	Done
+2020-07-21 22:44:01	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=71
+2020-07-21 22:44:01	[INFO]	Downloading Image: Gunnerkrigg/005 - Two Strange Girls/Gunnerkrigg_005-003.jpg
+2020-07-21 22:44:02	[INFO]	Adding to cbz
+2020-07-21 22:44:02	[INFO]	Done
+2020-07-21 22:44:02	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=72
+2020-07-21 22:44:02	[INFO]	Downloading Image: Gunnerkrigg/005 - Two Strange Girls/Gunnerkrigg_005-004.jpg
+2020-07-21 22:44:03	[INFO]	Adding to cbz
+2020-07-21 22:44:03	[INFO]	Done
+2020-07-21 22:44:03	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=73
+2020-07-21 22:44:03	[INFO]	Downloading Image: Gunnerkrigg/005 - Two Strange Girls/Gunnerkrigg_005-005.jpg
+2020-07-21 22:44:04	[INFO]	Adding to cbz
+2020-07-21 22:44:04	[INFO]	Done
+2020-07-21 22:44:04	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=74
+2020-07-21 22:44:04	[INFO]	Downloading Image: Gunnerkrigg/005 - Two Strange Girls/Gunnerkrigg_005-006.jpg
+2020-07-21 22:44:05	[INFO]	Adding to cbz
+2020-07-21 22:44:05	[INFO]	Done
+2020-07-21 22:44:05	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=75
+2020-07-21 22:44:06	[INFO]	Downloading Image: Gunnerkrigg/005 - Two Strange Girls/Gunnerkrigg_005-007.jpg
+2020-07-21 22:44:06	[INFO]	Adding to cbz
+2020-07-21 22:44:07	[INFO]	Done
+2020-07-21 22:44:07	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=76
+2020-07-21 22:44:07	[INFO]	Downloading Image: Gunnerkrigg/005 - Two Strange Girls/Gunnerkrigg_005-008.jpg
+2020-07-21 22:44:07	[INFO]	Adding to cbz
+2020-07-21 22:44:07	[INFO]	Done
+2020-07-21 22:44:07	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=77
+2020-07-21 22:44:08	[INFO]	Downloading Image: Gunnerkrigg/005 - Two Strange Girls/Gunnerkrigg_005-009.jpg
+2020-07-21 22:44:08	[INFO]	Adding to cbz
+2020-07-21 22:44:08	[INFO]	Done
+2020-07-21 22:44:08	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=78
+2020-07-21 22:44:09	[INFO]	Downloading Image: Gunnerkrigg/005 - Two Strange Girls/Gunnerkrigg_005-010.jpg
+2020-07-21 22:44:09	[INFO]	Adding to cbz
+2020-07-21 22:44:09	[INFO]	Done
+2020-07-21 22:44:09	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=79
+2020-07-21 22:44:09	[INFO]	Downloading Image: Gunnerkrigg/005 - Two Strange Girls/Gunnerkrigg_005-011.jpg
+2020-07-21 22:44:10	[INFO]	Adding to cbz
+2020-07-21 22:44:10	[INFO]	Done
+2020-07-21 22:44:10	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=80
+2020-07-21 22:44:10	[INFO]	Downloading Image: Gunnerkrigg/005 - Two Strange Girls/Gunnerkrigg_005-012.jpg
+2020-07-21 22:44:11	[INFO]	Adding to cbz
+2020-07-21 22:44:11	[INFO]	Done
+2020-07-21 22:44:11	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=81
+2020-07-21 22:44:11	[INFO]	Downloading Image: Gunnerkrigg/005 - Two Strange Girls/Gunnerkrigg_005-013.jpg
+2020-07-21 22:44:12	[INFO]	Adding to cbz
+2020-07-21 22:44:12	[INFO]	Done
+2020-07-21 22:44:12	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=82
+2020-07-21 22:44:12	[INFO]	Downloading Image: Gunnerkrigg/005 - Two Strange Girls/Gunnerkrigg_005-014.jpg
+2020-07-21 22:44:13	[INFO]	Adding to cbz
+2020-07-21 22:44:13	[INFO]	Done
+2020-07-21 22:44:13	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=83
+2020-07-21 22:44:13	[INFO]	Downloading Image: Gunnerkrigg/005 - Two Strange Girls/Gunnerkrigg_005-015.jpg
+2020-07-21 22:44:14	[INFO]	Adding to cbz
+2020-07-21 22:44:14	[INFO]	Done
+2020-07-21 22:44:14	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=84
+2020-07-21 22:44:14	[INFO]	Downloading Image: Gunnerkrigg/005 - Two Strange Girls/Gunnerkrigg_005-016.jpg
+2020-07-21 22:44:15	[INFO]	Adding to cbz
+2020-07-21 22:44:15	[INFO]	Done
+2020-07-21 22:44:15	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=85
+2020-07-21 22:44:15	[INFO]	Downloading Image: Gunnerkrigg/006 - A Handful of Dirt/Gunnerkrigg_006-001.jpg
+2020-07-21 22:44:15	[INFO]	Adding to cbz
+2020-07-21 22:44:15	[INFO]	Done
+2020-07-21 22:44:15	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=86
+2020-07-21 22:44:16	[INFO]	Downloading Image: Gunnerkrigg/006 - A Handful of Dirt/Gunnerkrigg_006-002.jpg
+2020-07-21 22:44:16	[INFO]	Adding to cbz
+2020-07-21 22:44:16	[INFO]	Done
+2020-07-21 22:44:16	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=87
+2020-07-21 22:44:17	[INFO]	Downloading Image: Gunnerkrigg/006 - A Handful of Dirt/Gunnerkrigg_006-003.jpg
+2020-07-21 22:44:17	[INFO]	Adding to cbz
+2020-07-21 22:44:17	[INFO]	Done
+2020-07-21 22:44:17	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=88
+2020-07-21 22:44:17	[INFO]	Downloading Image: Gunnerkrigg/006 - A Handful of Dirt/Gunnerkrigg_006-004.jpg
+2020-07-21 22:44:18	[INFO]	Adding to cbz
+2020-07-21 22:44:18	[INFO]	Done
+2020-07-21 22:44:18	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=89
+2020-07-21 22:44:18	[INFO]	Downloading Image: Gunnerkrigg/006 - A Handful of Dirt/Gunnerkrigg_006-005.jpg
+2020-07-21 22:44:20	[INFO]	Adding to cbz
+2020-07-21 22:44:20	[INFO]	Done
+2020-07-21 22:44:20	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=90
+2020-07-21 22:44:21	[INFO]	Downloading Image: Gunnerkrigg/006 - A Handful of Dirt/Gunnerkrigg_006-006.jpg
+2020-07-21 22:44:22	[INFO]	Adding to cbz
+2020-07-21 22:44:22	[INFO]	Done
+2020-07-21 22:44:22	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=91
+2020-07-21 22:44:22	[INFO]	Downloading Image: Gunnerkrigg/006 - A Handful of Dirt/Gunnerkrigg_006-007.jpg
+2020-07-21 22:44:23	[INFO]	Adding to cbz
+2020-07-21 22:44:23	[INFO]	Done
+2020-07-21 22:44:23	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=92
+2020-07-21 22:44:24	[INFO]	Downloading Image: Gunnerkrigg/006 - A Handful of Dirt/Gunnerkrigg_006-008.jpg
+2020-07-21 22:44:24	[INFO]	Adding to cbz
+2020-07-21 22:44:25	[INFO]	Done
+2020-07-21 22:44:25	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=93
+2020-07-21 22:44:25	[INFO]	Downloading Image: Gunnerkrigg/006 - A Handful of Dirt/Gunnerkrigg_006-009.jpg
+2020-07-21 22:44:26	[INFO]	Adding to cbz
+2020-07-21 22:44:26	[INFO]	Done
+2020-07-21 22:44:26	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=94
+2020-07-21 22:44:26	[INFO]	Downloading Image: Gunnerkrigg/006 - A Handful of Dirt/Gunnerkrigg_006-010.jpg
+2020-07-21 22:44:26	[INFO]	Adding to cbz
+2020-07-21 22:44:27	[INFO]	Done
+2020-07-21 22:44:27	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=95
+2020-07-21 22:44:27	[INFO]	Downloading Image: Gunnerkrigg/006 - A Handful of Dirt/Gunnerkrigg_006-011.jpg
+2020-07-21 22:44:27	[INFO]	Adding to cbz
+2020-07-21 22:44:27	[INFO]	Done
+2020-07-21 22:44:27	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=96
+2020-07-21 22:44:28	[INFO]	Downloading Image: Gunnerkrigg/006 - A Handful of Dirt/Gunnerkrigg_006-012.jpg
+2020-07-21 22:44:28	[INFO]	Adding to cbz
+2020-07-21 22:44:28	[INFO]	Done
+2020-07-21 22:44:28	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=97
+2020-07-21 22:44:30	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-001.jpg
+2020-07-21 22:44:31	[INFO]	Adding to cbz
+2020-07-21 22:44:31	[INFO]	Done
+2020-07-21 22:44:31	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=98
+2020-07-21 22:44:31	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-002.jpg
+2020-07-21 22:44:32	[INFO]	Adding to cbz
+2020-07-21 22:44:32	[INFO]	Done
+2020-07-21 22:44:32	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=99
+2020-07-21 22:44:32	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-003.jpg
+2020-07-21 22:44:33	[INFO]	Adding to cbz
+2020-07-21 22:44:33	[INFO]	Done
+2020-07-21 22:44:33	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=100
+2020-07-21 22:44:33	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-004.jpg
+2020-07-21 22:44:33	[INFO]	Adding to cbz
+2020-07-21 22:44:34	[INFO]	Done
+2020-07-21 22:44:34	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=101
+2020-07-21 22:44:34	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-005.jpg
+2020-07-21 22:44:34	[INFO]	Adding to cbz
+2020-07-21 22:44:34	[INFO]	Done
+2020-07-21 22:44:37	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=102
+2020-07-21 22:44:38	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-006.jpg
+2020-07-21 22:44:38	[INFO]	Adding to cbz
+2020-07-21 22:44:38	[INFO]	Done
+2020-07-21 22:44:38	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=103
+2020-07-21 22:44:39	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-007.jpg
+2020-07-21 22:44:39	[INFO]	Adding to cbz
+2020-07-21 22:44:39	[INFO]	Done
+2020-07-21 22:44:39	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=104
+2020-07-21 22:44:40	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-008.jpg
+2020-07-21 22:44:40	[INFO]	Adding to cbz
+2020-07-21 22:44:40	[INFO]	Done
+2020-07-21 22:44:40	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=105
+2020-07-21 22:44:41	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-009.jpg
+2020-07-21 22:44:41	[INFO]	Adding to cbz
+2020-07-21 22:44:41	[INFO]	Done
+2020-07-21 22:44:41	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=106
+2020-07-21 22:44:41	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-010.jpg
+2020-07-21 22:44:42	[INFO]	Adding to cbz
+2020-07-21 22:44:42	[INFO]	Done
+2020-07-21 22:44:42	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=107
+2020-07-21 22:44:42	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-011.jpg
+2020-07-21 22:44:43	[INFO]	Adding to cbz
+2020-07-21 22:44:43	[INFO]	Done
+2020-07-21 22:44:43	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=108
+2020-07-21 22:44:43	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-012.jpg
+2020-07-21 22:44:44	[INFO]	Adding to cbz
+2020-07-21 22:44:44	[INFO]	Done
+2020-07-21 22:44:44	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=109
+2020-07-21 22:44:44	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-013.jpg
+2020-07-21 22:44:45	[INFO]	Adding to cbz
+2020-07-21 22:44:45	[INFO]	Done
+2020-07-21 22:44:45	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=110
+2020-07-21 22:44:45	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-014.jpg
+2020-07-21 22:44:46	[INFO]	Adding to cbz
+2020-07-21 22:44:46	[INFO]	Done
+2020-07-21 22:44:46	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=111
+2020-07-21 22:44:46	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-015.jpg
+2020-07-21 22:44:47	[INFO]	Adding to cbz
+2020-07-21 22:44:47	[INFO]	Done
+2020-07-21 22:44:47	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=112
+2020-07-21 22:44:48	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-016.jpg
+2020-07-21 22:44:48	[INFO]	Adding to cbz
+2020-07-21 22:44:48	[INFO]	Done
+2020-07-21 22:44:48	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=113
+2020-07-21 22:44:49	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-017.jpg
+2020-07-21 22:44:50	[INFO]	Adding to cbz
+2020-07-21 22:44:50	[INFO]	Done
+2020-07-21 22:44:50	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=114
+2020-07-21 22:44:50	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-018.jpg
+2020-07-21 22:44:51	[INFO]	Adding to cbz
+2020-07-21 22:44:51	[INFO]	Done
+2020-07-21 22:44:51	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=115
+2020-07-21 22:44:51	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-019.jpg
+2020-07-21 22:44:51	[INFO]	Adding to cbz
+2020-07-21 22:44:52	[INFO]	Done
+2020-07-21 22:44:52	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=116
+2020-07-21 22:44:52	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-020.jpg
+2020-07-21 22:44:52	[INFO]	Adding to cbz
+2020-07-21 22:44:52	[INFO]	Done
+2020-07-21 22:44:52	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=117
+2020-07-21 22:44:53	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-021.jpg
+2020-07-21 22:44:53	[INFO]	Adding to cbz
+2020-07-21 22:44:53	[INFO]	Done
+2020-07-21 22:44:53	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=118
+2020-07-21 22:44:54	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-022.jpg
+2020-07-21 22:44:54	[INFO]	Adding to cbz
+2020-07-21 22:44:54	[INFO]	Done
+2020-07-21 22:44:54	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=119
+2020-07-21 22:44:55	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-023.jpg
+2020-07-21 22:44:55	[INFO]	Adding to cbz
+2020-07-21 22:44:55	[INFO]	Done
+2020-07-21 22:44:55	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=120
+2020-07-21 22:44:56	[INFO]	Downloading Image: Gunnerkrigg/007 - Of New And Old/Gunnerkrigg_007-024.jpg
+2020-07-21 22:44:56	[INFO]	Adding to cbz
+2020-07-21 22:44:56	[INFO]	Done
+2020-07-21 22:44:56	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=121
+2020-07-21 22:44:57	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-001.jpg
+2020-07-21 22:44:57	[INFO]	Adding to cbz
+2020-07-21 22:44:57	[INFO]	Done
+2020-07-21 22:44:57	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=122
+2020-07-21 22:44:57	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-002.jpg
+2020-07-21 22:44:58	[INFO]	Adding to cbz
+2020-07-21 22:44:58	[INFO]	Done
+2020-07-21 22:44:58	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=123
+2020-07-21 22:44:58	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-003.jpg
+2020-07-21 22:44:59	[INFO]	Adding to cbz
+2020-07-21 22:44:59	[INFO]	Done
+2020-07-21 22:44:59	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=124
+2020-07-21 22:44:59	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-004.jpg
+2020-07-21 22:45:00	[INFO]	Adding to cbz
+2020-07-21 22:45:00	[INFO]	Done
+2020-07-21 22:45:00	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=125
+2020-07-21 22:45:00	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-005.jpg
+2020-07-21 22:45:01	[INFO]	Adding to cbz
+2020-07-21 22:45:01	[INFO]	Done
+2020-07-21 22:45:01	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=126
+2020-07-21 22:45:01	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-006.jpg
+2020-07-21 22:45:02	[INFO]	Adding to cbz
+2020-07-21 22:45:02	[INFO]	Done
+2020-07-21 22:45:02	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=127
+2020-07-21 22:45:02	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-007.jpg
+2020-07-21 22:45:03	[INFO]	Adding to cbz
+2020-07-21 22:45:03	[INFO]	Done
+2020-07-21 22:45:03	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=128
+2020-07-21 22:45:03	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-008.jpg
+2020-07-21 22:45:04	[INFO]	Adding to cbz
+2020-07-21 22:45:04	[INFO]	Done
+2020-07-21 22:45:04	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=129
+2020-07-21 22:45:04	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-009.jpg
+2020-07-21 22:45:05	[INFO]	Adding to cbz
+2020-07-21 22:45:05	[INFO]	Done
+2020-07-21 22:45:05	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=130
+2020-07-21 22:45:05	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-010.jpg
+2020-07-21 22:45:06	[INFO]	Adding to cbz
+2020-07-21 22:45:06	[INFO]	Done
+2020-07-21 22:45:06	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=131
+2020-07-21 22:45:06	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-011.jpg
+2020-07-21 22:45:07	[INFO]	Adding to cbz
+2020-07-21 22:45:07	[INFO]	Done
+2020-07-21 22:45:07	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=132
+2020-07-21 22:45:07	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-012.jpg
+2020-07-21 22:45:08	[INFO]	Adding to cbz
+2020-07-21 22:45:08	[INFO]	Done
+2020-07-21 22:45:08	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=133
+2020-07-21 22:45:08	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-013.jpg
+2020-07-21 22:45:08	[INFO]	Adding to cbz
+2020-07-21 22:45:09	[INFO]	Done
+2020-07-21 22:45:09	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=134
+2020-07-21 22:45:09	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-014.jpg
+2020-07-21 22:45:09	[INFO]	Adding to cbz
+2020-07-21 22:45:09	[INFO]	Done
+2020-07-21 22:45:09	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=135
+2020-07-21 22:45:10	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-015.jpg
+2020-07-21 22:45:10	[INFO]	Adding to cbz
+2020-07-21 22:45:11	[INFO]	Done
+2020-07-21 22:45:11	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=136
+2020-07-21 22:45:12	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-016.jpg
+2020-07-21 22:45:12	[INFO]	Adding to cbz
+2020-07-21 22:45:12	[INFO]	Done
+2020-07-21 22:45:12	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=137
+2020-07-21 22:45:12	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-017.jpg
+2020-07-21 22:45:13	[INFO]	Adding to cbz
+2020-07-21 22:45:13	[INFO]	Done
+2020-07-21 22:45:13	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=138
+2020-07-21 22:45:14	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-018.jpg
+2020-07-21 22:45:15	[INFO]	Adding to cbz
+2020-07-21 22:45:15	[INFO]	Done
+2020-07-21 22:45:15	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=139
+2020-07-21 22:45:15	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-019.jpg
+2020-07-21 22:45:15	[INFO]	Adding to cbz
+2020-07-21 22:45:15	[INFO]	Done
+2020-07-21 22:45:15	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=140
+2020-07-21 22:45:18	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-020.jpg
+2020-07-21 22:45:19	[INFO]	Adding to cbz
+2020-07-21 22:45:19	[INFO]	Done
+2020-07-21 22:45:19	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=141
+2020-07-21 22:45:20	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-021.jpg
+2020-07-21 22:45:20	[INFO]	Adding to cbz
+2020-07-21 22:45:20	[INFO]	Done
+2020-07-21 22:45:20	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=142
+2020-07-21 22:45:21	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-022.jpg
+2020-07-21 22:45:21	[INFO]	Adding to cbz
+2020-07-21 22:45:21	[INFO]	Done
+2020-07-21 22:45:21	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=143
+2020-07-21 22:45:21	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-023.jpg
+2020-07-21 22:45:23	[INFO]	Adding to cbz
+2020-07-21 22:45:23	[INFO]	Done
+2020-07-21 22:45:23	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=144
+2020-07-21 22:45:24	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-024.jpg
+2020-07-21 22:45:24	[INFO]	Adding to cbz
+2020-07-21 22:45:24	[INFO]	Done
+2020-07-21 22:45:24	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=145
+2020-07-21 22:45:25	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-025.jpg
+2020-07-21 22:45:25	[INFO]	Adding to cbz
+2020-07-21 22:45:25	[INFO]	Done
+2020-07-21 22:45:25	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=146
+2020-07-21 22:45:26	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-026.jpg
+2020-07-21 22:45:26	[INFO]	Adding to cbz
+2020-07-21 22:45:26	[INFO]	Done
+2020-07-21 22:45:26	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=147
+2020-07-21 22:45:27	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-027.jpg
+2020-07-21 22:45:27	[INFO]	Adding to cbz
+2020-07-21 22:45:27	[INFO]	Done
+2020-07-21 22:45:27	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=148
+2020-07-21 22:45:28	[INFO]	Downloading Image: Gunnerkrigg/008 - Broken Glass And Other Things/Gunnerkrigg_008-028.jpg
+2020-07-21 22:45:28	[INFO]	Adding to cbz
+2020-07-21 22:45:28	[INFO]	Done
+2020-07-21 22:45:28	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=149
+2020-07-21 22:45:29	[INFO]	Downloading Image: Gunnerkrigg/009 - Questions and Answers/Gunnerkrigg_009-001.jpg
+2020-07-21 22:45:29	[INFO]	Adding to cbz
+2020-07-21 22:45:29	[INFO]	Done
+2020-07-21 22:45:29	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=150
+2020-07-21 22:45:29	[INFO]	Downloading Image: Gunnerkrigg/009 - Questions and Answers/Gunnerkrigg_009-002.jpg
+2020-07-21 22:45:30	[INFO]	Adding to cbz
+2020-07-21 22:45:31	[INFO]	Done
+2020-07-21 22:45:31	[INFO]	Getting soup for https://www.gunnerkrigg.com/?p=151

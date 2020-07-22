@@ -16,6 +16,8 @@ from requests import get
 from sqlite3 import connect, Cursor
 from yaml import load, Loader
 
+from pprint import pprint
+
 def createTables(db : Cursor):
 	 db.executescript("""
 			CREATE TABLE Arc(
@@ -123,6 +125,11 @@ def getText(url, retries=10):
 				logging.exception(e)
 				raise e
 
+def getArchiveUrl(soup, prevList, nxtList):
+	prev = getNext(soup, prevList)
+	psoup = bs(getText(prev), 'html.parser')
+	return getNext(psoup, nxtList)
+
 def getTitle(soup):
 	return soup.find('h2', {'class': 'post-title'}).find('a').text
 
@@ -205,11 +212,13 @@ def main():
 		comic = load(yml.read(), Loader=Loader)
 
 	cur = comic['cur'] if ('cur' in comic) else False
-	url = comic['home'] if (cur and 'home' in comic) else comic['url']
+	url = comic['home'] if cur else comic['url']
+	base = comic['home']
 	loc = comic['loc'] if ('loc' in comic) else (urlparse(url).netloc.split('.')[-2] + '/')
 	name = comic['name'] if ('name' in comic) else loc[:-1]
 	getAlt = comic['alt'] if ('alt' in comic) else False
 	nxtList = comic['nxt']
+	prevList = comic['prev']
 	dbName = loc + (comic['db'] if ('db' in comic) else (name + '.db'))
 	output = loc + (comic['log'] if ('log' in comic) else (name + '.log'))
 	loglevel = getLevel(comic['level']) if ('level' in comic) else logging.INFO
@@ -260,6 +269,7 @@ def main():
 			parts = getNext(soup, comic['book']).split('/')
 			book = parts[-3].split('-')[1].zfill(2)
 			arcs = parts[-2].split('-')
+			url = getArchiveUrl(soup, prevList, nxtList)
 		else:
 			parts = url.split('/')
 			book = parts[-4].split('-')[1].zfill(2)
