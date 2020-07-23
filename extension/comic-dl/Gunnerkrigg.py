@@ -20,7 +20,6 @@ def getChapter(soup, num):
 			return opts[idx-1]
 	return opts[-1]		
 
-# Chapter 77: The Thousand Eyes
 def getChapterInfo(chp):
 	val = chp.text.split(':')
 	if len(val) == 1:
@@ -71,14 +70,14 @@ def getSoup(url, base, cur):
 		return bs(getText(base + new), 'html.parser')
 	
 
-def main():
-	workdir = argv[1]
-	savedir = argv[2]
+def main(wd=None, sd=None):
+	workdir = wd if wd else argv[1]
+	savedir = sd if sd else argv[2]
 
 	chdir(workdir)
 
-	cur = False
-	url = 'https://www.gunnerkrigg.com/' if cur else 'https://www.gunnerkrigg.com/?p=930'
+	cur = True
+	url = 'https://www.gunnerkrigg.com/' if cur else 'https://www.gunnerkrigg.com/?p=1'
 	base = 'https://www.gunnerkrigg.com/'
 	loc = 'Gunnerkrigg/'
 	name = 'Gunnerkrigg'
