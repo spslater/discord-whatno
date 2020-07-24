@@ -220,18 +220,6 @@ def main(wd=None, sd=None):
 	nxtList = comic['nxt']
 	prevList = comic['prev']
 	dbName = loc + (comic['db'] if ('db' in comic) else (name + '.db'))
-	output = loc + (comic['log'] if ('log' in comic) else (name + '.log'))
-	loglevel = getLevel(comic['level']) if ('level' in comic) else logging.INFO
-
-	logging.basicConfig(
-		format='%(asctime)s\t[%(levelname)s]\t%(message)s', 
-		datefmt='%Y-%m-%d %H:%M:%S', 
-		level=loglevel, 
-		handlers=[
-			logging.FileHandler(output),
-			logging.StreamHandler(stdout)
-		]
-	)
 
 	conn = connect(dbName)
 	db = conn.cursor()

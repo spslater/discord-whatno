@@ -81,18 +81,6 @@ def main(wd=None, sd=None):
 	base = 'https://www.gunnerkrigg.com/'
 	loc = 'Gunnerkrigg/'
 	name = 'Gunnerkrigg'
-	output = loc + 'output.log'
-	loglevel = logging.INFO
-
-	logging.basicConfig(
-		format='%(asctime)s\t[%(levelname)s]\t%(message)s', 
-		datefmt='%Y-%m-%d %H:%M:%S', 
-		level=loglevel, 
-		handlers=[
-			logging.FileHandler(output),
-			logging.StreamHandler(stdout)
-		]
-	)
 
 	lastComic = False
 
