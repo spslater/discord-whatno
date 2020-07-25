@@ -10505,3 +10505,21 @@ NameError: name 'nxtList' is not defined
 2020-07-24 09:10:20	[INFO]	Gunnerkrigg	Adding to cbz
 2020-07-24 09:10:42	[INFO]	Gunnerkrigg	Done
 2020-07-24 09:10:42	[INFO]	Gunnerkrigg	Completed Comic
+2020-07-25 04:00:09	[INFO]	comics	Updating DumbingOfAge
+2020-07-25 04:00:17	[INFO]	DumbingOfAge	Getting soup for https://www.dumbingofage.com/
+2020-07-25 04:00:19	[INFO]	DumbingOfAge	Saving Arc to Database
+2020-07-25 04:00:19	[INFO]	DumbingOfAge	Saving Comic to Database
+2020-07-25 04:00:19	[INFO]	DumbingOfAge	Saving Tags to Database
+2020-07-25 04:00:19	[INFO]	DumbingOfAge	Downloading
+2020-07-25 04:00:20	[INFO]	DumbingOfAge	Adding Alt Text
+2020-07-25 04:00:21	[INFO]	DumbingOfAge	Saving Alt to Database
+2020-07-25 04:00:21	[INFO]	DumbingOfAge	Removing raw
+2020-07-25 04:00:21	[INFO]	DumbingOfAge	Adding to cbz
+2020-07-25 04:01:08	[INFO]	DumbingOfAge	Done
+2020-07-25 04:01:08	[INFO]	DumbingOfAge	Completed Comic
+2020-07-25 04:01:08	[INFO]	comics	Updating Gunnerkrigg
+2020-07-25 04:01:08	[INFO]	Gunnerkrigg	Getting soup for https://www.gunnerkrigg.com/
+2020-07-25 04:01:10	[INFO]	Gunnerkrigg	Downloading Image: Gunnerkrigg/077 - The Thousand Eyes/Gunnerkrigg_077-014.jpg
+2020-07-25 04:01:11	[INFO]	Gunnerkrigg	Adding to cbz
+2020-07-25 04:01:26	[INFO]	Gunnerkrigg	Done
+2020-07-25 04:01:26	[INFO]	Gunnerkrigg	Completed Comic

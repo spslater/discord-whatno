@@ -24,6 +24,7 @@ def main():
 	for comic in data['comics']:
 		logging.info('Updating ' + comic)
 		__import__(comic).main(workdir, savedir)
+	logging.info('Done Updating All Comics')
 
 
 if __name__ == "__main__":
