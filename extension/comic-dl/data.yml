@@ -1,0 +1,63 @@
+DumbingOfAge:
+  loc: "DumbingOfAge/"
+  name: "Dumbing of Age"
+  url: "https://www.dumbingofage.com/2010/comic/book-1/01-move-in-day/home/"
+  home: "https://www.dumbingofage.com/"
+  cur: True
+  alt: True
+  db: "DumbingOfAge.db"
+  log: "output.log"
+  level: "INFO"
+  book:
+    - tag: 'li'
+      class: 'storyline-root'
+    - tag: 'a'
+  nxt: 
+    - tag: 'div'
+      id: 'comic-foot'
+    - tag: 'a'
+      class: 'navi navi-next'
+  prev: 
+    - tag: 'div'
+      id: 'comic-foot'
+    - tag: 'a'
+      class: 'navi navi-prev'
+Gunnerkrigg:
+  loc: "Gunnerkrigg/"
+  name: "Gunnerkrigg"
+  url: "https://www.gunnerkrigg.com/?p=1"
+  home: "https://www.gunnerkrigg.com/"
+  cur: False
+  prev:
+    - tag: 'div'
+      class: 'extra'
+    - tag: 'div'
+      class: 'nav'
+    - tag: 'a'
+      class: 'left'
+  nxt:
+    - tag: 'a'
+      class: 'right'
+  img:
+    - tag: 'img'
+      class: 'comic_image'
+OrderOfTheStick:
+  loc: "OrderOfTheStick/"
+  name: "Order of the Stick"
+  url: "https://www.giantitp.com/comics/oots.html"
+  home: "https://www.giantitp.com/"
+  cur: False
+BittersweetCandyBowl:
+  loc: "BittersweetCandyBowl/"
+  name: "Bittersweet Candy Bowl"
+  url: "https://www.bittersweetcandybowl.com/c108/p13.html"
+  home: "https://www.bittersweetcandybowl.com/"
+  cur: True
+  alt: True
+  img:
+    - tag: 'img'
+      id: 'page_img'
+  nxt:
+    - tag: 'div'
+      class: 'comicpage'
+    - tag: 'a'
