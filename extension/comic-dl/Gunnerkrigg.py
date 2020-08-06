@@ -13,62 +13,66 @@ from bs4 import BeautifulSoup as bs
 from pprint import pprint
 from requests import get
 
-def getChapter(soup, num):
-	opts = soup.find('select', {'name': 'chapter'}).find_all('option')
-	for idx, opt in enumerate(opts):
-		if int(opt['value']) > num:
-			return opts[idx-1]
-	return opts[-1]		
+from Comic import Comic
 
-def getChapterInfo(chp):
-	val = chp.text.split(':')
-	if len(val) == 1:
-		return '061', val[0]
-	else:
-		return val[0].split(' ')[-1].zfill(3), val[-1][1:]
+class Gunnerkrigg(Comic):
+	def __init__(self, ymlFile, workdir, savedir):
+		super().__init__(ymlFile, 'Gunnerkrigg', workdir, savedir)
 
-def getPage(chp, num):
-	return str(int(num) - int(chp['value']) + 1).zfill(3)
 
-def getNext(soup):
-	return soup.find('a', {'class':'right'})['href']
+	def getChapter(self, soup, num):
+		opts = soup.find('select', {'name': 'chapter'}).find_all('option')
+		for idx, opt in enumerate(opts):
+			if int(opt['value']) > num:
+				return opts[idx-1]
+		return opts[-1]		
 
-def download(img, saveAs, retries=5):
-	dur = 2
-	for x in range(1,retries+1):
-		try:
-			urlretrieve(img, saveAs)
-			break
-		except Exception as e:
-			logging.warning(type(e).__name__ + ' exception occured. Waiting for ' + str(dur) + ' seconds to try again. Remaining atempts: ' + str(retries-x-1))
-			sleep(dur)
-			dur *= dur
-			if x == retries:
-				logging.exception(e)
-				raise e
+	def getChapterInfo(self, chp):
+		val = chp.text.split(':')
+		if len(val) == 1:
+			return '061', val[0]
+		else:
+			return val[0].split(' ')[-1].zfill(3), val[-1][1:]
 
-def getText(url, retries=10):
-	dur = 2
-	for x in range(1, retries+1):
-		try:
-			return get(url).text
-		except Exception as e:
-			logging.warning(type(e).__name__ + ' exception occured. Waiting for ' + str(dur) + ' seconds to try again. Remaining atempts: ' + str(retries-x-1))
-			sleep(dur)
-			dur *= dur
-			if x == retries:
-				logging.exception(e)
-				raise e
+	def getPage(self, chp, num):
+		return str(int(num) - int(chp['value']) + 1).zfill(3)
 
-def getSoup(url, base, cur):
-	if not cur:
-		return bs(getText(url), 'html.parser')
-	else:
-		soup = bs(getText(url), 'html.parser')
-		prev = soup.find('div', {'class':'extra'}).find('div', {'class':'nav'}).find('a', {'class':'left'})['href']
-		new = "?p=" + str(int(prev.split('=')[-1]) + 1)
-		return bs(getText(base + new), 'html.parser')
-	
+	def setNameInfo(self, soup, img):
+		fullnumber, ext = path.splitext(img)
+		num = int(fullnumber.split('/')[-1])
+		chp = self.getChapter(soup, num)
+		cpNum, cpName = self.getChapterInfo(chp)
+		page = self.getPage(chp, num)
+
+		self.arc = cpNum + ' - ' + cpName
+		dirs = self.arc + '/'
+		imgName = self.loc[:-1] + '_' + cpNum + '-' + page + ext
+
+		super().setNameInfo(imgName, dirs)
+
+	def getNext(self, soup):
+		nxt = super().getNext(soup)
+		if nxt:
+			return self.base + nxt
+		return nxt
+
+	def getSoup(self, url=None, retries=10):
+		self.url = url if url else self.url
+		if self.cur:
+			soup = super().getSoup(self.url)
+			prev = self.getPrev(soup)
+			self.url = self.base + "?p=" + str(int(prev.split('=')[-1]) + 1)
+		return super().getSoup()
+
+	def saveToArchive(self):
+		cmdArchive = self.savedir + self.name + '/' + self.name + ' - ' + self.arc + '.cbz'
+		allArchive = self.savedir + self.name + '/' + self.name + '.cbz'
+		super().saveToArchive(cmdArchive)
+		super().saveToArchive(allArchive)
+
+	def downloadAndSave(self, imgSoup):
+		imgSoup['src'] = self.base + imgSoup['src']
+		super().downloadAndSave(imgSoup)
 
 def main(wd=None, sd=None):
 	workdir = wd if wd else argv[1]
@@ -76,66 +80,38 @@ def main(wd=None, sd=None):
 
 	chdir(workdir)
 
-	cur = True
-	url = 'https://www.gunnerkrigg.com/' if cur else 'https://www.gunnerkrigg.com/?p=1'
-	base = 'https://www.gunnerkrigg.com/'
-	loc = 'Gunnerkrigg/'
-	name = 'Gunnerkrigg'
-
-	lastComic = False
-
-	curCount = 0
-	maxCount = 25
+	g = Gunnerkrigg('data.yml', workdir, savedir)	
 
 	while True:
-		logging.info('Getting soup for ' + url)
-		soup = getSoup(url, base, cur)
+		soup = g.getSoup()
+		nxt = g.getNext(soup)
 
-		try:
-			nxt = base + getNext(soup)
-		except Exception as e:
-			lastComic = True
+		imgSoup = g.getImage(soup)
+		img = g.base + imgSoup['src']
+		g.setNameInfo(soup, img)
 
-		img = base + soup.find('img', {'class', 'comic_image'})['src']
+		g.downloadAndSave(imgSoup)
+		g.saveToArchive()
 
-		fullnumber, ext = path.splitext(img)
-		num = int(fullnumber.split('/')[-1])
-		chp = getChapter(soup, num)
-		cpNum, cpName = getChapterInfo(chp)
-		page = getPage(chp, num)
-		arc = cpNum + ' - ' + cpName
-		dirs = loc + arc + '/'
-		imgName = loc[:-1] + '_' + cpNum + '-' + page + ext
-
-		if not path.isdir(dirs):
-			makedirs(dirs)
-
-		saveAs = dirs + imgName
-
-		logging.info('Downloading Image: ' + saveAs)
-		download(img, saveAs)
-
-		zip_cmd = 'cd "' + dirs + '" && zip -ur ' + savedir + '"' + name + '/' + name + ' - ' + arc + '.cbz" ' + imgName + ' > /dev/null'
-		zip_all = 'cd "' + dirs + '" && zip -ur ' + savedir + '"' + name + '/' + name + '.cbz" ' + imgName + ' > /dev/null'
-		logging.info('Adding to cbz')
-		system(zip_cmd)
-		system(zip_all)
 		logging.info('Done')
 
-
-		if lastComic:
+		if g.lastComic:
 			break
 
-		url = nxt
-		if curCount == maxCount:
-			curCount = 0
-			logging.info("Sleeping for 3 secs.")
-			sleep(3)
-		else:
-			curCount += 1
+		g.url = nxt
+		g.waitIfNeed()
 
 	logging.info('Completed Comic')
 
 
 if __name__ == "__main__":
+	logging.basicConfig(
+		format='%(asctime)s\t[%(levelname)s]\t%(module)s\t%(message)s',
+		datefmt='%Y-%m-%d %H:%M:%S',
+		level=logging.INFO,
+		handlers=[
+			logging.FileHandler(argv[1] + 'Gunnerkrigg/output.log'),
+			logging.StreamHandler(stdout)
+		]
+	)
 	main()
