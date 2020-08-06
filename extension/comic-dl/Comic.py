@@ -15,8 +15,8 @@ from yaml import load, Loader
 
 class Comic:
 	def __init__(self, ymlFile, name, workdir, savedir):
-		self.workdir = workdir
-		self.savedir = savedir
+		self.workdir = workdir if workdir[-1] == '/' else (workdir + '/')
+		self.savedir = savedir if savedir[-1] == '/' else (savedir + '/')
 		with open(ymlFile) as yml:
 			comic = load(yml.read(), Loader=Loader)[name]
 
@@ -166,7 +166,11 @@ class Comic:
 			self.convertToPNG(raw, fin)
 
 	def saveToArchive(self, archive):
-		cmd = 'cd "' + self.dirs + '" && zip -ur "' + archive + '" "' + self.saveAs + '" > /dev/null'
+		saveLoc = self.savedir + self.name
+		if not path.isdir(saveLoc):
+			makedirs(saveLoc)
+
+		cmd = 'cd "' + self.dirs + '" && zip -ur "' + saveLoc + '/' + archive + '" "' + self.saveAs + '" > /dev/null'
 		logging.info('Adding to archive: ' + archive)
 		system(cmd)
 

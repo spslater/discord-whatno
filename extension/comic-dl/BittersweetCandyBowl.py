@@ -67,8 +67,8 @@ class BittersweetCandyBowl(Comic):
 		return end
 
 	def saveToArchive(self):
-		chpArchive = savedir + self.name + '/' + self.name + ' - ' + self.chpNum + ' - ' + self.chpName + '.cbz'
-		allArchive = savedir + self.name + '/' + self.name + '.cbz'
+		chpArchive = self.name + ' - ' + self.chpNum + ' - ' + self.chpName + '.cbz'
+		allArchive = self.name + '.cbz'
 		super().saveToArchive(chpArchive)
 		super().saveToArchive(allArchive)
 		

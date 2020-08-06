@@ -65,8 +65,8 @@ class Gunnerkrigg(Comic):
 		return super().getSoup()
 
 	def saveToArchive(self):
-		cmdArchive = self.savedir + self.name + '/' + self.name + ' - ' + self.arc + '.cbz'
-		allArchive = self.savedir + self.name + '/' + self.name + '.cbz'
+		cmdArchive = self.name + ' - ' + self.arc + '.cbz'
+		allArchive = self.name + '.cbz'
 		super().saveToArchive(cmdArchive)
 		super().saveToArchive(allArchive)
 

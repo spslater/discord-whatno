@@ -10523,3 +10523,212 @@ NameError: name 'nxtList' is not defined
 2020-07-25 04:01:11	[INFO]	Gunnerkrigg	Adding to cbz
 2020-07-25 04:01:26	[INFO]	Gunnerkrigg	Done
 2020-07-25 04:01:26	[INFO]	Gunnerkrigg	Completed Comic
+2020-07-26 04:00:08	[INFO]	comics	Updating DumbingOfAge
+2020-07-26 04:00:14	[INFO]	DumbingOfAge	Getting soup for https://www.dumbingofage.com/
+2020-07-26 04:00:17	[INFO]	DumbingOfAge	Saving Arc to Database
+2020-07-26 04:00:17	[INFO]	DumbingOfAge	Saving Comic to Database
+2020-07-26 04:00:17	[INFO]	DumbingOfAge	Saving Tags to Database
+2020-07-26 04:00:17	[INFO]	DumbingOfAge	Downloading
+2020-07-26 04:00:17	[INFO]	DumbingOfAge	Adding Alt Text
+2020-07-26 04:00:18	[INFO]	DumbingOfAge	Saving Alt to Database
+2020-07-26 04:00:18	[INFO]	DumbingOfAge	Removing raw
+2020-07-26 04:00:18	[INFO]	DumbingOfAge	Adding to cbz
+2020-07-26 04:00:43	[INFO]	DumbingOfAge	Done
+2020-07-26 04:00:43	[INFO]	DumbingOfAge	Completed Comic
+2020-07-26 04:00:43	[INFO]	comics	Updating Gunnerkrigg
+2020-07-26 04:00:44	[INFO]	Gunnerkrigg	Getting soup for https://www.gunnerkrigg.com/
+2020-07-26 04:00:45	[INFO]	Gunnerkrigg	Downloading Image: Gunnerkrigg/077 - The Thousand Eyes/Gunnerkrigg_077-014.jpg
+2020-07-26 04:00:46	[INFO]	Gunnerkrigg	Adding to cbz
+2020-07-26 04:00:55	[INFO]	Gunnerkrigg	Done
+2020-07-26 04:00:55	[INFO]	Gunnerkrigg	Completed Comic
+2020-07-26 04:00:55	[INFO]	comics	Done Updating All Comics
+2020-07-27 04:00:14	[INFO]	comics	Updating DumbingOfAge
+2020-07-27 04:00:20	[INFO]	DumbingOfAge	Getting soup for https://www.dumbingofage.com/
+2020-07-27 04:00:22	[INFO]	DumbingOfAge	Saving Arc to Database
+2020-07-27 04:00:22	[INFO]	DumbingOfAge	Saving Comic to Database
+2020-07-27 04:00:22	[INFO]	DumbingOfAge	Saving Tags to Database
+2020-07-27 04:00:22	[INFO]	DumbingOfAge	Downloading
+2020-07-27 04:00:23	[INFO]	DumbingOfAge	Adding Alt Text
+2020-07-27 04:00:26	[INFO]	DumbingOfAge	Saving Alt to Database
+2020-07-27 04:00:26	[INFO]	DumbingOfAge	Removing raw
+2020-07-27 04:00:26	[INFO]	DumbingOfAge	Adding to cbz
+2020-07-27 04:01:12	[INFO]	DumbingOfAge	Done
+2020-07-27 04:01:12	[INFO]	DumbingOfAge	Completed Comic
+2020-07-27 04:01:12	[INFO]	comics	Updating Gunnerkrigg
+2020-07-27 04:01:12	[INFO]	Gunnerkrigg	Getting soup for https://www.gunnerkrigg.com/
+2020-07-27 04:01:13	[INFO]	Gunnerkrigg	Downloading Image: Gunnerkrigg/077 - The Thousand Eyes/Gunnerkrigg_077-015.jpg
+2020-07-27 04:01:13	[INFO]	Gunnerkrigg	Adding to cbz
+2020-07-27 04:01:24	[INFO]	Gunnerkrigg	Done
+2020-07-27 04:01:24	[INFO]	Gunnerkrigg	Completed Comic
+2020-07-27 04:01:24	[INFO]	comics	Done Updating All Comics
+2020-07-28 04:00:13	[INFO]	comics	Updating DumbingOfAge
+2020-07-28 04:00:24	[INFO]	DumbingOfAge	Getting soup for https://www.dumbingofage.com/
+2020-07-28 04:00:27	[INFO]	DumbingOfAge	Saving Arc to Database
+2020-07-28 04:00:29	[INFO]	DumbingOfAge	Saving Comic to Database
+2020-07-28 04:00:29	[INFO]	DumbingOfAge	Saving Tags to Database
+2020-07-28 04:00:29	[INFO]	DumbingOfAge	Downloading
+2020-07-28 04:00:30	[INFO]	DumbingOfAge	Adding Alt Text
+2020-07-28 04:00:31	[INFO]	DumbingOfAge	Saving Alt to Database
+2020-07-28 04:00:31	[INFO]	DumbingOfAge	Removing raw
+2020-07-28 04:00:31	[INFO]	DumbingOfAge	Adding to cbz
+2020-07-28 04:01:02	[INFO]	DumbingOfAge	Done
+2020-07-28 04:01:02	[INFO]	DumbingOfAge	Completed Comic
+2020-07-28 04:01:02	[INFO]	comics	Updating Gunnerkrigg
+2020-07-28 04:01:02	[INFO]	Gunnerkrigg	Getting soup for https://www.gunnerkrigg.com/
+2020-07-28 04:01:03	[INFO]	Gunnerkrigg	Downloading Image: Gunnerkrigg/077 - The Thousand Eyes/Gunnerkrigg_077-015.jpg
+2020-07-28 04:01:04	[INFO]	Gunnerkrigg	Adding to cbz
+2020-07-28 04:01:13	[INFO]	Gunnerkrigg	Done
+2020-07-28 04:01:13	[INFO]	Gunnerkrigg	Completed Comic
+2020-07-28 04:01:13	[INFO]	comics	Done Updating All Comics
+2020-07-29 04:00:13	[INFO]	comics	Updating DumbingOfAge
+2020-07-29 04:00:20	[INFO]	DumbingOfAge	Getting soup for https://www.dumbingofage.com/
+2020-07-29 04:00:23	[INFO]	DumbingOfAge	Saving Arc to Database
+2020-07-29 04:00:23	[INFO]	DumbingOfAge	Saving Comic to Database
+2020-07-29 04:00:23	[INFO]	DumbingOfAge	Saving Tags to Database
+2020-07-29 04:00:23	[INFO]	DumbingOfAge	Downloading
+2020-07-29 04:00:24	[INFO]	DumbingOfAge	Adding Alt Text
+2020-07-29 04:00:24	[INFO]	DumbingOfAge	Saving Alt to Database
+2020-07-29 04:00:24	[INFO]	DumbingOfAge	Removing raw
+2020-07-29 04:00:24	[INFO]	DumbingOfAge	Adding to cbz
+2020-07-29 04:01:11	[INFO]	DumbingOfAge	Done
+2020-07-29 04:01:11	[INFO]	DumbingOfAge	Completed Comic
+2020-07-29 04:01:11	[INFO]	comics	Updating Gunnerkrigg
+2020-07-29 04:01:11	[INFO]	Gunnerkrigg	Getting soup for https://www.gunnerkrigg.com/
+2020-07-29 04:01:13	[INFO]	Gunnerkrigg	Downloading Image: Gunnerkrigg/077 - The Thousand Eyes/Gunnerkrigg_077-016.jpg
+2020-07-29 04:01:14	[INFO]	Gunnerkrigg	Adding to cbz
+2020-07-29 04:01:38	[INFO]	Gunnerkrigg	Done
+2020-07-29 04:01:38	[INFO]	Gunnerkrigg	Completed Comic
+2020-07-29 04:01:38	[INFO]	comics	Done Updating All Comics
+2020-07-30 04:00:13	[INFO]	comics	Updating DumbingOfAge
+2020-07-30 04:00:20	[INFO]	DumbingOfAge	Getting soup for https://www.dumbingofage.com/
+2020-07-30 04:00:23	[INFO]	DumbingOfAge	Saving Arc to Database
+2020-07-30 04:00:23	[INFO]	DumbingOfAge	Saving Comic to Database
+2020-07-30 04:00:23	[INFO]	DumbingOfAge	Saving Tags to Database
+2020-07-30 04:00:23	[INFO]	DumbingOfAge	Downloading
+2020-07-30 04:00:23	[INFO]	DumbingOfAge	Adding Alt Text
+2020-07-30 04:00:24	[INFO]	DumbingOfAge	Saving Alt to Database
+2020-07-30 04:00:24	[INFO]	DumbingOfAge	Removing raw
+2020-07-30 04:00:24	[INFO]	DumbingOfAge	Adding to cbz
+2020-07-30 04:01:00	[INFO]	DumbingOfAge	Done
+2020-07-30 04:01:00	[INFO]	DumbingOfAge	Completed Comic
+2020-07-30 04:01:00	[INFO]	comics	Updating Gunnerkrigg
+2020-07-30 04:01:00	[INFO]	Gunnerkrigg	Getting soup for https://www.gunnerkrigg.com/
+2020-07-30 04:01:02	[INFO]	Gunnerkrigg	Downloading Image: Gunnerkrigg/077 - The Thousand Eyes/Gunnerkrigg_077-016.jpg
+2020-07-30 04:01:03	[INFO]	Gunnerkrigg	Adding to cbz
+2020-07-30 04:01:14	[INFO]	Gunnerkrigg	Done
+2020-07-30 04:01:14	[INFO]	Gunnerkrigg	Completed Comic
+2020-07-30 04:01:14	[INFO]	comics	Done Updating All Comics
+2020-07-31 04:00:04	[INFO]	comics	Updating DumbingOfAge
+2020-07-31 04:00:08	[INFO]	DumbingOfAge	Getting soup for https://www.dumbingofage.com/
+2020-07-31 04:00:11	[INFO]	DumbingOfAge	Saving Arc to Database
+2020-07-31 04:00:11	[INFO]	DumbingOfAge	Saving Comic to Database
+2020-07-31 04:00:11	[INFO]	DumbingOfAge	Saving Tags to Database
+2020-07-31 04:00:11	[INFO]	DumbingOfAge	Downloading
+2020-07-31 04:00:11	[INFO]	DumbingOfAge	Adding Alt Text
+2020-07-31 04:00:12	[INFO]	DumbingOfAge	Saving Alt to Database
+2020-07-31 04:00:12	[INFO]	DumbingOfAge	Removing raw
+2020-07-31 04:00:12	[INFO]	DumbingOfAge	Adding to cbz
+2020-07-31 04:00:42	[INFO]	DumbingOfAge	Done
+2020-07-31 04:00:42	[INFO]	DumbingOfAge	Completed Comic
+2020-07-31 04:00:42	[INFO]	comics	Updating Gunnerkrigg
+2020-07-31 04:00:42	[INFO]	Gunnerkrigg	Getting soup for https://www.gunnerkrigg.com/
+2020-07-31 04:00:44	[INFO]	Gunnerkrigg	Downloading Image: Gunnerkrigg/077 - The Thousand Eyes/Gunnerkrigg_077-017.jpg
+2020-07-31 04:00:45	[INFO]	Gunnerkrigg	Adding to cbz
+2020-07-31 04:00:51	[INFO]	Gunnerkrigg	Done
+2020-07-31 04:00:51	[INFO]	Gunnerkrigg	Completed Comic
+2020-07-31 04:00:51	[INFO]	comics	Done Updating All Comics
+2020-08-01 04:00:02	[INFO]	comics	Updating DumbingOfAge
+2020-08-01 04:00:09	[INFO]	DumbingOfAge	Getting soup for https://www.dumbingofage.com/
+2020-08-01 04:00:12	[INFO]	DumbingOfAge	Saving Arc to Database
+2020-08-01 04:00:12	[INFO]	DumbingOfAge	Saving Comic to Database
+2020-08-01 04:00:12	[INFO]	DumbingOfAge	Saving Tags to Database
+2020-08-01 04:00:12	[INFO]	DumbingOfAge	Downloading
+2020-08-01 04:00:12	[INFO]	DumbingOfAge	Adding Alt Text
+2020-08-01 04:00:13	[INFO]	DumbingOfAge	Saving Alt to Database
+2020-08-01 04:00:13	[INFO]	DumbingOfAge	Removing raw
+2020-08-01 04:00:13	[INFO]	DumbingOfAge	Adding to cbz
+2020-08-01 04:00:34	[INFO]	DumbingOfAge	Done
+2020-08-01 04:00:34	[INFO]	DumbingOfAge	Completed Comic
+2020-08-01 04:00:34	[INFO]	comics	Updating Gunnerkrigg
+2020-08-01 04:00:34	[INFO]	Gunnerkrigg	Getting soup for https://www.gunnerkrigg.com/
+2020-08-01 04:00:35	[INFO]	Gunnerkrigg	Downloading Image: Gunnerkrigg/077 - The Thousand Eyes/Gunnerkrigg_077-017.jpg
+2020-08-01 04:00:36	[INFO]	Gunnerkrigg	Adding to cbz
+2020-08-01 04:00:40	[INFO]	Gunnerkrigg	Done
+2020-08-01 04:00:40	[INFO]	Gunnerkrigg	Completed Comic
+2020-08-01 04:00:40	[INFO]	comics	Done Updating All Comics
+2020-08-02 04:00:07	[INFO]	comics	Updating DumbingOfAge
+2020-08-02 04:00:14	[INFO]	DumbingOfAge	Getting soup for https://www.dumbingofage.com/
+2020-08-02 04:00:17	[INFO]	DumbingOfAge	Saving Arc to Database
+2020-08-02 04:00:17	[INFO]	DumbingOfAge	Saving Comic to Database
+2020-08-02 04:00:17	[INFO]	DumbingOfAge	Saving Tags to Database
+2020-08-02 04:00:17	[INFO]	DumbingOfAge	Downloading
+2020-08-02 04:00:18	[INFO]	DumbingOfAge	Adding Alt Text
+2020-08-02 04:00:19	[INFO]	DumbingOfAge	Saving Alt to Database
+2020-08-02 04:00:19	[INFO]	DumbingOfAge	Removing raw
+2020-08-02 04:00:19	[INFO]	DumbingOfAge	Adding to cbz
+2020-08-02 04:00:49	[INFO]	DumbingOfAge	Done
+2020-08-02 04:00:49	[INFO]	DumbingOfAge	Completed Comic
+2020-08-02 04:00:49	[INFO]	comics	Updating Gunnerkrigg
+2020-08-02 04:00:49	[INFO]	Gunnerkrigg	Getting soup for https://www.gunnerkrigg.com/
+2020-08-02 04:00:50	[INFO]	Gunnerkrigg	Downloading Image: Gunnerkrigg/077 - The Thousand Eyes/Gunnerkrigg_077-017.jpg
+2020-08-02 04:00:51	[INFO]	Gunnerkrigg	Adding to cbz
+2020-08-02 04:01:02	[INFO]	Gunnerkrigg	Done
+2020-08-02 04:01:02	[INFO]	Gunnerkrigg	Completed Comic
+2020-08-02 04:01:02	[INFO]	comics	Done Updating All Comics
+2020-08-03 04:00:02	[INFO]	comics	Updating DumbingOfAge
+2020-08-03 04:00:11	[INFO]	DumbingOfAge	Getting soup for https://www.dumbingofage.com/
+2020-08-03 04:00:14	[INFO]	DumbingOfAge	Saving Arc to Database
+2020-08-03 04:00:15	[INFO]	DumbingOfAge	Saving Comic to Database
+2020-08-03 04:00:15	[INFO]	DumbingOfAge	Saving Tags to Database
+2020-08-03 04:00:15	[INFO]	DumbingOfAge	Downloading
+2020-08-03 04:00:16	[INFO]	DumbingOfAge	Adding Alt Text
+2020-08-03 04:00:17	[INFO]	DumbingOfAge	Saving Alt to Database
+2020-08-03 04:00:17	[INFO]	DumbingOfAge	Removing raw
+2020-08-03 04:00:17	[INFO]	DumbingOfAge	Adding to cbz
+2020-08-03 04:00:42	[INFO]	DumbingOfAge	Done
+2020-08-03 04:00:42	[INFO]	DumbingOfAge	Completed Comic
+2020-08-03 04:00:42	[INFO]	comics	Updating Gunnerkrigg
+2020-08-03 04:00:42	[INFO]	Gunnerkrigg	Getting soup for https://www.gunnerkrigg.com/
+2020-08-03 04:00:43	[INFO]	Gunnerkrigg	Downloading Image: Gunnerkrigg/077 - The Thousand Eyes/Gunnerkrigg_077-018.jpg
+2020-08-03 04:00:44	[INFO]	Gunnerkrigg	Adding to cbz
+2020-08-03 04:00:50	[INFO]	Gunnerkrigg	Done
+2020-08-03 04:00:50	[INFO]	Gunnerkrigg	Completed Comic
+2020-08-03 04:00:50	[INFO]	comics	Done Updating All Comics
+2020-08-04 04:00:08	[INFO]	comics	Updating DumbingOfAge
+2020-08-04 04:00:15	[INFO]	DumbingOfAge	Getting soup for https://www.dumbingofage.com/
+2020-08-04 04:00:18	[INFO]	DumbingOfAge	Saving Arc to Database
+2020-08-04 04:00:18	[INFO]	DumbingOfAge	Saving Comic to Database
+2020-08-04 04:00:18	[INFO]	DumbingOfAge	Saving Tags to Database
+2020-08-04 04:00:19	[INFO]	DumbingOfAge	Downloading
+2020-08-04 04:00:19	[INFO]	DumbingOfAge	Adding Alt Text
+2020-08-04 04:00:22	[INFO]	DumbingOfAge	Saving Alt to Database
+2020-08-04 04:00:22	[INFO]	DumbingOfAge	Removing raw
+2020-08-04 04:00:22	[INFO]	DumbingOfAge	Adding to cbz
+2020-08-04 04:00:38	[INFO]	DumbingOfAge	Done
+2020-08-04 04:00:38	[INFO]	DumbingOfAge	Completed Comic
+2020-08-04 04:00:38	[INFO]	comics	Updating Gunnerkrigg
+2020-08-04 04:00:38	[INFO]	Gunnerkrigg	Getting soup for https://www.gunnerkrigg.com/
+2020-08-04 04:00:39	[INFO]	Gunnerkrigg	Downloading Image: Gunnerkrigg/077 - The Thousand Eyes/Gunnerkrigg_077-018.jpg
+2020-08-04 04:00:40	[INFO]	Gunnerkrigg	Adding to cbz
+2020-08-04 04:00:44	[INFO]	Gunnerkrigg	Done
+2020-08-04 04:00:44	[INFO]	Gunnerkrigg	Completed Comic
+2020-08-04 04:00:44	[INFO]	comics	Done Updating All Comics
+2020-08-05 04:00:01	[INFO]	comics	Updating DumbingOfAge
+2020-08-05 04:00:05	[INFO]	DumbingOfAge	Getting soup for https://www.dumbingofage.com/
+2020-08-05 04:00:09	[INFO]	DumbingOfAge	Saving Arc to Database
+2020-08-05 04:00:09	[INFO]	DumbingOfAge	Saving Comic to Database
+2020-08-05 04:00:09	[INFO]	DumbingOfAge	Saving Tags to Database
+2020-08-05 04:00:09	[INFO]	DumbingOfAge	Downloading
+2020-08-05 04:00:09	[INFO]	DumbingOfAge	Adding Alt Text
+2020-08-05 04:00:10	[INFO]	DumbingOfAge	Saving Alt to Database
+2020-08-05 04:00:10	[INFO]	DumbingOfAge	Removing raw
+2020-08-05 04:00:10	[INFO]	DumbingOfAge	Adding to cbz
+2020-08-05 04:00:19	[INFO]	DumbingOfAge	Done
+2020-08-05 04:00:19	[INFO]	DumbingOfAge	Completed Comic
+2020-08-05 04:00:19	[INFO]	comics	Updating Gunnerkrigg
+2020-08-05 04:00:19	[INFO]	Gunnerkrigg	Getting soup for https://www.gunnerkrigg.com/
+2020-08-05 04:00:20	[INFO]	Gunnerkrigg	Downloading Image: Gunnerkrigg/077 - The Thousand Eyes/Gunnerkrigg_077-019.jpg
+2020-08-05 04:00:20	[INFO]	Gunnerkrigg	Adding to cbz
+2020-08-05 04:00:21	[INFO]	Gunnerkrigg	Done
+2020-08-05 04:00:21	[INFO]	Gunnerkrigg	Completed Comic
+2020-08-05 04:00:21	[INFO]	comics	Done Updating All Comics
