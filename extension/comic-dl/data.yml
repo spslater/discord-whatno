@@ -50,9 +50,9 @@ OrderOfTheStick:
 BittersweetCandyBowl:
   loc: "BittersweetCandyBowl/"
   name: "Bittersweet Candy Bowl"
-  url: "https://www.bittersweetcandybowl.com/c108/p13.html"
+  url: "https://www.bittersweetcandybowl.com/c1/p1.html"
   home: "https://www.bittersweetcandybowl.com/"
-  cur: True
+  cur: False
   alt: True
   img:
     - tag: 'img'

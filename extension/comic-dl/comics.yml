@@ -1,5 +1,6 @@
 comics:
   - DumbingOfAge
   - Gunnerkrigg
+	- BittersweetCandyBowl
 workdir: 'projects/comics/'
 savedir: 'media/reading/webcomics/'
