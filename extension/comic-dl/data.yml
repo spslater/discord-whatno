@@ -27,7 +27,7 @@ Gunnerkrigg:
   name: "Gunnerkrigg"
   url: "https://www.gunnerkrigg.com/?p=1057"
   home: "https://www.gunnerkrigg.com/"
-  cur: False
+  cur: True
   prev:
     - tag: 'div'
       class: 'extra'
@@ -45,14 +45,16 @@ OrderOfTheStick:
   loc: "OrderOfTheStick/"
   name: "Order of the Stick"
   url: "https://www.giantitp.com/comics/oots.html"
-  home: "https://www.giantitp.com/"
-  cur: False
+  base: "https://www.giantitp.com/"
+  cur: True
+  img: null
+  nxt: null
 BittersweetCandyBowl:
   loc: "BittersweetCandyBowl/"
   name: "Bittersweet Candy Bowl"
   url: "https://www.bittersweetcandybowl.com/c1/p1.html"
   home: "https://www.bittersweetcandybowl.com/"
-  cur: False
+  cur: True
   alt: True
   img:
     - tag: 'img'

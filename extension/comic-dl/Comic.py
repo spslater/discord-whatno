@@ -21,8 +21,8 @@ class Comic:
 			comic = load(yml.read(), Loader=Loader)[name]
 
 		self.cur = comic['cur']
-		self.url = comic['home'] if self.cur else comic['url']
-		self.base = comic['home']
+		self.url = comic['home'] if ('home' in comic and self.cur) else comic['url']
+		self.base = comic['base'] if 'base' in comic else comic['home']
 		self.loc = comic['loc']
 		self.name = comic['name']
 		self.saveAlt = comic['alt'] if 'alt' in comic else False
@@ -141,7 +141,7 @@ class Comic:
 		_, ext = path.splitext(inName)
 		if ext != '.png':
 			logging.info('Converting image to png: ' + outName)
-			comic = Image.open(inName).convert("RGBA")
+			comic = Image.open(inName).convert("RGB")
 			comic.save(outName, "PNG")
 			remove(inName)
 		else:
