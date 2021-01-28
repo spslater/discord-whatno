@@ -1,7 +1,5 @@
 comics:
   - DumbingOfAge
-  - Gunnerkrigg
-  - BittersweetCandyBowl
   - OrderOfTheStick
 workdir: 'projects/comics/'
 savedir: 'media/reading/webcomics/'
