@@ -12,10 +12,24 @@ from discord import Client, Embed, Colour
 from dotenv import load_dotenv
 
 class ComicReread(Client):
-	def __init__(self, database_filename, midweek, guild_name=None, guild_id=None, channel_name=None, channel_id=None):
+	def __init__(
+			self,
+			database_filename,
+			midweek,
+			guild_name=None,
+			guild_id=None,
+			channel_name=None,
+			channel_id=None,
+			info=False,
+			info_file=None,
+			message=None,
+			message_file=None,
+			send_comic=True,
+		):
 		super().__init__()
-		self.conn = connect(database_filename)
-		self.database = self.conn.cursor()
+		self.database_filename = database_filename
+		self.conn = None
+		self.database = None
 		self.midweek = midweek
 		self.guild_name = guild_name
 		self.guild_id = guild_id
@@ -23,14 +37,32 @@ class ComicReread(Client):
 		self.channel_name = channel_name
 		self.channel_id = channel_id
 		self.channel = None
+		self.info = info
+		self.info_file = info_file
+		self.message = message
+		self.message_file = message_file
+		self.send_comic = send_comic
 		if self.channel_id is None and self.channel_name is None:
 			raise RuntimeError('Channel Id or Name not added to Client.')
+
+	def get_connection(self):
+		if self.conn is None:
+			self.conn = connect(self.database_filename)
+		return self.conn
+
+	def get_database(self):
+		if self.database is None:
+			self.database = self.get_connection().cursor()
+		return self.database
 
 	def get_guild(self):
 		if self.guild is None:
 			logging.debug('Getting guild.')
 			if self.guild_id is None and self.guild_name is None:
-				raise RuntimeError('Guild Id or Name not added to Client.')
+				channel = self.get_channel()
+				self.guild = channel.guild
+				self.guild_id = self.guild.id
+				self.guild_name = self.guild.name
 			elif self.guild_id is None and self.guild_name is not None:
 				for guild in self.fetch_guilds():
 					if guild.name == self.guild_name:
@@ -62,6 +94,13 @@ class ComicReread(Client):
 				if self.channel_id is None:
 					raise RuntimeError('Channel Name not found in list of available channels.')
 			self.channel = super().get_channel(self.channel_id)
+			if self.guild is None:
+				self.get_guild()
+		if self.channel.guild.id != self.guild_id:
+			logging.warn('Guild provided channel ({}) belongs to does not match provied guild ({}).'.format(
+				self.channel.guild.name,
+				self.guild_name,
+			))
 		return self.channel
 
 	def date_from_week(self, yr, wk, wd):
@@ -82,8 +121,8 @@ class ComicReread(Client):
 		)
 
 	def get_tags(self, date_string):
-		self.database.execute('SELECT tag FROM Tag WHERE comicId = ?', (date_string,))
-		rows = self.database.fetchall()
+		self.get_database().execute('SELECT tag FROM Tag WHERE comicId = ?', (date_string,))
+		rows = self.get_database().fetchall()
 		tags = [ r[0] for r in rows ]
 		return ', '.join(tags)
 
@@ -92,7 +131,7 @@ class ComicReread(Client):
 
 		days = self.build_date_tuple(date_string)
 		logging.debug('Getting comics on following days: {}', (days,))
-		self.database.execute("""
+		self.get_database().execute("""
 			SELECT
 				Comic.release as release,
 				Comic.title as title,
@@ -104,7 +143,7 @@ class ComicReread(Client):
 			WHERE release IN {}
 		""".format(days))
 
-		rows = self.database.fetchall()
+		rows = self.get_database().fetchall()
 		logging.debug('{} comics from current week'.format(len(rows)))
 		for row in rows:
 			release = row[0]
@@ -125,18 +164,67 @@ class ComicReread(Client):
 
 		return embeds
 
-	async def on_ready(self):
-		logging.info('{} has connected to Discord!'.format(self.user))
+	def print_info(self):
+		info = ''
+		info += 'Accessing Guild: {} ({})\n'.format(self.get_guild().name, self.get_guild().id)
+		info += 'Accessing Channel: {} ({})\n'.format(self.get_channel().name, self.get_channel().id)
+		info += 'Total Number of Guilds: {}\n'.format(len(self.guilds))
+		for guild in self.guilds:
+			info += 'Guild: {} ({})\n'.format(guild.name, guild.id)
+			info += '\tTotal Number of Channels: {}\n'.format(len(guild.channels))
+			for channel in guild.channels:
+				info += '\tChannel: {} ({})\n'.format(channel.name, channel.id)
+
+		if self.info:
+			print(info)
+
+		if self.info_file is not None:
+			with open(self.info_file, 'w+') as fp:
+				fp.write(info)
+
+
+	async def send_message(self):
+		channel = self.get_channel()
+		if self.message is not None:
+			logging.debug('Sending a plaintext message')
+			await channel.send(self.message)
+
+		if self.message_file is not None:
+			logging.debug('Loading text from file: {}'.format(self.message_file))
+			with open(self.message_file, 'r') as fp:
+				data = fp.read()
+				await channel.send(data)
+
+
+	async def send_weekly_comics(self):
 		logging.info('Getting comics for midweek "{}".'.format(self.midweek))
 
 		channel = self.get_channel()
-
 		embeds = self.build_embeds(self.midweek)
-
 		for e in embeds:
 			await channel.send(embed=e)
 
-		self.conn.close()
+
+	async def on_ready(self):
+		logging.info('{} has connected to Discord!'.format(self.user))
+
+		channel = self.get_channel()
+		guild = self.get_guild()
+
+		if self.info or self.info_file is not None:
+			logging.info('Printing info about Client.')
+			self.print_info()
+
+		if self.message is not None or self.message_file is not None:
+			logging.info('Sending a message to channel "{}" on guild "{}"'.format(channel, guild))
+			await self.send_message()
+
+		if self.send_comic:
+			logging.info('Sending Comics to channel "{}" on guild "{}".'.format(channel, guild))
+			await self.send_weekly_comics()
+
+		if self.conn is not None:
+			self.conn.close()
 		await self.logout()
 
 	async def on_error(self, *args, **kwargs):
@@ -175,6 +263,16 @@ if __name__ == '__main__':
 		help="Date to pull week of comics from.", metavar='YYYY-MM-DD')
 	parser.add_argument('-wf', '--weekfile', dest='weekfile', default='midweek.txt',
 		help="File to load midweek date from. If week is passed in, this file will be ignore.", metavar='WEEKFILE')
+	parser.add_argument('-nc', '--no-comics', dest='send_comic', default=True, action='store_false',
+		help="Do not send the weekly comics to the server.")
+	parser.add_argument('-i', '--info', dest='info', default=False, action='store_true',
+		help="Print out availble guilds and channels and other random info I add. Prints to stdout, not the log file.")
+	parser.add_argument('-if', '--info-file', dest='infofile',
+		help="File to save info print to, won't print to stdout if set and -i flag not used.", metavar='FILENAME')
+	parser.add_argument('-m', '--message', dest='message',
+		help="Send a plaintext message to the configured channel", metavar='MESSAAGE')
+	parser.add_argument('-mf', '--message-file', dest='messagefile',
+		help="Send plaintext contents of a file as a message to the configured channel", metavar='FILENAME')
 
 	args = parser.parse_args()
 
@@ -224,6 +322,11 @@ if __name__ == '__main__':
 		guild_id=GUILD_ID,
 		channel_name=CHANNEL_NAME,
 		channel_id=CHANNEL_ID,
+		info=args.info,
+		info_file=args.infofile,
+		message=args.message,
+		message_file=args.messagefile,
+		send_comic=args.send_comic,
 	).run(TOKEN)
 
 	if args.week is None:
