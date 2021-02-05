@@ -9,7 +9,7 @@ from json import load, dump
 from sqlite3 import connect
 from sys import stdout, exc_info
 
-from discord import Client, Embed, Colour
+from discord import Client, Embed, Colour, NotFound, HTTPException
 from dotenv import load_dotenv
 
 class ComicReread(Client):
@@ -26,6 +26,8 @@ class ComicReread(Client):
 			message=None,
 			message_file=None,
 			send_comic=True,
+			delete=None,
+			delete_file=None,
 		):
 		super().__init__()
 
@@ -45,13 +47,16 @@ class ComicReread(Client):
 		self.channel_id = channel_id
 		self.channel = None
 
+		self.send_comic = send_comic
+
 		self.info = info
 		self.info_file = info_file
 
 		self.message = message
 		self.message_file = message_file
 
-		self.send_comic = send_comic
+		self.delete = delete
+		self.delete_file = delete_file
 
 		if self.channel_id is None and self.channel_name is None:
 			raise RuntimeError('Channel Id or Name not added to Client.')
@@ -206,6 +211,26 @@ class ComicReread(Client):
 				data = fp.read()
 				await channel.send(data)
 
+	async def delete_message(self):
+		channel = self.get_channel()
+		mids = []
+		if self.delete is not None:
+			logging.info('Deleting {} messages from cli'.format(len(self.delete)))
+			mids.extend(self.delete)
+
+		if self.delete_file is not None:
+			with open(self.delete_file, 'r') as fp:
+				file_mids = [ int(m.strip()) for m in fp.read().splitlines() if m.strip() ]
+				mids.extend(file_mids)
+			logging.info('Deleting {} messages from file: {}'.format(len(file_mids), self.delete_file))
+
+		for mid in mids:
+			logging.debug('Attemping to delete "{}".'.format(mid))
+			try:
+				msg = await channel.fetch_message(mid)
+				await msg.delete()
+			except (NotFound, HTTPException) as e:
+				logging.warn('Unable to get message "{}": {}'.format(mid, e))
 
 	async def send_weekly_comics(self):
 		logging.info('Sending comics for today.')
@@ -246,6 +271,10 @@ class ComicReread(Client):
 			logging.info('Sending a message to channel "{}" on guild "{}"'.format(channel, guild))
 			await self.send_message()
 
+		if self.delete is not None or self.delete_file is not None:
+			logging.info('Deleting messages in channel "{}" on guild "{}"'.format(channel, guild))
+			await self.delete_message()
+
 		if self.send_comic:
 			logging.info('Sending Comics to channel "{}" on guild "{}".'.format(channel, guild))
 			await self.send_weekly_comics()
@@ -257,8 +286,9 @@ class ComicReread(Client):
 
 	async def on_error(self, *args, **kwargs):
 		err_type, err_value, err_traceback = exc_info()
+		tb_string = '|'.join(err_traceback.format())
 		logging.debug('Error cause by call with args and kwargs: {} {}'.format(args, kwargs))
-		logging.error('{}: {}'.format(str(err_type), err_value))
+		logging.error('{}: {} | Traceback: {}'.format(str(err_type), err_value, ))
 		if self.conn is not None:
 			self.conn.close()
 		await self.logout()
@@ -301,6 +331,10 @@ if __name__ == '__main__':
 		help="Send a plaintext message to the configured channel", metavar='MESSAAGE')
 	parser.add_argument('-mf', '--message-file', dest='messagefile',
 		help="Send plaintext contents of a file as a message to the configured channel", metavar='FILENAME')
+	parser.add_argument('--delete', dest='delete', nargs='*', type=int,
+		help="Message ids to delete from channel", metavar="MID")
+	parser.add_argument('--delete-file', dest='deletefile',
+		help="Message ids to delete from channel", metavar="MID")
 
 	args = parser.parse_args()
 
@@ -323,7 +357,7 @@ if __name__ == '__main__':
 		format='%(asctime)s\t[%(levelname)s]\t{%(module)s}\t%(message)s',
 		datefmt='%Y-%m-%d %H:%M:%S',
 		level=log_level[args.mode],
-		handlers=handler_list
+		handlers=handler_list,
 	)
 	if args.quite:
 		logging.disable(logging.CRITICAL)
@@ -350,5 +384,7 @@ if __name__ == '__main__':
 		message=args.message,
 		message_file=args.messagefile,
 		send_comic=args.send_comic,
+		delete=args.delete,
+		delete_file=args.deletefile,
 	).run(TOKEN)
 

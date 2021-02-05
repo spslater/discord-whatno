@@ -16,7 +16,8 @@ usage: rewatchbot.py [-h] [-l LOGFILE] [-q] [--mode MODE] [-e, --env ENV]
                      [-d, --database SQLITE3] [-t TOKEN] [-gn GUILDNAME]
                      [-gi GUILDID] [-cn CHANNELNAME] [-ci CHANNELID]
                      [-s FILENAME] [-nc] [-i] [-if FILENAME] [-m MESSAAGE]
-                     [-mf FILENAME]
+                     [-mf FILENAME] [--delete [MID [MID ...]]]
+                     [--delete-file MID]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -54,6 +55,9 @@ optional arguments:
   -mf FILENAME, --message-file FILENAME
                         Send plaintext contents of a file as a message to the
                         configured channel (default: None)
+  --delete [MID [MID ...]]
+                        Message ids to delete from channel (default: None)
+  --delete-file MID     Message ids to delete from channel (default: None)
 ```
 
 ## Non Comic Sending Stuff
@@ -76,6 +80,15 @@ The `-mf, --message-file` flag loads the conents of a file and sends that as a
 plaintext markdown formatted message, just like the `-m` flag. When both flags
 are used, the `-m` message gets sent first then the contents of the file.
 
+### Delete
+The `--delete` flag can be used multiple times or have multiple args passed to it.
+It takes those message ids and sends a delete request for them. If there is an error
+it just skips over the request.
+
+The `--delete-file` acts the same way but is just a list of message ids, a single one
+on each line.
+
+The two flags can be used together.
 
 ## File / Data Setup
 ### SQL Comic Database
