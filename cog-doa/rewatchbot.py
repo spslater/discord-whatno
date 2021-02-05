@@ -5,6 +5,7 @@ import logging
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from datetime import datetime, timedelta
 from os import getenv
+from json import load, dump
 from sqlite3 import connect
 from sys import stdout, exc_info
 
@@ -15,7 +16,7 @@ class ComicReread(Client):
 	def __init__(
 			self,
 			database_filename,
-			midweek,
+			schedule_filename,
 			guild_name=None,
 			guild_id=None,
 			channel_name=None,
@@ -27,21 +28,31 @@ class ComicReread(Client):
 			send_comic=True,
 		):
 		super().__init__()
+
 		self.database_filename = database_filename
 		self.conn = None
 		self.database = None
-		self.midweek = midweek
+
+		self.schedule_filename = schedule_filename
+		with open(self.schedule_filename, 'r') as fp:
+			self.schedule = load(fp)
+
 		self.guild_name = guild_name
 		self.guild_id = guild_id
 		self.guild = None
+
 		self.channel_name = channel_name
 		self.channel_id = channel_id
 		self.channel = None
+
 		self.info = info
 		self.info_file = info_file
+
 		self.message = message
 		self.message_file = message_file
+
 		self.send_comic = send_comic
+
 		if self.channel_id is None and self.channel_name is None:
 			raise RuntimeError('Channel Id or Name not added to Client.')
 
@@ -108,9 +119,9 @@ class ComicReread(Client):
 		iso_date = datetime.strptime(ywd, "%G-%V-%u")
 		return datetime.strftime(iso_date, "%Y-%m-%d")
 
-	def build_date_tuple(self, date_string):
+	def build_date_list(self, date_string):
 		yr, wk, _ = datetime.strptime(date_string, "%Y-%m-%d").isocalendar()
-		return (
+		return [
 			self.date_from_week(yr, wk, 1),
 			self.date_from_week(yr, wk, 2),
 			self.date_from_week(yr, wk, 3),
@@ -118,7 +129,7 @@ class ComicReread(Client):
 			self.date_from_week(yr, wk, 5),
 			self.date_from_week(yr, wk, 6),
 			self.date_from_week(yr, wk, 7),
-		)
+		]
 
 	def get_tags(self, date_string):
 		self.get_database().execute('SELECT tag FROM Tag WHERE comicId = ?', (date_string,))
@@ -129,7 +140,7 @@ class ComicReread(Client):
 	def build_embeds(self, date_string):
 		embeds = []
 
-		days = self.build_date_tuple(date_string)
+		days = tuple(self.schedule['days'][date_string])
 		logging.debug('Getting comics on following days: {}', (days,))
 		self.get_database().execute("""
 			SELECT
@@ -197,13 +208,29 @@ class ComicReread(Client):
 
 
 	async def send_weekly_comics(self):
-		logging.info('Getting comics for midweek "{}".'.format(self.midweek))
+		logging.info('Sending comics for today.')
 
 		channel = self.get_channel()
-		embeds = self.build_embeds(self.midweek)
+		today = datetime.strftime(datetime.now(), '%Y-%m-%d')
+		embeds = self.build_embeds(today)
 		for e in embeds:
 			await channel.send(embed=e)
 
+	def update_schedule(self):
+		old_week = self.schedule['next_week']
+		if old_week == datetime.strftime(datetime.now(), '%Y-%m-%d'):
+			new_week = old_week + timedelta(days=7)
+			new_week_str = datetime.strftime(new_week, '%Y-%m-%d')
+			self.schedule['next_week'] = new_week_str
+
+			last_day = sorted(self.schedule['days'].keys())[-1]
+			next_day = datetime.strptime(last_day, '%Y-%m-%d') + deltatime(days=1)
+			next_day_str = datetime.strptime(last_day, '%Y-%m-%d')
+
+			self.schedule['days'][next_day_str] = self.build_date_list(new_week_str)
+
+			with open(self.schedule_file, 'w+') as fp:
+				dump(self.schedule, fp, sort_keys=True, indent='\t')
 
 	async def on_ready(self):
 		logging.info('{} has connected to Discord!'.format(self.user))
@@ -222,6 +249,7 @@ class ComicReread(Client):
 		if self.send_comic:
 			logging.info('Sending Comics to channel "{}" on guild "{}".'.format(channel, guild))
 			await self.send_weekly_comics()
+			self.update_schedule()
 
 		if self.conn is not None:
 			self.conn.close()
@@ -230,8 +258,10 @@ class ComicReread(Client):
 	async def on_error(self, *args, **kwargs):
 		err_type, err_value, err_traceback = exc_info()
 		logging.debug('Error cause by call with args and kwargs: {} {}'.format(args, kwargs))
-		logging.error('{}: {}'.format(err_type, err_value))
-		raise err_type(err_value)
+		logging.error('{}: {}'.format(str(err_type), err_value))
+		if self.conn is not None:
+			self.conn.close()
+		await self.logout()
 
 
 if __name__ == '__main__':
@@ -259,10 +289,8 @@ if __name__ == '__main__':
 		help="Name of Guild to post to.", metavar='CHANNELNAME')
 	parser.add_argument('-ci', '--channel-id', dest='channel_id', type=int,
 		help="Id of Guild to post to.", metavar='CHANNELID')
-	parser.add_argument('-w', '--week', dest='week',
-		help="Date to pull week of comics from.", metavar='YYYY-MM-DD')
-	parser.add_argument('-wf', '--weekfile', dest='weekfile', default='midweek.txt',
-		help="File to load midweek date from. If week is passed in, this file will be ignore.", metavar='WEEKFILE')
+	parser.add_argument('-s', '--schedule', dest='schedule',
+		help="JSON file to load release information from.", metavar='FILENAME')
 	parser.add_argument('-nc', '--no-comics', dest='send_comic', default=True, action='store_false',
 		help="Do not send the weekly comics to the server.")
 	parser.add_argument('-i', '--info', dest='info', default=False, action='store_true',
@@ -302,22 +330,17 @@ if __name__ == '__main__':
 
 	load_dotenv(args.envfile, verbose=(args.mode == 'DEBUG'))
 
-	if args.week is None:
-		with open(args.weekfile, 'r') as fp:
-			week = fp.read().strip()
-	else:
-		week = args.week
-
 	TOKEN = args.token if args.token else getenv('DISCORD_TOKEN')
 	GUILD_NAME = args.guild_name if args.guild_name else getenv('GUILD_NAME')
 	GUILD_ID = args.guild_id if args.guild_id else int(getenv('GUILD_ID'))
 	CHANNEL_NAME = args.channel_name if args.channel_name else getenv('CHANNEL_NAME')
 	CHANNEL_ID = args.channel_id if args.channel_id else int(getenv('CHANNEL_ID'))
 	DATABASE = args.database if args.database else getenv('DATABASE')
+	SCHEDULE = args.schedule if args.schedule else getenv('SCHEDULE')
 
 	ComicReread(
 		database_filename=DATABASE,
-		midweek=week,
+		schedule_filename=SCHEDULE,
 		guild_name=GUILD_NAME,
 		guild_id=GUILD_ID,
 		channel_name=CHANNEL_NAME,
@@ -328,10 +351,4 @@ if __name__ == '__main__':
 		message_file=args.messagefile,
 		send_comic=args.send_comic,
 	).run(TOKEN)
-
-	if args.week is None:
-		current_week = datetime.strptime(week, '%Y-%m-%d')
-		next_week = current_week + timedelta(days=7)
-		with open(args.weekfile, 'w+') as fp:
-			fp.write(datetime.strftime(next_week, '%Y-%m-%d'))
 

@@ -15,8 +15,8 @@ Command line args will override values in the `.env` file.
 usage: rewatchbot.py [-h] [-l LOGFILE] [-q] [--mode MODE] [-e, --env ENV]
                      [-d, --database SQLITE3] [-t TOKEN] [-gn GUILDNAME]
                      [-gi GUILDID] [-cn CHANNELNAME] [-ci CHANNELID]
-                     [-w YYYY-MM-DD] [-wf WEEKFILE] [-nc] [-i] [-if FILENAME]
-                     [-m MESSAAGE] [-mf FILENAME]
+                     [-s FILENAME] [-nc] [-i] [-if FILENAME] [-m MESSAAGE]
+                     [-mf FILENAME]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -37,11 +37,9 @@ optional arguments:
                         Name of Guild to post to. (default: None)
   -ci CHANNELID, --channel-id CHANNELID
                         Id of Guild to post to. (default: None)
-  -w YYYY-MM-DD, --week YYYY-MM-DD
-                        Date to pull week of comics from. (default: None)
-  -wf WEEKFILE, --weekfile WEEKFILE
-                        File to load midweek date from. If week is passed in,
-                        this file will be ignore. (default: midweek.txt)
+  -s FILENAME, --schedule FILENAME
+                        JSON file to load release information from. (default:
+                        None)
   -nc, --no-comics      Do not send the weekly comics to the server. (default:
                         True)
   -i, --info            Print out availble guilds and channels and other
@@ -110,13 +108,30 @@ CHANNEL_ID=<int>
 GUILD_NAME=<str>
 GUILD_ID=<int>
 DATABASE=<path>
+SCHEDULE=<path>
 ```
 
-### Midweek File
-Midweek file just needs the date in it in the format `%Y-%m-%d`
+### Schedule File
+Schedule File is a json file that dictates which comics get published on each day.
+```json
+{
+  'next_week': 'YYYY-MM-DD',
+  'days': {
+    'YYYY-MM-DD': [ 'YYYY-MM-DD', 'YYYY-MM-DD', 'YYYY-MM-DD', 'YYYY-MM-DD', 'YYYY-MM-DD', 'YYYY-MM-DD', 'YYYY-MM-DD' ],
+    'YYYY-MM-DD': [ 'YYYY-MM-DD', 'YYYY-MM-DD', 'YYYY-MM-DD', 'YYYY-MM-DD', 'YYYY-MM-DD', 'YYYY-MM-DD', 'YYYY-MM-DD' ]
+  }
+}
 ```
-2010-10-09
-```
+The`next_week` key is used to determine when a weeks of comics has been
+published and need to be added to the schedule. It will be a Sunday and
+present day(ish). When the date is the same date as now, it'll update
+the schedule.
+
+The `days` key is a dictionary used as to lookup what comics to publish on
+the key day. The present day gets looked up and the returned list gets passed
+to the Comics database.
+
+
 
 ## License
 [The Anti-Capitalist Software License (v 1.4)](https://anticapitalist.software)
