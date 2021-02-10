@@ -8,8 +8,10 @@ from os import getenv
 from json import load, dump
 from sqlite3 import connect
 from sys import stdout, exc_info
+from time import sleep
+from traceback import format_tb
 
-from discord import Client, Embed, Colour, NotFound, HTTPException
+from discord import Client, Embed, Colour, NotFound, HTTPException, Forbidden
 from dotenv import load_dotenv
 
 class ComicReread(Client):
@@ -28,6 +30,9 @@ class ComicReread(Client):
 			send_comic=True,
 			delete=None,
 			delete_file=None,
+			embed_file=None,
+			refresh=None,
+			refresh_file=None,
 		):
 		super().__init__()
 
@@ -57,6 +62,11 @@ class ComicReread(Client):
 
 		self.delete = delete
 		self.delete_file = delete_file
+
+		self.embed_file = embed_file
+
+		self.refresh = refresh
+		self.refresh_file = refresh_file
 
 		if self.channel_id is None and self.channel_name is None:
 			raise RuntimeError('Channel Id or Name not added to Client.')
@@ -178,6 +188,17 @@ class ComicReread(Client):
 			embed.set_footer(text=footer)
 			embeds.append(embed)
 
+		if self.embed_file:
+			prev = None
+			try:
+				with open(self.embed_file, 'r') as fp:
+					prev = load(fp)
+			except FileNotFoundError:
+					prev = {}
+			prev[date_string] = [ e.to_dict() for e in embeds ]
+			with open(self.embed_file, 'w+') as fp:
+				dump(prev, fp, sort_keys=True, indent='\t')
+
 		return embeds
 
 	def print_info(self):
@@ -215,21 +236,46 @@ class ComicReread(Client):
 		channel = self.get_channel()
 		mids = []
 		if self.delete is not None:
-			logging.info('Deleting {} messages from cli'.format(len(self.delete)))
+			logging.debug('Deleting {} messages from cli'.format(len(self.delete)))
 			mids.extend(self.delete)
 
 		if self.delete_file is not None:
 			with open(self.delete_file, 'r') as fp:
 				file_mids = [ int(m.strip()) for m in fp.read().splitlines() if m.strip() ]
 				mids.extend(file_mids)
-			logging.info('Deleting {} messages from file: {}'.format(len(file_mids), self.delete_file))
+			logging.debug('Deleting {} messages from file: {}'.format(len(file_mids), self.delete_file))
 
+		logging.info('Deleting {} messages.'.format(len(mids)))
 		for mid in mids:
 			logging.debug('Attemping to delete "{}".'.format(mid))
 			try:
 				msg = await channel.fetch_message(mid)
 				await msg.delete()
 			except (NotFound, HTTPException) as e:
+				logging.warn('Unable to get message "{}": {}'.format(mid, e))
+
+	async def refresh_message(self):
+		channel = self.get_channel()
+		mids = []
+		if self.refresh is not None:
+			logging.debug('Reloading {} messages from cli'.format(len(self.refresh)))
+			mids.extend(self.refresh)
+
+		if self.refresh_file is not None:
+			with open(self.refresh_file, 'r') as fp:
+				file_mids = [ int(m.strip()) for m in fp.read().splitlines() if m.strip() ]
+				mids.extend(file_mids)
+			logging.debug('Reloading {} messages from file: {}'.format(len(file_mids), self.refresh_file))
+
+		logging.info('Editing {} messages.'.format(len(mids)))
+		for mid in mids:
+			try:
+				msg = await channel.fetch_message(mid)
+				embed = msg.embeds[0]
+				embed.colour = Colour.random()
+				await msg.edit(embed=embed)
+				sleep(1)
+			except (NotFound, HTTPException, Forbidden) as e:
 				logging.warn('Unable to get message "{}": {}'.format(mid, e))
 
 	async def send_weekly_comics(self):
@@ -240,6 +286,7 @@ class ComicReread(Client):
 		embeds = self.build_embeds(today)
 		for e in embeds:
 			await channel.send(embed=e)
+			sleep(1)
 
 	def update_schedule(self):
 		old_week = self.schedule['next_week']
@@ -275,6 +322,10 @@ class ComicReread(Client):
 			logging.info('Deleting messages in channel "{}" on guild "{}"'.format(channel, guild))
 			await self.delete_message()
 
+		if self.refresh is not None or self.refresh_file is not None:
+			logging.info('Reloading messages in channel "{}" on guild "{}"'.format(channel, guild))
+			await self.refresh_message()
+
 		if self.send_comic:
 			logging.info('Sending Comics to channel "{}" on guild "{}".'.format(channel, guild))
 			await self.send_weekly_comics()
@@ -286,9 +337,10 @@ class ComicReread(Client):
 
 	async def on_error(self, *args, **kwargs):
 		err_type, err_value, err_traceback = exc_info()
-		tb_string = '|'.join(err_traceback.format())
+		tb_list = '\n'.join(format_tb(err_traceback))
+		tb_string = ' | '.join(tb_list.splitlines())
 		logging.debug('Error cause by call with args and kwargs: {} {}'.format(args, kwargs))
-		logging.error('{}: {} | Traceback: {}'.format(str(err_type), err_value, ))
+		logging.error('{}: {} | Traceback: {}'.format(err_type.__name__, err_value, tb_string))
 		if self.conn is not None:
 			self.conn.close()
 		await self.logout()
@@ -332,9 +384,15 @@ if __name__ == '__main__':
 	parser.add_argument('-mf', '--message-file', dest='messagefile',
 		help="Send plaintext contents of a file as a message to the configured channel", metavar='FILENAME')
 	parser.add_argument('--delete', dest='delete', nargs='*', type=int,
-		help="Message ids to delete from channel", metavar="MID")
+		help="Message ids to delete from channel", metavar='MID')
 	parser.add_argument('--delete-file', dest='deletefile',
-		help="Message ids to delete from channel", metavar="MID")
+		help="Message ids to delete from channel", metavar='MID')
+	parser.add_argument('--embed-file', dest='embedfile',
+		help="File to print embeds to for debugging purposes", metavar='EMBED')
+	parser.add_argument('--refresh', dest='refresh', nargs='*', type=int,
+		help="Message ids to refresh from channel", metavar='MID')
+	parser.add_argument('--refresh-file', dest='refreshfile',
+		help="Message ids to refresh from channel", metavar='MID')
 
 	args = parser.parse_args()
 
@@ -371,6 +429,7 @@ if __name__ == '__main__':
 	CHANNEL_ID = args.channel_id if args.channel_id else int(getenv('CHANNEL_ID'))
 	DATABASE = args.database if args.database else getenv('DATABASE')
 	SCHEDULE = args.schedule if args.schedule else getenv('SCHEDULE')
+	EMBED = args.schedule if args.schedule else getenv('EMBED')
 
 	ComicReread(
 		database_filename=DATABASE,
@@ -386,5 +445,8 @@ if __name__ == '__main__':
 		send_comic=args.send_comic,
 		delete=args.delete,
 		delete_file=args.deletefile,
+		embed_file=EMBED,
+		refresh=args.refresh,
+		refresh_file=args.refreshfile,
 	).run(TOKEN)
 

@@ -17,7 +17,8 @@ usage: rewatchbot.py [-h] [-l LOGFILE] [-q] [--mode MODE] [-e, --env ENV]
                      [-gi GUILDID] [-cn CHANNELNAME] [-ci CHANNELID]
                      [-s FILENAME] [-nc] [-i] [-if FILENAME] [-m MESSAAGE]
                      [-mf FILENAME] [--delete [MID [MID ...]]]
-                     [--delete-file MID]
+                     [--delete-file MID] [--embed-file EMBED]
+                     [--refresh [MID [MID ...]]] [--refresh-file MID]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -58,9 +59,14 @@ optional arguments:
   --delete [MID [MID ...]]
                         Message ids to delete from channel (default: None)
   --delete-file MID     Message ids to delete from channel (default: None)
+  --embed-file EMBED    File to print embeds to for debugging purposes
+                        (default: None)
+  --refresh [MID [MID ...]]
+                        Message ids to refresh from channel (default: None)
+  --refresh-file MID    Message ids to refresh from channel (default: None)
 ```
 
-## Non Comic Sending Stuff
+## Flags / Arguments
 ### No Comics
 The `-nc, --no-comics` arguments prevent the comics getting sent to the server.
 This should be used for when you just want a message to be sent or to print out
@@ -86,6 +92,21 @@ It takes those message ids and sends a delete request for them. If there is an e
 it just skips over the request.
 
 The `--delete-file` acts the same way but is just a list of message ids, a single one
+on each line.
+
+The two flags can be used together.
+
+### Embed
+The embed file stores the dictionary representaion of the Embed objects sent
+to help with debugging. The `--embed-file` flag will override the `EMBED` value
+in the env file.
+
+### Refresh
+The `--refresh` flag can be used multiple times or have multiple args passed to it.
+It takes those message ids and edits their color to try and get the embed to load.
+If there is an error it just skips over the request.
+
+The `--refresh-file` acts the same way but is just a list of message ids, a single one
 on each line.
 
 The two flags can be used together.
@@ -122,6 +143,7 @@ GUILD_NAME=<str>
 GUILD_ID=<int>
 DATABASE=<path>
 SCHEDULE=<path>
+EMBED=<path>
 ```
 
 ### Schedule File
