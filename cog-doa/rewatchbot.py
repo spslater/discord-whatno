@@ -123,14 +123,11 @@ class ComicReread(Client):
 			if self.guild is None:
 				self.get_guild()
 		if self.channel.guild.id != self.guild_id:
-			logging.warn('Guild provided channel ({}) belongs to does not match provied guild ({}).'.format(
-				self.channel.guild.name,
-				self.guild_name,
-			))
+			logging.warn(f'Guild provided channel ({self.channel.guild.name}) belongs to does not match provied guild ({self.guild_name}).')
 		return self.channel
 
 	def date_from_week(self, yr, wk, wd):
-		ywd = "{}-{}-{}".format(yr, wk, wd)
+		ywd = f"{yr}-{wk}-{wd}"
 		iso_date = datetime.strptime(ywd, "%G-%V-%u")
 		return datetime.strftime(iso_date, "%Y-%m-%d")
 
@@ -156,7 +153,7 @@ class ComicReread(Client):
 		embeds = []
 
 		days = tuple(self.schedule['days'][date_string])
-		logging.debug('Getting comics on following days: {}', (days,))
+		logging.debug(f'Getting comics on following days: {days}')
 		self.get_database().execute("""
 			SELECT
 				Comic.release as release,
@@ -170,19 +167,19 @@ class ComicReread(Client):
 		""".format(days))
 
 		rows = self.get_database().fetchall()
-		logging.debug('{} comics from current week'.format(len(rows)))
+		logging.debug(f'{len(rows)} comics from current week')
 		for row in rows:
 			release = row[0]
 			title = row[1]
 			image = row[2].split('_', maxsplit=3)[3]
 			url = row[3]
-			alt = '||{}||'.format(row[4])
-			header = '[{}]({})'.format(title, url)
-			img_url = 'https://www.dumbingofage.com/comics/{}'.format(image)
+			alt = f'||{row[4]}||'
+			header = f'[{title}]({url})'
+			img_url = f'https://www.dumbingofage.com/comics/{image}'
 			tags = self.get_tags(release)
-			footer = '{} - {}'.format(release, tags)
+			footer = f'{release} - {tags}'
 
-			logging.debug('Generating embed for "{}" from {}'.format(title, release))
+			logging.debug(f'Generating embed for "{title}" from {release}')
 			embed = Embed(title=title, url=url, description=alt, colour=Colour.random())
 			embed.set_image(url=img_url)
 			embed.set_footer(text=footer)
@@ -202,15 +199,17 @@ class ComicReread(Client):
 		return embeds
 
 	def print_info(self):
+		main_guild = self.get_guild()
+		main_channel = self.get_channel()
 		info = ''
-		info += 'Accessing Guild: {} ({})\n'.format(self.get_guild().name, self.get_guild().id)
-		info += 'Accessing Channel: {} ({})\n'.format(self.get_channel().name, self.get_channel().id)
-		info += 'Total Number of Guilds: {}\n'.format(len(self.guilds))
+		info += f'Accessing Guild: {main_guild.name} ({main_guild.id})\n'
+		info += f'Accessing Channel: {main_channel.name} ({main_channel.id})\n'
+		info += f'Total Number of Guilds: {len(self.guilds)}\n'
 		for guild in self.guilds:
-			info += 'Guild: {} ({})\n'.format(guild.name, guild.id)
-			info += '\tTotal Number of Channels: {}\n'.format(len(guild.channels))
+			info += f'Guild: {guild.name} ({guild.id})\n'
+			info += f'\tTotal Number of Channels: {len(guild.channels)}\n'
 			for channel in guild.channels:
-				info += '\tChannel: {} ({})\n'.format(channel.name, channel.id)
+				info += f'\tChannel: {channel.name} ({channel.id})\n'
 
 		if self.info:
 			print(info)
@@ -227,7 +226,7 @@ class ComicReread(Client):
 			await channel.send(self.message)
 
 		if self.message_file is not None:
-			logging.debug('Loading text from file: {}'.format(self.message_file))
+			logging.debug(f'Loading text from file: {self.message_file}')
 			with open(self.message_file, 'r') as fp:
 				data = fp.read()
 				await channel.send(data)
@@ -236,38 +235,38 @@ class ComicReread(Client):
 		channel = self.get_channel()
 		mids = []
 		if self.delete is not None:
-			logging.debug('Deleting {} messages from cli'.format(len(self.delete)))
+			logging.debug(f'Deleting {len(self.delete)} messages from cli')
 			mids.extend(self.delete)
 
 		if self.delete_file is not None:
 			with open(self.delete_file, 'r') as fp:
 				file_mids = [ int(m.strip()) for m in fp.read().splitlines() if m.strip() ]
 				mids.extend(file_mids)
-			logging.debug('Deleting {} messages from file: {}'.format(len(file_mids), self.delete_file))
+			logging.debug(f'Deleting {len(file_mids)} messages from file: {self.delete_file}')
 
-		logging.info('Deleting {} messages.'.format(len(mids)))
+		logging.info(f'Deleting {len(mids)} messages.')
 		for mid in mids:
-			logging.debug('Attemping to delete "{}".'.format(mid))
+			logging.debug(f'Attemping to delete "{mid}".')
 			try:
 				msg = await channel.fetch_message(mid)
 				await msg.delete()
 			except (NotFound, HTTPException) as e:
-				logging.warn('Unable to get message "{}": {}'.format(mid, e))
+				logging.warn(f'Unable to get message "{mid}": {e}')
 
 	async def refresh_message(self):
 		channel = self.get_channel()
 		mids = []
 		if self.refresh is not None:
-			logging.debug('Reloading {} messages from cli'.format(len(self.refresh)))
+			logging.debug(f'Reloading {len(self.refresh)} messages from cli')
 			mids.extend(self.refresh)
 
 		if self.refresh_file is not None:
 			with open(self.refresh_file, 'r') as fp:
 				file_mids = [ int(m.strip()) for m in fp.read().splitlines() if m.strip() ]
 				mids.extend(file_mids)
-			logging.debug('Reloading {} messages from file: {}'.format(len(file_mids), self.refresh_file))
+			logging.debug(f'Reloading {len(file_mids)} messages from file: {self.refresh_file}')
 
-		logging.info('Editing {} messages.'.format(len(mids)))
+		logging.info(f'Editing {len(mids)} messages.')
 		for mid in mids:
 			try:
 				msg = await channel.fetch_message(mid)
@@ -276,7 +275,7 @@ class ComicReread(Client):
 				await msg.edit(embed=embed)
 				sleep(1)
 			except (NotFound, HTTPException, Forbidden) as e:
-				logging.warn('Unable to get message "{}": {}'.format(mid, e))
+				logging.warn('Unable to get message "{mid}": {e}')
 
 	async def send_weekly_comics(self):
 		logging.info('Sending comics for today.')
@@ -305,7 +304,7 @@ class ComicReread(Client):
 				dump(self.schedule, fp, sort_keys=True, indent='\t')
 
 	async def on_ready(self):
-		logging.info('{} has connected to Discord!'.format(self.user))
+		logging.info(f'{self.user} has connected to Discord!')
 
 		channel = self.get_channel()
 		guild = self.get_guild()
@@ -315,19 +314,19 @@ class ComicReread(Client):
 			self.print_info()
 
 		if self.message is not None or self.message_file is not None:
-			logging.info('Sending a message to channel "{}" on guild "{}"'.format(channel, guild))
+			logging.info(f'Sending a message to channel "{channel}" on guild "{guild}"')
 			await self.send_message()
 
 		if self.delete is not None or self.delete_file is not None:
-			logging.info('Deleting messages in channel "{}" on guild "{}"'.format(channel, guild))
+			logging.info(f'Deleting messages in channel "{channel}" on guild "{guild}"')
 			await self.delete_message()
 
 		if self.refresh is not None or self.refresh_file is not None:
-			logging.info('Reloading messages in channel "{}" on guild "{}"'.format(channel, guild))
+			logging.info(f'Reloading messages in channel "{channel}" on guild "{guild}"')
 			await self.refresh_message()
 
 		if self.send_comic:
-			logging.info('Sending Comics to channel "{}" on guild "{}".'.format(channel, guild))
+			logging.info(f'Sending Comics to channel "{channel}" on guild "{guild}".')
 			await self.send_weekly_comics()
 			self.update_schedule()
 
@@ -339,8 +338,8 @@ class ComicReread(Client):
 		err_type, err_value, err_traceback = exc_info()
 		tb_list = '\n'.join(format_tb(err_traceback))
 		tb_string = ' | '.join(tb_list.splitlines())
-		logging.debug('Error cause by call with args and kwargs: {} {}'.format(args, kwargs))
-		logging.error('{}: {} | Traceback: {}'.format(err_type.__name__, err_value, tb_string))
+		logging.debug(f'Error cause by call with args and kwargs: {args} {kwargs}')
+		logging.error(f'{err_type.__name__}: {err_value} | Traceback: {tb_string}')
 		if self.conn is not None:
 			self.conn.close()
 		await self.logout()
