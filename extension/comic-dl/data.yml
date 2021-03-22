@@ -22,25 +22,6 @@ DumbingOfAge:
       id: 'comic-foot'
     - tag: 'a'
       class: 'navi navi-prev'
-Gunnerkrigg:
-  loc: "Gunnerkrigg/"
-  name: "Gunnerkrigg"
-  url: "https://www.gunnerkrigg.com/?p=1057"
-  home: "https://www.gunnerkrigg.com/"
-  cur: True
-  prev:
-    - tag: 'div'
-      class: 'extra'
-    - tag: 'div'
-      class: 'nav'
-    - tag: 'a'
-      class: 'left'
-  nxt:
-    - tag: 'a'
-      class: 'right'
-  img:
-    - tag: 'img'
-      class: 'comic_image'
 OrderOfTheStick:
   loc: "OrderOfTheStick/"
   name: "Order of the Stick"
@@ -49,17 +30,3 @@ OrderOfTheStick:
   cur: True
   img: null
   nxt: null
-BittersweetCandyBowl:
-  loc: "BittersweetCandyBowl/"
-  name: "Bittersweet Candy Bowl"
-  url: "https://www.bittersweetcandybowl.com/c1/p1.html"
-  home: "https://www.bittersweetcandybowl.com/"
-  cur: True
-  alt: True
-  img:
-    - tag: 'img'
-      id: 'page_img'
-  nxt:
-    - tag: 'div'
-      class: 'comicpage'
-    - tag: 'a'
