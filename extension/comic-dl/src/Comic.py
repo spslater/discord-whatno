@@ -122,7 +122,7 @@ class Comic:
         comic = Image.open(input_filename).convert("RGBA")
         c_width, c_height = comic.size
 
-        font = ImageFont.truetype("./font/Ubuntu-R.ttf", 16)
+        font = ImageFont.truetype(join(self.workdir, "src/font/Ubuntu-R.ttf"), 16)
         drawFont = ImageDraw.Draw(
             Image.new("RGB", (c_width, c_height * 2), (255, 255, 255))
         )

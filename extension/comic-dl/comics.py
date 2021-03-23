@@ -8,7 +8,7 @@ from yaml import load, Loader
 
 
 if __name__ == "__main__":
-    parser = cli.init()
+    parser = cli.init(log_default="output.log")
     parser.add_argument(
         "yaml",
         help="yaml file that contains info for what and where to download",
