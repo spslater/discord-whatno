@@ -1,18 +1,44 @@
+"""
+Archive the "Dumbing of Age" webcomic and update an info database
+
+Classes:
+    DumbingOfAge
+
+Methods:
+    main
+"""
 import logging
-import re
-from os import chdir, getcwd, makedirs
-from os.path import exists, isdir, join, splitext
-from textwrap import fill
+from os import makedirs
+from os.path import isdir, join, splitext
+from sqlite3 import connect, OperationalError, Row
+from typing import Optional, Union
 
-from pysean import cli, logs
-from sqlite3 import connect, OperationalError
-from yaml import load, Loader
+from bs4 import BeautifulSoup
+from bs4.element import Tag
 
-from .Comic import Comic
+from .comic import Comic, main_setup
 
 
 class DumbingOfAge(Comic):
-    def __init__(self, comic, workdir, savedir):
+    """
+    Dumbing of Age comic archiver
+
+    Methods:
+        process(): Archive the comics
+    """
+
+    def __init__(self, comic: dict, workdir: str, savedir: str) -> None:
+        """
+        Initializer
+
+            Parameters:
+                comic (dict): dictionary with info needed for initalization
+                workdir (str): working directory where downloaded images get saved to
+                savedir (str): directory where the image archives live
+
+            Returns:
+                None
+        """
         super().__init__(comic, "DumbingOfAge", workdir, savedir)
         self.database_filename = None
         if "db" in self.comic:
@@ -23,78 +49,137 @@ class DumbingOfAge(Comic):
             makedirs(self.loc)
         self.database_path = join(self.loc, self.database_filename)
         self.conn = connect(self.database_path)
-        self.db = self.conn.cursor()
+        self.database = self.conn.cursor()
         try:
-            self.createTables()
+            self.create_tables()
         except OperationalError:
             pass
         self.book_list = comic["book"]
 
-    def createTables(self):
-        self.db.executescript(
+    def create_tables(self):
+        """Create the needed tables in the SQLite3 database"""
+        self.database.executescript(
             """
-				CREATE TABLE Arc(
-					number PRIMARY KEY,
-					name TEXT UNIQUE NOT NULL,
-					url TEXT UNIQUE NOT NULL
-				);
+                CREATE TABLE Arc(
+                    number PRIMARY KEY,
+                    name TEXT UNIQUE NOT NULL,
+                    url TEXT UNIQUE NOT NULL
+                );
 
-				CREATE TABLE Comic(
-					release PRIMARY KEY,
-					title TEXT NOT NULL,
-					image TEXT UNIQUE NOT NULL,
-					url TEXT UNIQUE NOT NULL,
-					arcId
-							REFERENCES Arc(rowid)
-							ON DELETE CASCADE
-							ON UPDATE CASCADE
-							NOT NULL
-				);
+                CREATE TABLE Comic(
+                    release PRIMARY KEY,
+                    title TEXT NOT NULL,
+                    image TEXT UNIQUE NOT NULL,
+                    url TEXT UNIQUE NOT NULL,
+                    arcId
+                            REFERENCES Arc(rowid)
+                            ON DELETE CASCADE
+                            ON UPDATE CASCADE
+                            NOT NULL
+                );
 
-				CREATE TABLE Alt(
-					comicId
-							UNIQUE
-							REFERENCES Comic(release)
-							ON DELETE CASCADE
-							ON UPDATE CASCADE
-							NOT NULL,
-					alt TEXT NOT NULL
-				);
+                CREATE TABLE Alt(
+                    comicId
+                            UNIQUE
+                            REFERENCES Comic(release)
+                            ON DELETE CASCADE
+                            ON UPDATE CASCADE
+                            NOT NULL,
+                    alt TEXT NOT NULL
+                );
 
-				CREATE TABLE Tag(
-					comicId
-							REFERENCES Comic(release)
-							ON DELETE CASCADE
-							ON UPDATE CASCADE
-							NOT NULL,
-					tag TEXT NOT NULL
-				);
-		"""
+                CREATE TABLE Tag(
+                    comicId
+                            REFERENCES Comic(release)
+                            ON DELETE CASCADE
+                            ON UPDATE CASCADE
+                            NOT NULL,
+                    tag TEXT NOT NULL
+                );
+        """
         )
 
-    def _get_tags(self, soup):
-        tagList = []
+    @staticmethod
+    def _get_tags(soup: Union[BeautifulSoup, Tag]) -> list[str]:
+        """
+        Get list of tags for the comic.
+
+            Parameters:
+                soup (Union[BeautifulSoup, Tag]): soup to search for tags
+
+            Returns:
+                tag_list (list[str]): list of tags for the comic
+        """
+        tag_list = []
         tags = soup.find("div", {"class": "post-tags"}).find_all("a")
         for tag in tags:
-            tagList.append(tag.text)
-        return tagList
+            tag_list.append(tag.text)
+        return tag_list
 
-    def get_archive_url(self, soup):
-        logging.debug(f"Getting archive url from landing page")
+    def get_archive_url(self, soup: Union[BeautifulSoup, Tag]) -> Optional[str]:
+        """
+        Get direct link to comic instead of homepage of website
+
+            Parameters:
+                soup (Union[BeautifulSoup, Tag]): soup of comic homepage
+
+            Returns:
+                url (Optional[str]): direct url link to comic
+        """
+        logging.debug("Getting archive url from landing page")
         prev = self.get_prev(soup)
         prev_soup = self.get_soup(prev)
         return self.get_next(prev_soup)
 
-    def get_title(self, soup):
-        logging.debug(f"Getting title of current comic")
-        return soup.find("h2", {"class": "post-title"}).find("a").text
+    def get_title(self, soup: Union[BeautifulSoup, Tag]) -> Optional[str]:
+        """
+        Get title of comic
 
-    def get_arc_name(self, soup):
-        logging.debug(f"Getting current arc name")
-        return soup.find("li", {"class": "storyline-root"}).find("a").text[5:]
+            Parameters:
+                soup (Union[BeautifulSoup, Tag]): soup of current comic
 
-    def add_arc(self, image_filename, fullname):
-        logging.debug(f"Checking if arc needs to be added to database")
+            Returns:
+                title (Optional[str]): title of comic
+        """
+        logging.debug("Getting title of current comic")
+        title_tag = self._search_soup(
+            soup, [{"tag": "h2", "class": "post-title"}, {"tag": "a"}]
+        )
+        if title_tag:
+            return title_tag.text
+        return None
+
+    def get_arc_name(self, soup: Union[BeautifulSoup, Tag]) -> Optional[str]:
+        """
+        Get name of current arc
+
+            Parameters:
+                soup (Union[BeautifulSoup, Tag]): soup of current comic
+
+            Returns:
+                arc (Optional[str]): name of current arc
+        """
+        logging.debug("Getting current arc name")
+        arc_tag = self._search_soup(
+            soup, [{"tag": "li", "class": "storyline-root"}, {"tag": "a"}]
+        )
+        if arc_tag:
+            return arc_tag.text[5:]
+        return None
+
+    def add_arc(self, image_filename: str, arc_name: str) -> Optional[Row]:
+        """
+        Add arc to info database if it doesn't exist, otherwise return existing row.
+
+            Parameters:
+                image_filename (str): name of saved image to parse info for database from
+                arc_name (str): full name of arc
+
+            Returns:
+                row (Optional[Row]): database row of added arc
+
+        """
+        logging.debug("Checking if arc needs to be added to database")
         data = image_filename.split("_")
         num = data[1]
         name = data[2]
@@ -102,92 +187,175 @@ class DumbingOfAge(Comic):
         arc = int(num[2:4])
         url = f"https://www.dumbingofage.com/category/comic/book-{book}/{arc}-{name}/"
 
-        self.db.execute("SELECT * FROM Arc WHERE number = ?", (num,))
-        row = self.db.fetchone()
+        self.database.execute("SELECT * FROM Arc WHERE number = ?", (num,))
+        row = self.database.fetchone()
 
         if not row:
-            logging.info(f'Inserting new arc: "{fullname}"')
-            self.db.execute("INSERT INTO Arc VALUES (?,?,?)", (num, fullname, url))
-            self.db.execute("SELECT * FROM Arc WHERE number = ?", (num,))
-            row = self.db.fetchone()
+            logging.info('Inserting new arc: "%s"', arc_name)
+            self.database.execute(
+                "INSERT INTO Arc VALUES (?,?,?)", (num, arc_name, url)
+            )
+            self.database.execute("SELECT * FROM Arc WHERE number = ?", (num,))
+            row = self.database.fetchone()
 
         return row
 
-    def add_comic(self, image_filename, arc_row, comic_title, url):
-        logging.debug(f"Checking if comic needs to be added to database")
-        titleRelease = image_filename.split("_")[3]
-        release = "-".join(titleRelease.split("-")[0:3])
+    def add_comic(
+        self, image_filename: str, arc_row: Row, comic_title: str, url: str
+    ) -> Optional[Row]:
+        """
+        Add comic to info database if it doesn't exist, otherwise return existing row.
 
-        self.db.execute("SELECT * FROM Comic WHERE release = ?", (release,))
-        row = self.db.fetchone()
+            Parameters:
+                image_filename (str): name of saved image to parse info for database from
+                arc_row (Row): database row of arc
+                comic_title (str): title of current comic
+                url (str): Website page to view comic
+
+            Returns:
+                row (Optional[Row]): database row of added comic
+
+        """
+        logging.debug("Checking if comic needs to be added to database")
+        title_release = image_filename.split("_")[3]
+        release = "-".join(title_release.split("-")[0:3])
+
+        self.database.execute("SELECT * FROM Comic WHERE release = ?", (release,))
+        row = self.database.fetchone()
 
         if not row:
-            logging.info(f'Inserting new comic: "{comic_title}"')
-            self.db.execute(
+            logging.info('Inserting new comic: "%s"', comic_title)
+            self.database.execute(
                 "INSERT INTO Comic VALUES (?,?,?,?,?)",
                 (release, comic_title, image_filename, url, arc_row[0]),
             )
-            self.db.execute("SELECT * FROM Comic WHERE release = ?", (release,))
-            row = self.db.fetchone()
+            self.database.execute("SELECT * FROM Comic WHERE release = ?", (release,))
+            row = self.database.fetchone()
 
         return row
 
-    def add_alt(self, comic, alt):
-        logging.debug(f"Checking if alt text needs to be added to database")
-        self.db.execute("SELECT * FROM Alt WHERE comicId = ?", (comic[0],))
-        row = self.db.fetchone()
+    def add_alt(self, comic: Row, alt: str) -> Optional[Row]:
+        """
+        Add alt text to info database if it doesn't exist, otherwise return existing row.
+
+            Parameters:
+                comic_row (Row): database row of comic
+                alt (str): alt text to save for current comic
+
+            Returns:
+                row (Optional[Row]): database row of added alt text
+
+        """
+        logging.debug("Checking if alt text needs to be added to database")
+        self.database.execute("SELECT * FROM Alt WHERE comicId = ?", (comic[0],))
+        row = self.database.fetchone()
 
         if not row:
-            logging.debug(f'Inserting new alt: "{comic[0]}"')
-            self.db.execute("INSERT INTO Alt VALUES (?,?)", (comic[0], alt))
-            self.db.execute("SELECT * FROM Alt WHERE comicId = ?", (comic[0],))
-            row = self.db.fetchone()
+            logging.debug('Inserting new alt: "%s"', comic[0])
+            self.database.execute("INSERT INTO Alt VALUES (?,?)", (comic[0], alt))
+            self.database.execute("SELECT * FROM Alt WHERE comicId = ?", (comic[0],))
+            row = self.database.fetchone()
 
         return row
 
-    def add_tags(self, comic, tags):
-        logging.debug(f"Checking if tags needs to be added to database")
+    def add_tags(self, comic: Row, tags: list[str]) -> list[Row]:
+        """
+        Add tags to info database if it doesn't exist, otherwise return existing rows.
+
+            Parameters:
+                comic_row (Row): database row of comic
+                tags (list[str]): tags to save for current comic
+
+            Returns:
+                added_tags (list[Row]): list of rows of added tags
+
+        """
+        logging.debug("Checking if tags needs to be added to database")
         added_tags = []
         for tag in tags:
-            self.db.execute(
+            self.database.execute(
                 "SELECT * FROM Tag WHERE comicId = ? AND tag = ?", (comic[0], tag)
             )
-            row = self.db.fetchone()
+            row = self.database.fetchone()
 
             if not row:
-                self.db.execute("INSERT INTO Tag VALUES (?,?)", (comic[0], tag))
-                added_tags.append(tag)
-        logging.debug(f"Inserted new tags: {added_tags}")
+                self.database.execute("INSERT INTO Tag VALUES (?,?)", (comic[0], tag))
+                self.database.execute(
+                    "SELECT * FROM Tag WHERE comicId = ? AND tag = ?", (comic[0], tag)
+                )
+                row = self.database.fetchone()
+                added_tags.append(row)
+        logging.debug("Inserted new tags: %s", [tag[1] for tag in added_tags])
+        return added_tags
 
-    def process(self):
+    def _naming_info(
+        self, soup: Union[BeautifulSoup, Tag], image_url: str
+    ) -> None:
+        """
+        Get book/arc number, image filename, final filename, and raw filename for current comic
+
+            Parameters:
+                soup (Union[BeautifulSoup, Tag]): comic page soup
+                image_url (str): url for image
+
+            Returns:
+                book_arc (str): book / arc combo, ie: 1003 (Book 10, Arc 3)
+                image_filename (str): filename of image to pull down
+                final_filename (str): filename to save image as
+                raw_filename (str): temp raw file before adding hover text, if needed
+        """
+        strip_name, ext = splitext(image_url.split("/")[-1])
+
+        if ext.lower() != ".png":
+            self.url = self.get_next(soup)
+            return True, None, None, None, None
+
+
+        if self.cur:
+            parts = self._search_soup(soup, self.book_list, "href").split("/")
+            book_number = parts[-3].split("-")[1].zfill(2)
+            arcs = parts[-2].split("-")
+            self.url = self.get_archive_url(soup)
+        else:
+            parts = self.url.split("/")
+            book_number = parts[-4].split("-")[1].zfill(2)
+            arcs = parts[-3].split("-")
+        arc_number = arcs[0].zfill(2)
+        arc_name = "-".join(arcs[1:])
+        book_arc = f"{book_number}{arc_number}"
+        book_arc_dir = join(self.loc, book_arc)
+        image_filename = (
+            f"{self.short_name}_{book_arc}_{arc_name}_{strip_name}{ext.lower()}"
+        )
+
+        if not isdir(book_arc_dir):
+            makedirs(book_arc_dir)
+
+        final_filename, raw_filename = self.get_name_info(image_filename, book_arc_dir)
+
+        return False, book_arc, image_filename, final_filename, raw_filename
+
+    def process(self) -> None:
+        """
+        Archive the web comic. Downloads latest if `cur` is True, otherwise downloads all the
+            ones from given url.
+
+            Parameters:
+                None
+
+            Returns:
+                None
+        """
         while True:
-            logging.info(f"Getting soup for {self.url}")
+            logging.info("Getting soup for %s", self.url)
             soup = self.get_soup()
 
             img_soup = self.get_image(soup)
-            image_url = img_soup["src"]
-            strip_name, ext = splitext(image_url.split("/")[-1])
-
-            if ext.lower() != ".png":
-                self.url = self.get_next(soup)
-                continue
-
-            if self.cur:
-                parts = self._search_soup(soup, self.book_list, "href").split("/")
-                book_number = parts[-3].split("-")[1].zfill(2)
-                arcs = parts[-2].split("-")
-                self.url = self.get_archive_url(soup)
-            else:
-                parts = self.url.split("/")
-                book_number = parts[-4].split("-")[1].zfill(2)
-                arcs = parts[-3].split("-")
-            arc_number = arcs[0].zfill(2)
-            arc_name = "-".join(arcs[1:])
-            book_arc = f"{book_number}{arc_number}"
-            book_arc_dir = join(self.loc, book_arc)
-            image_filename = (
-                f"{self.short_name}_{book_arc}_{arc_name}_{strip_name}{ext.lower()}"
+            skip_comic, book_arc, image_filename, final_filename, raw_filename = self._naming_info(
+                soup, img_soup["src"]
             )
+            if skip_comic:
+                continue
 
             logging.info("Saving Arc to Database")
             full_arc_name = self.get_arc_name(soup)
@@ -206,18 +374,12 @@ class DumbingOfAge(Comic):
             tags = self._get_tags(soup)
             self.add_tags(comic_row, tags)
 
-            if not isdir(book_arc_dir):
-                makedirs(book_arc_dir)
-
-            final_filename, raw_filename = self.get_name_info(
-                image_filename, book_arc_dir
-            )
             self.download_and_save(img_soup, final_filename, raw_filename)
             self.save_to_archive(self.name, final_filename)
             self.save_to_archive(f"{self.name} - {book_arc}", final_filename)
 
             self.conn.commit()
-            logging.info(f'Done processing comic "{final_filename}"')
+            logging.info('Done processing comic "%s"', final_filename)
 
             self.url = self.get_next(soup)
             self.wait_if_need()
@@ -229,58 +391,13 @@ class DumbingOfAge(Comic):
         logging.info('Completed processing "Dumbing of Age"')
 
 
-def main(arguments=None):
-    parser = cli.init()
-    parser.add_argument(
-        "yaml",
-        help="yaml file that contains info for what and where to download",
-        metavar="YAML",
-    )
-    parser.add_argument(
-        "--basedir",
-        default=getcwd(),
-        help="base directory to append workdir and savedir to",
-        metavar="DIR",
-    )
-    parser.add_argument(
-        "--workdir", help="working directory where resource and comic files are saved"
-    )
-    parser.add_argument("--savedir", help="archive directory to save cbz files")
-    parser.add_argument(
-        "--start", dest="start", help="start from comic url", metavar="URL"
-    )
-    args = parser.parse_args(arguments)
+def main(arguments: Optional[list[str]] = None) -> None:
+    """
+    Archive the "Dumbing of Age" webcomic from the command line.
+    """
+    comics, workdir, savedir, _ = main_setup("DumbingOfAge", arguments)
 
-    with open(args.yaml, "r") as yml:
-        data = load(yml.read(), Loader=Loader)
-
-    workdir_raw = args.workdir if args.workdir else data.get("workdir", None)
-    savedir_raw = args.savedir if args.savedir else data.get("savedir", None)
-    comics = data.get("comics", None)
-
-    missing = []
-    if workdir_raw is None:
-        missing.append("workdir")
-    if savedir_raw is None:
-        missing.append("savedir")
-    if comics is None:
-        missing.append("comics")
-    if missing:
-        missing_string = ", ".join(missing)
-        logging.error(
-            f'Missing fields in data yaml "{args.yaml}" or supplied from the cli: {missing_string}'
-        )
-        exit(1)
-
-    workdir = join(args.basedir, workdir_raw)
-    savedir = join(args.basedir, savedir_raw)
-
-    chdir(workdir)
-
-    log_file = join(workdir, "DumbingOfAge", "output.log")
-    logs.init(logfile=log_file, args=args)
-
-    doa = DumbingOfAge(comics["DumbingOfAge"], workdir, savedir)
+    doa = DumbingOfAge(comics["dumbingofage"], workdir, savedir)
     doa.process()
 
 

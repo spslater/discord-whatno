@@ -1,13 +1,21 @@
+"""
+Archive Webcomics by dynamically loading them from the src directory.
+
+Methods:
+    main
+"""
 import logging
+import sys
+from importlib import import_module
 from os import getcwd
 from os.path import join
-from sys import exit
 
 from pysean import cli, logs
 from yaml import load, Loader
 
 
-if __name__ == "__main__":
+def main():
+    """Main function to parse and archive web comics"""
     parser = cli.init(log_default="output.log")
     parser.add_argument(
         "yaml",
@@ -44,9 +52,11 @@ if __name__ == "__main__":
     if missing:
         missing_string = ", ".join(missing)
         logging.error(
-            f'Missing fields in data yaml "{args.yaml}" or supplied from the cli: {missing_string}'
+            'Missing fields in data yaml "%s" or supplied from the cli: %s',
+            args.yaml,
+            missing_string,
         )
-        exit(1)
+        sys.exit(1)
 
     workdir = join(args.basedir, workdir_raw)
     savedir = join(args.basedir, savedir_raw)
@@ -54,7 +64,11 @@ if __name__ == "__main__":
     logs.init(args=args)
 
     for name, info in comics.items():
-        logging.info(f"Updating {name}")
-        module = __import__("src", fromlist=[name])
+        logging.info("Updating %s", name)
+        module = import_module(f"src.{name.lower()}")
         getattr(module, name)(info, workdir, savedir).process()
     logging.info("Done Updating All Comics")
+
+
+if __name__ == "__main__":
+    main()
