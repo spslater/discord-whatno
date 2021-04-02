@@ -14,7 +14,7 @@ from os import chdir, getcwd, makedirs, remove, rename, system
 from os.path import basename, isdir, join, splitext
 from textwrap import fill
 from time import sleep
-from typing import Optional, Union, NamedTuple
+from typing import NamedTuple, Optional, Union
 from urllib.error import URLError
 from urllib.parse import urlparse
 from urllib.request import build_opener, install_opener, urlretrieve
@@ -26,9 +26,11 @@ from pysean import cli, logs
 from requests import get, RequestException
 from yaml import load, Loader
 
-#pylint: disable=invalid-name
+
+# pylint: disable=invalid-name
 class RGBA(NamedTuple):
     """Wrapper for RGBA color value tuple"""
+
     r: int
     g: int
     b: int
@@ -155,9 +157,7 @@ class Comic:
                 soup = soup.find(name=nxt.get("tag"), attrs=dic)
         return soup[value] if soup and value else soup
 
-    def search(
-        self, soup: Union[BeautifulSoup, Tag], path: list[dict]
-    ) -> list[Tag]:
+    def search(self, soup: Union[BeautifulSoup, Tag], path: list[dict]) -> list[Tag]:
         """
         Search a soup for all instances of the last thing in the path.
 
@@ -177,7 +177,9 @@ class Comic:
             dic["id"] = last["id"]
         return soup.find_all(last["tag"], dic)
 
-    def get_soup(self, url: Optional[str] = None, retries: int = 10) -> Optional[BeautifulSoup]:
+    def get_soup(
+        self, url: Optional[str] = None, retries: int = 10
+    ) -> Optional[BeautifulSoup]:
         """
         Get the soup for the requested url.
 
@@ -258,7 +260,7 @@ class Comic:
             g_value = alt_color[1]
             b_value = alt_color[2]
             a_value = alt_color[3] if len(alt_color) > 3 else 255
-            return RGBA(r_value,g_value,b_value,a_value)
+            return RGBA(r_value, g_value, b_value, a_value)
         return RGBA(224, 238, 239, 255)
 
     def _get_alt(self, img: Tag) -> Optional[str]:
@@ -296,7 +298,9 @@ class Comic:
         comic = Image.open(input_filename).convert("RGBA")
         c_width, c_height = comic.size
 
-        font = ImageFont.truetype(join(self.workdir, "src/font/Ubuntu-R.ttf"), self.alt_size)
+        font = ImageFont.truetype(
+            join(self.workdir, "src/font/Ubuntu-R.ttf"), self.alt_size
+        )
         draw_font = ImageDraw.Draw(
             Image.new("RGB", (c_width, c_height * 2), (255, 255, 255))
         )
@@ -436,6 +440,7 @@ class Comic:
             sleep(self.sleep_time)
         else:
             self.cur_count += 1
+
 
 def main_setup(comic_dir: str, arguments: Optional[list[str]] = None) -> None:
     """

@@ -288,9 +288,7 @@ class DumbingOfAge(Comic):
         logging.debug("Inserted new tags: %s", [tag[1] for tag in added_tags])
         return added_tags
 
-    def _naming_info(
-        self, soup: Union[BeautifulSoup, Tag], image_url: str
-    ) -> None:
+    def _naming_info(self, soup: Union[BeautifulSoup, Tag], image_url: str) -> None:
         """
         Get book/arc number, image filename, final filename, and raw filename for current comic
 
@@ -309,7 +307,6 @@ class DumbingOfAge(Comic):
         if ext.lower() != ".png":
             self.url = self.get_next(soup)
             return True, None, None, None, None
-
 
         if self.cur:
             parts = self._search_soup(soup, self.book_list, "href").split("/")
@@ -351,9 +348,13 @@ class DumbingOfAge(Comic):
             soup = self.get_soup()
 
             img_soup = self.get_image(soup)
-            skip_comic, book_arc, image_filename, final_filename, raw_filename = self._naming_info(
-                soup, img_soup["src"]
-            )
+            (
+                skip_comic,
+                book_arc,
+                image_filename,
+                final_filename,
+                raw_filename,
+            ) = self._naming_info(soup, img_soup["src"])
             if skip_comic:
                 continue
 
