@@ -54,7 +54,7 @@ comics:
     name: "Clover and Cutlass"
     url: "https://cloverandcutlass.com/comic/cover/"
     home: "https://cloverandcutlass.com/"
-    cur: false
+    cur: true
     alt: true
     alt_size: 64
     alt_color: [43, 110, 135]
