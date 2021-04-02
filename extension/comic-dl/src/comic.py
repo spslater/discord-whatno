@@ -14,8 +14,9 @@ from os import chdir, getcwd, makedirs, remove, rename, system
 from os.path import basename, isdir, join, splitext
 from textwrap import fill
 from time import sleep
-from typing import Optional, Union
+from typing import Optional, Union, NamedTuple
 from urllib.error import URLError
+from urllib.parse import urlparse
 from urllib.request import build_opener, install_opener, urlretrieve
 
 from bs4 import BeautifulSoup
@@ -24,6 +25,14 @@ from PIL import Image, ImageDraw, ImageFont
 from pysean import cli, logs
 from requests import get, RequestException
 from yaml import load, Loader
+
+#pylint: disable=invalid-name
+class RGBA(NamedTuple):
+    """Wrapper for RGBA color value tuple"""
+    r: int
+    g: int
+    b: int
+    a: int
 
 
 class Comic:
@@ -43,9 +52,16 @@ class Comic:
         self.cur = comic["cur"]
         self.url = comic["home"] if ("home" in comic and self.cur) else comic["url"]
         self.base = comic["base"] if "base" in comic else comic["home"]
+        self.discard_query = (
+            comic["discard_query"] if "discard_query" in comic else True
+        )
         self.loc = join(self.workdir, "archive", comic["loc"])
+        if not isdir(self.loc):
+            makedirs(self.loc)
         self.name = comic["name"]
         self.save_alt = comic["alt"] if "alt" in comic else False
+        self.alt_size = comic["alt_size"] if "alt_size" in comic else 16
+        self.alt_color = self._alt_get_color(comic)
         self.image_list = comic["img"]
         self.next_list = comic["nxt"]
         self.prev_list = comic["prev"] if "prev" in comic else None
@@ -179,7 +195,15 @@ class Comic:
         logging.info("Getting soup for %s", url)
         for x in range(1, retries + 1):
             try:
-                return BeautifulSoup(get(url).text, "html.parser")
+                return BeautifulSoup(
+                    get(
+                        url,
+                        headers={
+                            "User-agent": "Whatno Comic Reader / (WhatnoComicReader v0.2.0)"
+                        },
+                    ).text,
+                    "html.parser",
+                )
             except RequestException as e:
                 self.exception_sleep(e, x, retries)
         return None
@@ -226,6 +250,17 @@ class Comic:
         logging.debug("Getting image soup")
         return self._search_soup(soup, self.image_list)
 
+    @staticmethod
+    def _alt_get_color(comic: dict) -> RGBA:
+        alt_color = comic.get("alt_color")
+        if alt_color:
+            r_value = alt_color[0]
+            g_value = alt_color[1]
+            b_value = alt_color[2]
+            a_value = alt_color[3] if len(alt_color) > 3 else 255
+            return RGBA(r_value,g_value,b_value,a_value)
+        return RGBA(224, 238, 239, 255)
+
     def _get_alt(self, img: Tag) -> Optional[str]:
         """
         Get the alt text of the comic if it exists.
@@ -261,7 +296,7 @@ class Comic:
         comic = Image.open(input_filename).convert("RGBA")
         c_width, c_height = comic.size
 
-        font = ImageFont.truetype(join(self.workdir, "src/font/Ubuntu-R.ttf"), 16)
+        font = ImageFont.truetype(join(self.workdir, "src/font/Ubuntu-R.ttf"), self.alt_size)
         draw_font = ImageDraw.Draw(
             Image.new("RGB", (c_width, c_height * 2), (255, 255, 255))
         )
@@ -269,7 +304,7 @@ class Comic:
         _, alt_height = draw_font.textsize(alt, font=font)
 
         height = c_height + 10 + alt_height + 10
-        output = Image.new("RGBA", (c_width, height), (224, 238, 239, 255))
+        output = Image.new("RGBA", (c_width, height), self.alt_color)
 
         draw = ImageDraw.Draw(output)
 
@@ -318,6 +353,9 @@ class Comic:
         """
         logging.info('Downloading and saving "%s"', final_filename)
         image_url = img_soup["src"]
+        if self.discard_query:
+            parsed_url = urlparse(image_url)
+            image_url = f"{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}"
 
         alt_text = self._get_alt(img_soup)
         if alt_text:

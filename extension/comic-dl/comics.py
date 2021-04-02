@@ -32,6 +32,7 @@ def main():
         "--workdir", help="working directory where resource and comic files are saved"
     )
     parser.add_argument("--savedir", help="archive directory to save cbz files")
+    parser.add_argument("--only", help="only run these comics", nargs="*")
 
     args = parser.parse_args()
 
@@ -64,9 +65,10 @@ def main():
     logs.init(args=args)
 
     for name, info in comics.items():
-        logging.info("Updating %s", name)
-        module = import_module(f"src.{name.lower()}")
-        getattr(module, name)(info, workdir, savedir).process()
+        if not args.only or name in args.only:
+            logging.info("Updating %s", name)
+            module = import_module(f"src.{name.lower()}")
+            getattr(module, name)(info, workdir, savedir).process()
     logging.info("Done Updating All Comics")
 
 

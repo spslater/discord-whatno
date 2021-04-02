@@ -8,6 +8,8 @@ comics:
     home: "https://www.dumbingofage.com/"
     cur: True
     alt: True
+    alt_size: 16
+    alt_color: [224, 238, 239]
     db: "DumbingOfAge.db"
     log: "output.log"
     level: "INFO"
@@ -47,3 +49,26 @@ comics:
         recursive: false
       - tag: 'img'
     nxt: null
+  CloverAndCutlass:
+    loc: "CloverAndCutlass/"
+    name: "Clover and Cutlass"
+    url: "https://cloverandcutlass.com/comic/cover/"
+    home: "https://cloverandcutlass.com/"
+    cur: false
+    alt: true
+    alt_size: 64
+    alt_color: [43, 110, 135]
+    db: 'CloverAndCutlass.db'
+    img:
+      - id: 'spliced-comic'
+      - tag: 'img'
+    nxt:
+      - tag: 'div'
+        class: 'single-comic-navigation'
+      - tag: 'a'
+        class: 'next-comic'
+    prev:
+      - tag: 'div'
+        class: 'single-comic-navigation'
+      - tag: 'a'
+        class: 'previous-comic'
