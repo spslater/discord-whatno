@@ -395,20 +395,25 @@ class ComicReread(Client):
 
     def update_schedule(self):
         """Update the schedule file with the week's comics that were just published"""
+        logging.info("Checking schedule to see if it needs updating")
         old_week = self.schedule["next_week"]
-        if old_week == datetime.strftime(datetime.now(), "%Y-%m-%d"):
-            new_week = old_week + timedelta(days=7)
+        now = datetime.strftime(datetime.now(), "%Y-%m-%d")
+        while old_week <= now:
+            new_week = datetime.strptime(old_week, "%Y-%m-%d") + timedelta(days=7)
             new_week_str = datetime.strftime(new_week, "%Y-%m-%d")
             self.schedule["next_week"] = new_week_str
 
             last_day = sorted(self.schedule["days"].keys())[-1]
-            next_day = datetime.strptime(last_day, "%Y-%m-%d") + deltatime(days=1)
-            next_day_str = datetime.strptime(last_day, "%Y-%m-%d")
+            next_day = datetime.strptime(last_day, "%Y-%m-%d") + timedelta(days=1)
+            next_day_str = datetime.strftime(next_day, "%Y-%m-%d")
 
             self.schedule["days"][next_day_str] = self._build_date_list(new_week_str)
 
-            with open(self.schedule_file, "w+") as fp:
-                dump(self.schedule, fp, sort_keys=True, indent="\t")
+            old_week = self.schedule["next_week"]
+
+        with open(self.schedule_filename, "w+") as fp:
+            dump(self.schedule, fp, sort_keys=True, indent="\t")
+
 
     async def on_ready(self):
         """Called by the Client after all prep data has been recieved from Discord
