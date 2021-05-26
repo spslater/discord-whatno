@@ -272,6 +272,7 @@ class ComicReread(Client):
 				msg = await channel.fetch_message(mid)
 				embed = msg.embeds[0]
 				embed.colour = Colour.random()
+				logging.debug(embed.__repr__())
 				await msg.edit(embed=embed)
 				sleep(1)
 			except (NotFound, HTTPException, Forbidden) as e:
@@ -284,8 +285,9 @@ class ComicReread(Client):
 		today = datetime.strftime(datetime.now(), '%Y-%m-%d')
 		embeds = self.build_embeds(today)
 		for e in embeds:
+			logging.debug(embed.__repr__())
 			await channel.send(embed=e)
-			sleep(1)
+			sleep(3)
 
 	def update_schedule(self):
 		old_week = self.schedule['next_week']
