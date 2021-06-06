@@ -215,8 +215,7 @@ class ComicReread(Client):
             (date_string,),
         )
         rows = self._get_database().fetchall()
-        tags = [r[0] for r in rows]
-        return ", ".join(tags)
+        return [r[0] for r in rows]
 
     def _build_embeds(self, date_string: str) -> list[Embed]:
         """Generated embeds of comics for a given week"""
@@ -245,13 +244,17 @@ class ComicReread(Client):
             url = row[3]
             alt = f"||{row[4]}||"
             img_url = f"https://www.dumbingofage.com/comics/{image}"
-            tags = self._get_tags(release)
-            footer = f"{release} - {tags}"
+            tags = [
+                f"[{tag}](https://www.dumbingofage.com/tag/{tag}/)"
+                for tag in self._get_tags(release)
+            ]
+            tag_text = ", ".join(tags)
 
             logging.debug('Generating embed for "%s" from %s', title, release)
-            embed = Embed(title=title, url=url, description=alt, colour=Colour.random())
+            embed = Embed(title=title, url=url, colour=Colour.random())
+            embed.add_field(name=alt, value=tag_text)
             embed.set_image(url=img_url)
-            embed.set_footer(text=footer)
+            embed.set_footer(text=release)
             embeds.append(embed)
 
         if self.embed_file:
