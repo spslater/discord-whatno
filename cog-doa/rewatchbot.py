@@ -4,6 +4,7 @@ Bot publishes a weeks worth of DoA comics every day.
 """
 
 import logging
+import re
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from datetime import datetime, timedelta
 from json import dump, load
@@ -48,6 +49,8 @@ class ComicReread(Client):
     :type message: str, optional
     :param message_file: filename to read contents of to send to channel, defaults to None
     :type message_file: str, optional
+    :param edit_file: filename to read contents of to edit different messages, defaults to None
+    :type edit_file: str, optional
     :param send_comic: send that days comics to the channel, defaults to True
     :type send_comic: bool, optional
     :param delete: delete specific message previouslly sent, defaults to None
@@ -62,6 +65,7 @@ class ComicReread(Client):
     :type refresh_file: str, optional
     :raises RuntimeError: Channel Name / Id missing.
     """
+
     # pylint: disable=too-many-arguments,too-many-locals
     def __init__(
         self,
@@ -75,6 +79,7 @@ class ComicReread(Client):
         info_file: str = None,
         message: str = None,
         message_file: str = None,
+        edit_file: str = None,
         send_comic: bool = True,
         delete: int = None,
         delete_file: str = None,
@@ -107,6 +112,8 @@ class ComicReread(Client):
 
         self.message = message
         self.message_file = message_file
+
+        self.edit_file = edit_file
 
         self.delete = delete
         self.delete_file = delete_file
@@ -217,6 +224,18 @@ class ComicReread(Client):
         rows = self._get_database().fetchall()
         return [r[0] for r in rows]
 
+    def _backup_embeds(self, embeds):
+        if self.embed_file:
+            prev = None
+            try:
+                with open(self.embed_file, "r") as fp:
+                    prev = load(fp)
+            except FileNotFoundError:
+                prev = {}
+            prev[date_string] = [e.to_dict() for e in embeds]
+            with open(self.embed_file, "w+") as fp:
+                dump(prev, fp, sort_keys=True, indent="\t")
+
     def _build_embeds(self, date_string: str) -> list[Embed]:
         """Generated embeds of comics for a given week"""
         embeds = []
@@ -245,7 +264,7 @@ class ComicReread(Client):
             alt = f"||{row[4]}||"
             img_url = f"https://www.dumbingofage.com/comics/{image}"
             tags = [
-                f"[{tag}](https://www.dumbingofage.com/tag/{tag}/)"
+                f"[{tag}](https://www.dumbingofage.com/tag/{re.sub(' ', '-', tag)}/)"
                 for tag in self._get_tags(release)
             ]
             tag_text = ", ".join(tags)
@@ -257,16 +276,7 @@ class ComicReread(Client):
             embed.set_footer(text=release)
             embeds.append(embed)
 
-        if self.embed_file:
-            prev = None
-            try:
-                with open(self.embed_file, "r") as fp:
-                    prev = load(fp)
-            except FileNotFoundError:
-                prev = {}
-            prev[date_string] = [e.to_dict() for e in embeds]
-            with open(self.embed_file, "w+") as fp:
-                dump(prev, fp, sort_keys=True, indent="\t")
+        self._backup_embeds(embeds)
 
         return embeds
 
@@ -348,6 +358,71 @@ class ComicReread(Client):
             except (NotFound, HTTPException) as e:
                 logging.warning('Unable to get message "%s": %s', mid, e)
 
+    async def edit_message(self):
+        """Edit messages based on JSON file given
+
+        File specifies the message id (mid) to edit. If it's a regular text message, `text` field
+        is what the new message should say. If it is an embed, `title`, `url`, `image`, `footer`
+        can be included if those values should be changed. A `field` dict with `value` and/or
+        `name` to change the first field.
+        """
+        channel = self._get_channel()
+        mids = []
+        if self.edit_file is not None:
+            with open(self.edit_file, "r") as fp:
+                data = load(fp)
+            mids.extend(data)
+
+        embeds = []
+        for mid in mids:
+            try:
+                msg = await channel.fetch_message(mid["mid"])
+            except (NotFound, HTTPException, Forbidden) as e:
+                logging.warning('Unable to get message "%s": %s', mid, e)
+                continue
+
+            if msg.embeds:
+                embed = msg.embeds[0]
+
+                embed.colour = Colour.random()
+                embed.title = mid.get("title", embed.title)
+                embed.url = mid.get("url", embed.url)
+                embed.set_image(url=mid.get("image", embed.image.url))
+                embed.set_footer(text=mid.get("footer", embed.footer.text))
+
+                old_field = embed.fields[0]
+                new_field = mid.get("field", {})
+                field = {
+                    "name": new_field.get("name", old_field.name),
+                    "value": new_field.get("value", old_field.value),
+                }
+                embed.set_field_at(0, **field)
+
+                logging.debug(embed.__repr__())
+                try:
+                    await msg.edit(embed=embed)
+                except (HTTPException, Forbidden) as e:
+                    logging.warning('Unable to edit message "%s": %s', mid, e)
+                else:
+                    embeds.append(embed)
+                finally:
+                    sleep(1)
+
+            else:
+                text = mid.get("text")
+                if text == msg.content:
+                    logging.warning(
+                        'Message content the same, no edits being made for message "%s"',
+                        mid,
+                    )
+                    continue
+                try:
+                    await msg.edit(content=text)
+                except (HTTPException, Forbidden) as e:
+                    logging.warning('Unable to edit message "%s": %s', mid, e)
+                finally:
+                    sleep(1)
+
     async def refresh_message(self):
         """Refresh the color of an embed message to try and get any imbeds to load
 
@@ -376,13 +451,18 @@ class ComicReread(Client):
         for mid in mids:
             try:
                 msg = await channel.fetch_message(mid)
-                embed = msg.embeds[0]
-                embed.colour = Colour.random()
-                logging.debug(embed.__repr__())
+            except (NotFound, HTTPException, Forbidden) as e:
+                logging.warning('Unable to get message "%s": %s', mid, e)
+                continue
+            embed = msg.embeds[0]
+            embed.colour = Colour.random()
+            logging.debug(embed.__repr__())
+            try:
                 await msg.edit(embed=embed)
+            except (HTTPException, Forbidden) as e:
+                logging.warning('Unable to edit message "%s": %s', mid, e)
+            finally:
                 sleep(1)
-            except (NotFound, HTTPException, Forbidden):
-                logging.warning('Unable to get message "{mid}": {e}')
 
     async def send_weekly_comics(self):
         """Send the comics for todays dates to primary channel"""
@@ -416,7 +496,6 @@ class ComicReread(Client):
 
         with open(self.schedule_filename, "w+") as fp:
             dump(self.schedule, fp, sort_keys=True, indent="\t")
-
 
     async def on_ready(self):
         """Called by the Client after all prep data has been recieved from Discord
@@ -460,6 +539,14 @@ class ComicReread(Client):
             )
             await self.refresh_message()
 
+        if self.edit_file is not None:
+            logging.info(
+                'Editing messages in channel "%s" on guild "%s"',
+                channel,
+                guild,
+            )
+            await self.edit_message()
+
         if self.send_comic:
             logging.info('Sending Comics to channel "%s" on guild "%s"', channel, guild)
             await self.send_weekly_comics()
@@ -479,6 +566,7 @@ class ComicReread(Client):
         if self.conn is not None:
             self.conn.close()
         await self.logout()
+
 
 def _main():
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
@@ -637,6 +725,12 @@ def _main():
         help="Message ids to refresh from channel",
         metavar="MID",
     )
+    parser.add_argument(
+        "--edit-file",
+        dest="editfile",
+        help="JSON with info on what messages to edit and how",
+        metavar="JSON",
+    )
 
     args = parser.parse_args()
 
@@ -685,6 +779,7 @@ def _main():
         info_file=args.infofile,
         message=args.message,
         message_file=args.messagefile,
+        edit_file=args.editfile,
         send_comic=args.send_comic,
         delete=args.delete,
         delete_file=args.deletefile,
@@ -692,6 +787,7 @@ def _main():
         refresh=args.refresh,
         refresh_file=args.refreshfile,
     ).run(token)
+
 
 if __name__ == "__main__":
     _main()
