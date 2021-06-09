@@ -123,6 +123,8 @@ class ComicReread(Client):
         self.refresh = refresh
         self.refresh_file = refresh_file
 
+        self._logger = logging.getLogger("rewatchbot")
+
         if self.channel_id is None and self.channel_name is None:
             raise RuntimeError("Channel Id or Name not added to Client.")
 
@@ -162,15 +164,15 @@ class ComicReread(Client):
         """Get primary Channel object"""
         if self.channel is None:
             if self.channel_id is None:
-                logging.debug("Getting channel.")
+                self._logger.debug("Getting channel.")
                 channels = None
                 try:
-                    logging.debug("Trying to get channel from specific guild.")
+                    self._logger.debug("Trying to get channel from specific guild.")
                     if self.guild is None:
                         self._get_guild()
                     channels = self.guild.fetch_channels()
                 except RuntimeError:
-                    logging.debug(
+                    self._logger.debug(
                         "Error getting from guild, trying to get from all availible channels."
                     )
                     channels = self.get_all_channels()
@@ -187,7 +189,7 @@ class ComicReread(Client):
             if self.guild is None:
                 self._get_guild()
         if self.channel.guild.id != self.guild_id:
-            logging.warning(
+            self._logger.warning(
                 "Guild provided channel (%s) belongs to does not match provied guild (%s).",
                 self.channel.guild.name,
                 self.guild_name,
@@ -224,7 +226,8 @@ class ComicReread(Client):
         rows = self._get_database().fetchall()
         return [r[0] for r in rows]
 
-    def _backup_embeds(self, embeds):
+    def _backup_embeds(self, embeds: list[Embed], date_string: str):
+        """Save embeds to a json file"""
         if self.embed_file:
             prev = None
             try:
@@ -241,7 +244,7 @@ class ComicReread(Client):
         embeds = []
 
         days = tuple(self.schedule["days"][date_string])
-        logging.debug("Getting comics on following days: %s", days)
+        self._logger.debug("Getting comics on following days: %s", days)
         self._get_database().execute(
             f"""SELECT
             Comic.release as release,
@@ -255,7 +258,7 @@ class ComicReread(Client):
         )
 
         rows = self._get_database().fetchall()
-        logging.debug("%s comics from current week", len(rows))
+        self._logger.debug("%s comics from current week", len(rows))
         for row in rows:
             release = row[0]
             title = row[1]
@@ -269,14 +272,14 @@ class ComicReread(Client):
             ]
             tag_text = ", ".join(tags)
 
-            logging.debug('Generating embed for "%s" from %s', title, release)
+            self._logger.debug('Generating embed for "%s" from %s', title, release)
             embed = Embed(title=title, url=url, colour=Colour.random())
             embed.add_field(name=alt, value=tag_text)
             embed.set_image(url=img_url)
             embed.set_footer(text=release)
             embeds.append(embed)
 
-        self._backup_embeds(embeds)
+        self._backup_embeds(embeds, date_string)
 
         return embeds
 
@@ -316,11 +319,11 @@ class ComicReread(Client):
         """
         channel = self._get_channel()
         if self.message is not None:
-            logging.debug("Sending a plaintext message")
+            self._logger.debug("Sending a plaintext message")
             await channel.send(self.message)
 
         if self.message_file is not None:
-            logging.debug("Loading text from file: %s", self.message_file)
+            self._logger.debug("Loading text from file: %s", self.message_file)
             with open(self.message_file, "r") as fp:
                 data = fp.read()
                 await channel.send(data)
@@ -334,7 +337,7 @@ class ComicReread(Client):
         channel = self._get_channel()
         mids = []
         if self.delete is not None:
-            logging.debug("Deleting %s messages from cli", len(self.delete))
+            self._logger.debug("Deleting %s messages from cli", len(self.delete))
             mids.extend(self.delete)
 
         if self.delete_file is not None:
@@ -343,20 +346,20 @@ class ComicReread(Client):
                     int(m.strip()) for m in fp.read().splitlines() if m.strip()
                 ]
                 mids.extend(file_mids)
-            logging.debug(
+            self._logger.debug(
                 "Deleting %s messages from file: %s",
                 len(file_mids),
                 self.delete_file,
             )
 
-        logging.info("Deleting %s messages", len(mids))
+        self._logger.info("Deleting %s messages", len(mids))
         for mid in mids:
-            logging.debug('Attemping to delete "%s"', mid)
+            self._logger.debug('Attemping to delete "%s"', mid)
             try:
                 msg = await channel.fetch_message(mid)
                 await msg.delete()
             except (NotFound, HTTPException) as e:
-                logging.warning('Unable to get message "%s": %s', mid, e)
+                self._logger.warning('Unable to get message "%s": %s', mid, e)
 
     async def edit_message(self):
         """Edit messages based on JSON file given
@@ -378,7 +381,7 @@ class ComicReread(Client):
             try:
                 msg = await channel.fetch_message(mid["mid"])
             except (NotFound, HTTPException, Forbidden) as e:
-                logging.warning('Unable to get message "%s": %s', mid, e)
+                self._logger.warning('Unable to get message "%s": %s', mid, e)
                 continue
 
             if msg.embeds:
@@ -398,11 +401,11 @@ class ComicReread(Client):
                 }
                 embed.set_field_at(0, **field)
 
-                logging.debug(embed.__repr__())
+                self._logger.debug(embed.__repr__())
                 try:
                     await msg.edit(embed=embed)
                 except (HTTPException, Forbidden) as e:
-                    logging.warning('Unable to edit message "%s": %s', mid, e)
+                    self._logger.warning('Unable to edit message "%s": %s', mid, e)
                 else:
                     embeds.append(embed)
                 finally:
@@ -411,7 +414,7 @@ class ComicReread(Client):
             else:
                 text = mid.get("text")
                 if text == msg.content:
-                    logging.warning(
+                    self._logger.warning(
                         'Message content the same, no edits being made for message "%s"',
                         mid,
                     )
@@ -419,7 +422,7 @@ class ComicReread(Client):
                 try:
                     await msg.edit(content=text)
                 except (HTTPException, Forbidden) as e:
-                    logging.warning('Unable to edit message "%s": %s', mid, e)
+                    self._logger.warning('Unable to edit message "%s": %s', mid, e)
                 finally:
                     sleep(1)
 
@@ -432,7 +435,7 @@ class ComicReread(Client):
         channel = self._get_channel()
         mids = []
         if self.refresh is not None:
-            logging.debug("Reloading %s messages from cli", len(self.refresh))
+            self._logger.debug("Reloading %s messages from cli", len(self.refresh))
             mids.extend(self.refresh)
 
         if self.refresh_file is not None:
@@ -441,44 +444,44 @@ class ComicReread(Client):
                     int(m.strip()) for m in fp.read().splitlines() if m.strip()
                 ]
                 mids.extend(file_mids)
-            logging.debug(
+            self._logger.debug(
                 "Reloading %s messages from file: %s",
                 len(file_mids),
                 self.refresh_file,
             )
 
-        logging.info("Editing %s messages", len(mids))
+        self._logger.info("Editing %s messages", len(mids))
         for mid in mids:
             try:
                 msg = await channel.fetch_message(mid)
             except (NotFound, HTTPException, Forbidden) as e:
-                logging.warning('Unable to get message "%s": %s', mid, e)
+                self._logger.warning('Unable to get message "%s": %s', mid, e)
                 continue
             embed = msg.embeds[0]
             embed.colour = Colour.random()
-            logging.debug(embed.__repr__())
+            self._logger.debug(embed.__repr__())
             try:
                 await msg.edit(embed=embed)
             except (HTTPException, Forbidden) as e:
-                logging.warning('Unable to edit message "%s": %s', mid, e)
+                self._logger.warning('Unable to edit message "%s": %s', mid, e)
             finally:
                 sleep(1)
 
     async def send_weekly_comics(self):
         """Send the comics for todays dates to primary channel"""
-        logging.info("Sending comics for today.")
+        self._logger.info("Sending comics for today.")
 
         channel = self._get_channel()
         today = datetime.strftime(datetime.now(), "%Y-%m-%d")
         embeds = self._build_embeds(today)
         for embed in embeds:
-            logging.debug(embed.__repr__())
+            self._logger.debug(embed.__repr__())
             await channel.send(embed=embed)
             sleep(3)
 
     def update_schedule(self):
         """Update the schedule file with the week's comics that were just published"""
-        logging.info("Checking schedule to see if it needs updating")
+        self._logger.info("Checking schedule to see if it needs updating")
         old_week = self.schedule["next_week"]
         now = datetime.strftime(datetime.now(), "%Y-%m-%d")
         while old_week <= now:
@@ -506,17 +509,17 @@ class ComicReread(Client):
 
         Closes the connection after everything is complete.
         """
-        logging.info("%s has connected to Discord!", self.user)
+        self._logger.info("%s has connected to Discord!", self.user)
 
         channel = self._get_channel()
         guild = self._get_guild()
 
         if self.info or self.info_file is not None:
-            logging.info("Printing info about Client.")
+            self._logger.info("Printing info about Client.")
             self.print_info()
 
         if self.message is not None or self.message_file is not None:
-            logging.info(
+            self._logger.info(
                 'Sending a message to channel "%s" on guild "%s"',
                 channel,
                 guild,
@@ -524,7 +527,7 @@ class ComicReread(Client):
             await self.send_message()
 
         if self.delete is not None or self.delete_file is not None:
-            logging.info(
+            self._logger.info(
                 'Deleting messages in channel "%s" on guild "%s"',
                 channel,
                 guild,
@@ -532,7 +535,7 @@ class ComicReread(Client):
             await self.delete_message()
 
         if self.refresh is not None or self.refresh_file is not None:
-            logging.info(
+            self._logger.info(
                 'Reloading messages in channel "%s" on guild "%s"',
                 channel,
                 guild,
@@ -540,7 +543,7 @@ class ComicReread(Client):
             await self.refresh_message()
 
         if self.edit_file is not None:
-            logging.info(
+            self._logger.info(
                 'Editing messages in channel "%s" on guild "%s"',
                 channel,
                 guild,
@@ -548,7 +551,7 @@ class ComicReread(Client):
             await self.edit_message()
 
         if self.send_comic:
-            logging.info('Sending Comics to channel "%s" on guild "%s"', channel, guild)
+            self._logger.info('Sending Comics to channel "%s" on guild "%s"', channel, guild)
             await self.send_weekly_comics()
             self.update_schedule()
 
@@ -561,8 +564,8 @@ class ComicReread(Client):
         err_type, err_value, err_traceback = exc_info()
         tb_list = "\n".join(format_tb(err_traceback))
         tb_string = " | ".join(tb_list.splitlines())
-        logging.debug("Error cause by call with args and kwargs: %s %s", args, kwargs)
-        logging.error("%s: %s | Traceback: %s", err_type.__name__, err_value, tb_string)
+        self._logger.debug("Error cause by call with args and kwargs: %s %s", args, kwargs)
+        self._logger.error("%s: %s | Traceback: %s", err_type.__name__, err_value, tb_string)
         if self.conn is not None:
             self.conn.close()
         await self.logout()
