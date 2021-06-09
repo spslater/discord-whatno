@@ -45,6 +45,9 @@ class CloverAndCutlass(Comic):
         self.number_match = re.compile(
             r"^.*?\/comic\/chapter-(?P<chapter>[0-9]+)-page-(?P<page>[0-9]+).*?$"
         )
+        self.cover_match = re.compile(
+            r"^.*?\/comic\/chapter-(?P<chapter>[0-9]+)-cover.*?$"
+        )
 
     def _create_tables(self):
         """Create tables in database for comic"""
@@ -178,6 +181,10 @@ class CloverAndCutlass(Comic):
             if match:
                 chapter = match.group("chapter").zfill(2)
                 page = match.group("page").zfill(2)
+            else:
+                match = self.cover_match.search(self.url)
+                if match:
+                    chapter = match.group("chapter").zfill(2)
 
             number = f"{chapter}{page}"
 
