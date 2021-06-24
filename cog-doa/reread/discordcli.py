@@ -9,6 +9,7 @@ import sys
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from json import dump, load
 from os import getenv
+from shlex import split
 from shutil import get_terminal_size
 from time import sleep
 from traceback import format_tb
@@ -226,35 +227,55 @@ class DiscordCLI(Client):
         )
         return edit_parser
 
+    def _automate_parser(self, subparsers):
+        auto_parser = subparsers.add_parser(
+            "automate",
+            aliases=["a", "auto"],
+            help="file with list of sequential commands",
+            add_help=False,
+        )
+        auto_parser.set_defaults(func=self.automate)
+        auto_parser.add_argument(
+            "filename",
+            nargs="*",
+            help="filename to load commands from",
+            metavar="FILE"
+        )
+
     def _setup_parser(self):
         parser = ArgumentParser(
             formatter_class=ArgumentDefaultsHelpFormatter,
             add_help=False,
         )
         subs = parser.add_subparsers()
+        self._automate_parser(subs)
         self._delete_parser(subs)
         self._edit_parser(subs)
         self._info_parser(subs)
         self._message_parser(subs)
         self._refresh_parser(subs)
 
-        # pylint: disable=protected-access
-        self.subparser_list = parser._subparsers._actions[-1].choices
-        self.subs = subs
         self.parser = parser
+        self.subs = subs
+        self.update_subparser_list()
+
+    # pylint: disable=protected-access
+    def update_subparser_list(self):
+        self.subparser_list = self.parser._subparsers._actions[-1].choices
 
     def _parse_leftovers(self, leftovers):
         command_names = self.subparser_list.keys()
+        commands = []
         current_command = []
         while leftovers:
             current_arg = leftovers.pop(0)
             if current_arg in command_names:
-                self.commands.append(current_command)
+                commands.append(current_command)
                 current_command = [current_arg]
             else:
                 current_command.append(current_arg)
-        self.commands.append(current_command)
-        self.commands = [command for command in self.commands if command]
+        commands.append(current_command)
+        return [cmd for cmd in commands if cmd]
 
     async def _set_guild_connection(self):
         guild_id = guild_name = None
@@ -325,6 +346,19 @@ class DiscordCLI(Client):
             prev[date_string] = [e.to_dict() for e in embeds]
             with open(self.embed_file, "w+") as fp:
                 dump(prev, fp, sort_keys=True, indent="\t")
+
+    async def automate(self, args):
+        user_args = []
+        for filename in (args.filename or []):
+            try:
+                with open(filename, "r") as fp:
+                    user_args.extend(split(fp.read()))
+            except FileNotFoundError:
+                self._logger.warning("%s not found, skipping", filename)
+
+        for command in self._parse_leftovers(user_args):
+            args = self.parser.parse_args(command)
+            await args.func(args)
 
     def print_info(self, args):
         """Print info on bot's connection to discord.
@@ -692,11 +726,7 @@ class DiscordCLI(Client):
 
         args, leftovers = parser.parse_known_args(arguments)
         self._top_level_args(args)
-
-        self._parse_leftovers(leftovers)
-        for command in self.commands:
-            print(command)
-        print()
+        self.commands = self._parse_leftovers(leftovers)
 
         return self
 
