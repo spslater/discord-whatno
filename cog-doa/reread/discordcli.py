@@ -1,15 +1,13 @@
-"""DoA Comic Reread Bot
+"""Discord CLI Bot
 
-Bot publishes a weeks worth of DoA comics every day.
+Bot meant to run specific commands and not stay open
+and listen to discord.
 """
 
 import logging
-import re
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
-from datetime import datetime, timedelta
 from json import dump, load
 from os import getenv
-from sqlite3 import Connection, Cursor, connect
 from sys import exc_info, stdout
 from time import sleep
 from traceback import format_tb
@@ -23,16 +21,11 @@ from discord.guild import Guild
 
 
 # pylint: disable=too-many-instance-attributes
-class ComicReread(Client):
-    """Comic Reread Bot
+class DiscordCLI(Client):
+    """Discord CLI
 
-    Handles the publishing of the comics and updating the schedule.
     Also can send messages manually to Discord.
 
-    :param database_filename: sqlite3 database filename containing comic information
-    :type database_filename: str
-    :param schedule_filename: json filename with publishing schedule
-    :type schedule_filename: str
     :param guild_name: name of guild to connect to, defaults to None
     :type guild_name: str, optional
     :param guild_id: id of guild to connect to, defaults to None
@@ -51,8 +44,6 @@ class ComicReread(Client):
     :type message_file: str, optional
     :param edit_file: filename to read contents of to edit different messages, defaults to None
     :type edit_file: str, optional
-    :param send_comic: send that days comics to the channel, defaults to True
-    :type send_comic: bool, optional
     :param delete: delete specific message previouslly sent, defaults to None
     :type delete: int, optional
     :param delete_file: filename containing message ids to delete, defaults to None
@@ -69,8 +60,6 @@ class ComicReread(Client):
     # pylint: disable=too-many-arguments,too-many-locals
     def __init__(
         self,
-        database_filename: str,
-        schedule_filename: str,
         guild_name: str = None,
         guild_id: int = None,
         channel_name: str = None,
@@ -80,7 +69,6 @@ class ComicReread(Client):
         message: str = None,
         message_file: str = None,
         edit_file: str = None,
-        send_comic: bool = True,
         delete: int = None,
         delete_file: str = None,
         embed_file: str = None,
@@ -89,14 +77,6 @@ class ComicReread(Client):
     ):
         super().__init__()
 
-        self.database_filename = database_filename
-        self.conn = None
-        self.database = None
-
-        self.schedule_filename = schedule_filename
-        with open(self.schedule_filename, "r") as fp:
-            self.schedule = load(fp)
-
         self.guild_name = guild_name
         self.guild_id = guild_id
         self.guild = None
@@ -104,8 +84,6 @@ class ComicReread(Client):
         self.channel_name = channel_name
         self.channel_id = channel_id
         self.channel = None
-
-        self.send_comic = send_comic
 
         self.info = info
         self.info_file = info_file
@@ -123,22 +101,10 @@ class ComicReread(Client):
         self.refresh = refresh
         self.refresh_file = refresh_file
 
-        self._logger = logging.getLogger("rewatchbot")
+        self._logger = logging.getLogger(self.__class__.__name__)
 
         if self.channel_id is None and self.channel_name is None:
             raise RuntimeError("Channel Id or Name not added to Client.")
-
-    def _get_connection(self) -> Connection:
-        """Create database connection"""
-        if self.conn is None:
-            self.conn = connect(self.database_filename)
-        return self.conn
-
-    def _get_database(self) -> Cursor:
-        """Get cursor to database"""
-        if self.database is None:
-            self.database = self._get_connection().cursor()
-        return self.database
 
     def _get_guild(self) -> Guild:
         """Get primary Guild object"""
@@ -196,36 +162,6 @@ class ComicReread(Client):
             )
         return self.channel
 
-    # pylint: disable=invalid-name
-    @staticmethod
-    def _date_from_week(yr: int, wk: int, wd: int) -> str:
-        """Generate YYYY-MM-DD from year, week number, day number"""
-        ywd = f"{yr}-{wk}-{wd}"
-        iso_date = datetime.strptime(ywd, "%G-%V-%u")
-        return datetime.strftime(iso_date, "%Y-%m-%d")
-
-    def _build_date_list(self, date_string: str) -> list[str]:
-        """Dates for the 7 days of a given week"""
-        yr, wk, _ = datetime.strptime(date_string, "%Y-%m-%d").isocalendar()
-        return [
-            self._date_from_week(yr, wk, 1),
-            self._date_from_week(yr, wk, 2),
-            self._date_from_week(yr, wk, 3),
-            self._date_from_week(yr, wk, 4),
-            self._date_from_week(yr, wk, 5),
-            self._date_from_week(yr, wk, 6),
-            self._date_from_week(yr, wk, 7),
-        ]
-
-    def _get_tags(self, date_string: str) -> str:
-        """Comma seperated tags from a comic"""
-        self._get_database().execute(
-            "SELECT tag FROM Tag WHERE comicId = ?",
-            (date_string,),
-        )
-        rows = self._get_database().fetchall()
-        return [r[0] for r in rows]
-
     def _backup_embeds(self, embeds: list[Embed], date_string: str):
         """Save embeds to a json file"""
         if self.embed_file:
@@ -238,50 +174,6 @@ class ComicReread(Client):
             prev[date_string] = [e.to_dict() for e in embeds]
             with open(self.embed_file, "w+") as fp:
                 dump(prev, fp, sort_keys=True, indent="\t")
-
-    def _build_embeds(self, date_string: str) -> list[Embed]:
-        """Generated embeds of comics for a given week"""
-        embeds = []
-
-        days = tuple(self.schedule["days"][date_string])
-        self._logger.debug("Getting comics on following days: %s", days)
-        self._get_database().execute(
-            f"""SELECT
-            Comic.release as release,
-            Comic.title as title,
-            Comic.image as image,
-            Comic.url as url,
-            Alt.alt as alt
-        FROM Comic
-        JOIN Alt ON Comic.release = Alt.comicId
-        WHERE release IN {days}"""
-        )
-
-        rows = self._get_database().fetchall()
-        self._logger.debug("%s comics from current week", len(rows))
-        for row in rows:
-            release = row[0]
-            title = row[1]
-            image = row[2].split("_", maxsplit=3)[3]
-            url = row[3]
-            alt = f"||{row[4]}||"
-            img_url = f"https://www.dumbingofage.com/comics/{image}"
-            tags = [
-                f"[{tag}](https://www.dumbingofage.com/tag/{re.sub(' ', '-', tag)}/)"
-                for tag in self._get_tags(release)
-            ]
-            tag_text = ", ".join(tags)
-
-            self._logger.debug('Generating embed for "%s" from %s', title, release)
-            embed = Embed(title=title, url=url, colour=Colour.random())
-            embed.add_field(name=alt, value=tag_text)
-            embed.set_image(url=img_url)
-            embed.set_footer(text=release)
-            embeds.append(embed)
-
-        self._backup_embeds(embeds, date_string)
-
-        return embeds
 
     def print_info(self):
         """Print info on bot's connection to discord.
@@ -467,39 +359,6 @@ class ComicReread(Client):
             finally:
                 sleep(1)
 
-    async def send_weekly_comics(self):
-        """Send the comics for todays dates to primary channel"""
-        self._logger.info("Sending comics for today.")
-
-        channel = self._get_channel()
-        today = datetime.strftime(datetime.now(), "%Y-%m-%d")
-        embeds = self._build_embeds(today)
-        for embed in embeds:
-            self._logger.debug(embed.__repr__())
-            await channel.send(embed=embed)
-            sleep(3)
-
-    def update_schedule(self):
-        """Update the schedule file with the week's comics that were just published"""
-        self._logger.info("Checking schedule to see if it needs updating")
-        old_week = self.schedule["next_week"]
-        now = datetime.strftime(datetime.now(), "%Y-%m-%d")
-        while old_week <= now:
-            new_week = datetime.strptime(old_week, "%Y-%m-%d") + timedelta(days=7)
-            new_week_str = datetime.strftime(new_week, "%Y-%m-%d")
-            self.schedule["next_week"] = new_week_str
-
-            last_day = sorted(self.schedule["days"].keys())[-1]
-            next_day = datetime.strptime(last_day, "%Y-%m-%d") + timedelta(days=1)
-            next_day_str = datetime.strftime(next_day, "%Y-%m-%d")
-
-            self.schedule["days"][next_day_str] = self._build_date_list(new_week_str)
-
-            old_week = self.schedule["next_week"]
-
-        with open(self.schedule_filename, "w+") as fp:
-            dump(self.schedule, fp, sort_keys=True, indent="\t")
-
     async def on_ready(self):
         """Called by the Client after all prep data has been recieved from Discord
 
@@ -550,13 +409,6 @@ class ComicReread(Client):
             )
             await self.edit_message()
 
-        if self.send_comic:
-            self._logger.info('Sending Comics to channel "%s" on guild "%s"', channel, guild)
-            await self.send_weekly_comics()
-            self.update_schedule()
-
-        if self.conn is not None:
-            self.conn.close()
         await self.logout()
 
     async def on_error(self, *args, **kwargs):
@@ -564,10 +416,12 @@ class ComicReread(Client):
         err_type, err_value, err_traceback = exc_info()
         tb_list = "\n".join(format_tb(err_traceback))
         tb_string = " | ".join(tb_list.splitlines())
-        self._logger.debug("Error cause by call with args and kwargs: %s %s", args, kwargs)
-        self._logger.error("%s: %s | Traceback: %s", err_type.__name__, err_value, tb_string)
-        if self.conn is not None:
-            self.conn.close()
+        self._logger.debug(
+            "Error cause by call with args and kwargs: %s %s", args, kwargs
+        )
+        self._logger.error(
+            "%s: %s | Traceback: %s", err_type.__name__, err_value, tb_string
+        )
         await self.logout()
 
 
@@ -605,12 +459,6 @@ def _main():
         metavar="ENV",
     )
     parser.add_argument(
-        "-d, --database",
-        dest="database",
-        help="Sqlite3 database with comic info.",
-        metavar="SQLITE3",
-    )
-    parser.add_argument(
         "-t",
         "--token",
         dest="token",
@@ -646,13 +494,6 @@ def _main():
         type=int,
         help="Id of Guild to post to.",
         metavar="CHANNELID",
-    )
-    parser.add_argument(
-        "-s",
-        "--schedule",
-        dest="schedule",
-        help="JSON file to load release information from.",
-        metavar="FILENAME",
     )
     parser.add_argument(
         "-nc",
@@ -767,13 +608,9 @@ def _main():
     guild_id = args.guild_id or int(getenv("GUILD_ID"))
     channel_name = args.channel_name or getenv("CHANNEL_NAME")
     channel_id = args.channel_id or int(getenv("CHANNEL_ID"))
-    database = args.database or getenv("DATABASE")
-    schedule = args.schedule or getenv("SCHEDULE")
     embed = args.schedule or getenv("EMBED")
 
-    ComicReread(
-        database_filename=database,
-        schedule_filename=schedule,
+    DiscordCLI(
         guild_name=guild_name,
         guild_id=guild_id,
         channel_name=channel_name,
@@ -783,7 +620,6 @@ def _main():
         message=args.message,
         message_file=args.messagefile,
         edit_file=args.editfile,
-        send_comic=args.send_comic,
         delete=args.delete,
         delete_file=args.deletefile,
         embed_file=embed,
