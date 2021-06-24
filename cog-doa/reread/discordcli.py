@@ -128,13 +128,6 @@ class DiscordCLI(Client):
             help="file to save info print to",
         )
         info_parser.add_argument(
-            "-f",
-            "--file",
-            dest="filename",
-            help="file to save info print to",
-            metavar="FILENAME",
-        )
-        info_parser.add_argument(
             "-q",
             "--quite",
             dest="quite",
@@ -158,15 +151,6 @@ class DiscordCLI(Client):
             help="send plaintext message",
         )
         message_parser.add_argument(
-            "-m",
-            "--msg",
-            "--message",
-            nargs="*",
-            dest="message",
-            help="send plaintext message",
-            metavar="MESSAAGE",
-        )
-        message_parser.add_argument(
             "-f",
             "--file",
             nargs="*",
@@ -186,16 +170,6 @@ class DiscordCLI(Client):
         delete_parser.set_defaults(func=self.delete_message)
         delete_parser.add_argument(
             "delete",
-            nargs="*",
-            type=int,
-            help="message ids to delete from channel",
-            metavar="MID",
-        )
-        delete_parser.add_argument(
-            "-d",
-            "--del",
-            "--delete",
-            dest="delete",
             nargs="*",
             type=int,
             help="message ids to delete from channel",
@@ -227,15 +201,6 @@ class DiscordCLI(Client):
             metavar="MID",
         )
         refresh_parser.add_argument(
-            "-r",
-            "--refresh",
-            nargs="*",
-            dest="refresh",
-            type=int,
-            help="message ids to refresh from channel",
-            metavar="MID",
-        )
-        refresh_parser.add_argument(
             "-f",
             "--file",
             nargs="*",
@@ -256,14 +221,6 @@ class DiscordCLI(Client):
         edit_parser.add_argument(
             "filename",
             nargs="*",
-            help="JSON with info on what messages to edit and how",
-            metavar="JSON",
-        )
-        edit_parser.add_argument(
-            "-f",
-            "--file",
-            nargs="*",
-            dest="filename",
             help="JSON with info on what messages to edit and how",
             metavar="JSON",
         )
