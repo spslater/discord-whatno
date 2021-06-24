@@ -61,11 +61,16 @@ class DiscordCLI(Client):
         self._logger = logging.getLogger(self.__class__.__name__)
 
         self.token = None
+        self.given_channel = None
+        self.given_guild = None
         self.channel = None
         self.guild = None
         self.embed_file = None
-        self.leftovers = None
+
+        self.parser = None
         self.subparsers = None
+        self.subparser_list = None
+        self.commands = []
 
         self._setup_parser()
 
@@ -99,56 +104,15 @@ class DiscordCLI(Client):
         load_dotenv(args.envfile, verbose=(args.level == "DEBUG"))
 
         self.embed_file = args.embedfile or getenv("EMBED", None)
+        self.token = args.token or getenv("DISCORD_TOKEN", None)
 
-    def _discord_parser(self, subparsers):
-        discord_parser = subparsers.add_parser(
-            "discord",
-            aliases=["d"],
-            help="discord connection info",
-            add_help=False,
-        )
-        discord_parser.set_defaults(func=self._set_discord_connection)
-        discord_parser.add_argument(
-            "token",
-            nargs="?",
-            help="discord api token",
-        )
-        discord_parser.add_argument(
-            "guild",
-            nargs="?",
-            help="name or id of guild to post to",
-        )
-        discord_parser.add_argument(
-            "channel",
-            nargs="?",
-            help="name or id of channel to post to",
-        )
+        if not self.token:
+            raise RuntimeError("No api token provided")
 
-        discord_parser.add_argument(
-            "-t",
-            "--token",
-            nargs=1,
-            dest="token",
-            help="Discord API Token.",
-            metavar="TOKEN",
-        )
-        discord_parser.add_argument(
-            "-g",
-            "--guild",
-            nargs=1,
-            dest="guild",
-            help="name or id of guild to post to",
-            metavar="GUILD",
-        )
-        discord_parser.add_argument(
-            "-c",
-            "--channel",
-            nargs=1,
-            dest="channel",
-            help="name or id of channel to post to",
-            metavar="CHANNEL",
-        )
-        return discord_parser
+        self.given_guild = args.guild or getenv("DISCORD_GUILD", None)
+        self.given_channel = args.guild or getenv("DISCORD_CHANNEL", None)
+        if not self.given_channel:
+            raise RuntimeError("Channel Id or Name not provided to Client")
 
     def _info_parser(self, subparsers):
         info_parser = subparsers.add_parser(
@@ -310,73 +274,40 @@ class DiscordCLI(Client):
             formatter_class=ArgumentDefaultsHelpFormatter,
             add_help=False,
         )
-        parser.add_argument(
-            "-h",
-            "--help",
-            nargs="*",
-            dest="help",
-            help="show help message for listed subcommands or main program if none provided",
-        )
-        parser.add_argument(
-            "-l",
-            "--logfile",
-            dest="logfile",
-            help="log file",
-            metavar="LOGFILE",
-        )
-        parser.add_argument(
-            "-q",
-            "--quite",
-            dest="quite",
-            default=False,
-            action="store_true",
-            help="quite output",
-        )
-        parser.add_argument(
-            "--level",
-            dest="level",
-            default="info",
-            choices=["debug", "info", "warning", "error", "critical"],
-            help="logging level for output",
-            metavar="LEVEL",
-        )
-
-        parser.add_argument(
-            "--env",
-            "-e",
-            dest="envfile",
-            help="env file with connection info",
-            metavar="ENV",
-        )
-        parser.add_argument(
-            "--embeds",
-            dest="embedfile",
-            help="file to save embeds to for debugging purposes",
-            metavar="EMBED",
-        )
-
         subs = parser.add_subparsers()
         self._delete_parser(subs)
-        self._discord_parser(subs)
         self._edit_parser(subs)
         self._info_parser(subs)
         self._message_parser(subs)
         self._refresh_parser(subs)
 
         # pylint: disable=protected-access
-        self.subparsers = parser._subparsers._actions[-1].choices
-
+        self.subparser_list = parser._subparsers._actions[-1].choices
+        self.subs = subs
         self.parser = parser
 
-    def _set_guild_connection(self, args):
+    def _parse_leftovers(self, leftovers):
+        command_names = self.subparser_list.keys()
+        current_command = []
+        while leftovers:
+            current_arg = leftovers.pop(0)
+            if current_arg in command_names:
+                self.commands.append(current_command)
+                current_command = [current_arg]
+            else:
+                current_command.append(current_arg)
+        self.commands.append(current_command)
+        self.commands = [command for command in self.commands if command]
+
+    async def _set_guild_connection(self):
+        guild_id = guild_name = None
         try:
-            guild_id = int(args.guild)
-        except ValueError:
-            guild_name = args.guild
+            guild_id = int(self.given_guild)
+        except (TypeError, ValueError):
+            guild_name = self.given_guild
 
         if guild_id is None and guild_name is not None:
-            # pylint: disable=not-an-iterable
-            for guild in self.fetch_guilds():
+            async for guild in self.fetch_guilds():
                 if guild.name == guild_name:
                     guild_id = int(guild.id)
                     break
@@ -384,11 +315,12 @@ class DiscordCLI(Client):
             raise RuntimeError("Provided Guild is not an available guild")
         self.guild = super().get_guild(guild_id)
 
-    def _set_channel_connection(self, args):
+    def _set_channel_connection(self):
+        channel_id = channel_name = None
         try:
-            channel_id = int(args.channel)
-        except ValueError:
-            channel_name = args.channel
+            channel_id = int(self.given_channel)
+        except (TypeError, ValueError):
+            channel_name = self.given_channel
 
         if channel_id is None:
             self._logger.debug("Getting channel.")
@@ -413,19 +345,9 @@ class DiscordCLI(Client):
                 raise RuntimeError("Provided channel is not an available channels")
         self.channel = super().get_channel(channel_id)
 
-        if self.channel is None:
-            raise RuntimeError("Channel Id or Name not added to Client.")
-
-    def _set_discord_connection(self, args):
-        if args.help:
-            self.display_help("discord",)
-
-        self.token = args.token or getenv("DISCORD_TOKEN", None)
-        if not self.token:
-            raise RuntimeError("No api token provided")
-
-        self._set_guild_connection(args)
-        self._set_channel_connection(args)
+    async def _set_discord_connection(self):
+        await self._set_guild_connection()
+        self._set_channel_connection()
 
         if self.channel.guild.id != self.guild.id:
             self._logger.warning(
@@ -494,7 +416,7 @@ class DiscordCLI(Client):
             self._logger.debug("Sending a plaintext message")
             await self.channel.send(message)
 
-        for filename in args.filename:
+        for filename in (args.filename or []):
             self._logger.debug("Loading text from file: %s", filename)
             with open(filename, "r") as fp:
                 data = fp.read()
@@ -517,7 +439,7 @@ class DiscordCLI(Client):
             self._logger.debug("Deleting %s messages from cli", len(args.delete))
             mids.extend(args.delete)
 
-        for filename in args.filename:
+        for filename in (args.filename or []):
             try:
                 with open(filename, "r") as fp:
                     data = fp.readlines()
@@ -562,7 +484,7 @@ class DiscordCLI(Client):
         )
 
         entries = []
-        for filename in args.filename:
+        for filename in (args.filename or []):
             try:
                 with open(filename, "r") as fp:
                     data = load(fp)
@@ -637,7 +559,7 @@ class DiscordCLI(Client):
             self._logger.debug("Reloading %s messages from cli", len(args.refresh))
             mids.extend(args.refresh)
 
-        for filename in args.filename:
+        for filename in (args.filename or []):
             try:
                 with open(filename, "r") as fp:
                     data = fp.readlines()
@@ -683,7 +605,7 @@ class DiscordCLI(Client):
         unknown = False
         for parser in parsers:
             try:
-                subparser = self.subparsers[parser]
+                subparser = self.subparser_list[parser]
             except KeyError:
                 print(f"Unknown command: {parser}", file=sys.stderr)
                 unknown = True
@@ -710,10 +632,11 @@ class DiscordCLI(Client):
         Closes the connection after everything is complete.
         """
         self._logger.info("%s has connected to Discord!", self.user)
-
-        while self.leftovers:
-            args, self.leftovers = self.parser.parse_known_args(self.leftovers)
-            args.func(args)
+        
+        await self._set_discord_connection()
+        for parsed_args in self.commands:
+            args = self.parser.parse_args(parsed_args)
+            await args.func(args)
 
         await self.logout()
 
@@ -723,21 +646,109 @@ class DiscordCLI(Client):
         tb_list = "\n".join(format_tb(err_traceback))
         tb_string = " | ".join(tb_list.splitlines())
         self._logger.debug(
-            "Error cause by call with args and kwargs: %s %s", args, kwargs
+            "Error cause by call with args and kwargs: %s %s",
+            args,
+            kwargs,
         )
         self._logger.error(
-            "%s: %s | Traceback: %s", err_type.__name__, err_value, tb_string
+            "%s: %s | Traceback:\n%s",
+            err_type.__name__,
+            err_value,
+            tb_string,
         )
         await self.logout()
 
     def parse(self, arguments=None):
-        args, self.leftovers = self.parser.parse_known_args(arguments)
+        parser = ArgumentParser(
+            formatter_class=ArgumentDefaultsHelpFormatter,
+            add_help=False,
+        )
+        parser.add_argument(
+            "-h",
+            "--help",
+            nargs="*",
+            dest="help",
+            help="show help message for listed subcommands or main program if none provided",
+        )
+        parser.add_argument(
+            "--logfile",
+            dest="logfile",
+            help="log file",
+            metavar="LOGFILE",
+        )
+        parser.add_argument(
+            "-q",
+            "--quite",
+            dest="quite",
+            default=False,
+            action="store_true",
+            help="quite output",
+        )
+        parser.add_argument(
+            "--level",
+            dest="level",
+            default="info",
+            choices=["debug", "info", "warning", "error", "critical"],
+            help="logging level for output",
+            metavar="LEVEL",
+        )
+
+        parser.add_argument(
+            "-e",
+            "--env",
+            dest="envfile",
+            help="env file with connection info",
+            metavar="ENV",
+        )
+
+        parser.add_argument(
+            "-t",
+            "--token",
+            nargs=1,
+            dest="token",
+            help="Discord API Token.",
+            metavar="TOKEN",
+        )
+        parser.add_argument(
+            "-g",
+            "--guild",
+            nargs=1,
+            dest="guild",
+            help="name or id of guild to post to",
+            metavar="GUILD",
+        )
+        parser.add_argument(
+            "-c",
+            "--channel",
+            nargs=1,
+            dest="channel",
+            help="name or id of channel to post to",
+            metavar="CHANNEL",
+        )
+
+        parser.add_argument(
+            "--embeds",
+            dest="embedfile",
+            help="file to save embeds to for debugging purposes",
+            metavar="EMBED",
+        )
+
+        args, leftovers = parser.parse_known_args(arguments)
         self._top_level_args(args)
-        self.run(self.token)
+
+        self._parse_leftovers(leftovers)
+        for command in self.commands:
+            print(command)
+        print()
+
+        return self
+
+    def run(self):
+        super().run(self.token)
 
 
 def _main():
-    DiscordCLI().parse()
+    DiscordCLI().parse().run()
 
 
 if __name__ == "__main__":
