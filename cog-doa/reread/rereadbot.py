@@ -185,7 +185,3 @@ class DoaReread(AbstractComic):
     async def on_error(self, *args, **kwargs):
         super().on_error()
         self._close_db()
-
-
-if __name__ == "__main__":
-    DoaReread().parse().run()

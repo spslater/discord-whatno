@@ -737,7 +737,3 @@ class DiscordCLI(Client):
     def run(self):
         """Run the bot"""
         super().run(self.token)
-
-
-if __name__ == "__main__":
-    DiscordCLI().parse().run()
