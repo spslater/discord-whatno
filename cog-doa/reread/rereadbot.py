@@ -12,7 +12,7 @@ from argparse import Namespace
 from datetime import datetime, timedelta
 from json import dump, load
 from os import getenv
-from sqlite3 import connect, Connection, Cursor
+from sqlite3 import Connection, Cursor, connect
 from typing import Union
 
 from discord import Embed

@@ -44,6 +44,7 @@ class DiscordCLI(Client):
         self.guild = None
         self.embed_file = None
 
+        self._top_level_parser = None
         self.parser = None
         self.subparsers = None
         self.subparser_list = None
@@ -528,7 +529,11 @@ class DiscordCLI(Client):
                 try:
                     await msg.edit(embed=embed)
                 except (HTTPException, Forbidden) as e:
-                    self._logger.warning('Unable to edit message "%s": %s', entry["mid"], e)
+                    self._logger.warning(
+                        'Unable to edit message "%s": %s',
+                        entry["mid"],
+                        e,
+                    )
                 else:
                     embeds.append(embed)
 
@@ -543,7 +548,11 @@ class DiscordCLI(Client):
                 try:
                     await msg.edit(content=text)
                 except (HTTPException, Forbidden) as e:
-                    self._logger.warning('Unable to edit message "%s": %s', entry["mid"], e)
+                    self._logger.warning(
+                        'Unable to edit message "%s": %s',
+                        entry["mid"],
+                        e,
+                    )
             sleep(1)
         self._backup_embeds(embeds)
 
@@ -612,7 +621,19 @@ class DiscordCLI(Client):
         :type parsers: str
         """
         if not parsers:
-            self.parser.print_help()
+            tlp_full = self._top_level_parser.format_help().splitlines()
+            tlp_usage = tlp_full[0].split(maxsplit=2)[2].strip()
+            tlp_help = "\n".join(tlp_full[3:])
+
+            scp_full = self.parser.format_help().splitlines()
+            scp_usage = scp_full[0].split(maxsplit=2)
+            scp_help = "\n".join(scp_full[4:])
+
+            usage = (
+                f"{' '.join(scp_usage[:2])} {tlp_usage}\n  {scp_usage[2]}\n\n"
+                f"global arguments:\n{tlp_help}\n\nsub commands:\n{scp_help}"
+            )
+            print(usage, file=sys.stderr)
             sys.exit(0)
 
         completed = {}
@@ -629,7 +650,7 @@ class DiscordCLI(Client):
             print(
                 "Unable to display help for following unknown commands:\n",
                 *[f"> {cmd}\n" for cmd in unknown],
-                file=sys.stderr
+                file=sys.stderr,
             )
 
         columns = min(80, get_terminal_size()[0])
@@ -751,6 +772,7 @@ class DiscordCLI(Client):
             metavar="EMBED",
         )
 
+        self._top_level_parser = parser
 
         args, leftovers = parser.parse_known_args(arguments)
         self._top_level_args(args)
