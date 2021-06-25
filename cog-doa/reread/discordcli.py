@@ -334,18 +334,18 @@ class DiscordCLI(Client):
                 self.guild.name,
             )
 
-    def _backup_embeds(self, embeds: list[Embed], date_string: str):
+    def _backup_embeds(self, embeds: list[Embed]):
         """Save embeds to a json file"""
         if self.embed_file:
-            prev = None
+            data = []
             try:
                 with open(self.embed_file, "r") as fp:
-                    prev = load(fp)
+                    data = load(fp)
             except FileNotFoundError:
-                prev = {}
-            prev[date_string] = [e.to_dict() for e in embeds]
+                pass
+            data.extend([e.to_dict() for e in embeds])
             with open(self.embed_file, "w+") as fp:
-                dump(prev, fp, sort_keys=True, indent="\t")
+                dump(data, fp, sort_keys=True, indent="\t")
 
     async def automate(self, args):
         user_args = []
@@ -531,7 +531,7 @@ class DiscordCLI(Client):
                 except (HTTPException, Forbidden) as e:
                     self._logger.warning('Unable to edit message "%s": %s', mid, e)
             sleep(1)
-        self._backup_embeds(embeds, None)
+        self._backup_embeds(embeds)
 
     async def refresh_message(self, args):
         """Refresh the color of an embed message to try and get any imbeds to load
@@ -726,7 +726,7 @@ class DiscordCLI(Client):
 
         args, leftovers = parser.parse_known_args(arguments)
         self._top_level_args(args)
-        self.commands = self._parse_leftovers(leftovers)
+        self.commands.extend(self._parse_leftovers(leftovers))
 
         return self
 
