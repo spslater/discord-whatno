@@ -734,9 +734,5 @@ class DiscordCLI(Client):
         super().run(self.token)
 
 
-def _main():
-    DiscordCLI().parse().run()
-
-
 if __name__ == "__main__":
-    _main()
+    DiscordCLI().parse().run()
