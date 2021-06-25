@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 
 from discord import Colour, Embed
 
-from .discordcli import DiscordCLI
+from discordcli import DiscordCLI
 
 class AbstractComic(ABC, DiscordCLI):
 
@@ -43,26 +43,22 @@ class AbstractComic(ABC, DiscordCLI):
             help="what days to send",
         )
         comic_parser.add_argument(
-            "--no-comic",
             "-n",
-            dest="no_comic",
-            action="store_true",
-            default=False,
+            "--no-comic",
+            dest="comic",
+            action="store_false",
+            default=True,
             help="do not send todays comics",
         )
 
         return comic_parser
 
-    @abstratmethod
+    @abstractmethod
     def get_embeds(self):
         pass
 
     @abstractmethod
     def send_comic(self, args):
-        pass
-
-    @abstractmethod
-    def parse(self):
         pass
 
     def default_embeds(self, entries: list[dict[str, str]]):
@@ -71,8 +67,8 @@ class AbstractComic(ABC, DiscordCLI):
             title = entry.get("title", None)
             url = entry.get("url", None)
             alt = entry.get("alt", None)
-            tag_text = entry.get("tag_text", None)
-            img_url = entry.get("img_url", None)
+            tag_text = entry.get("tags", None)
+            img_url = entry.get("image", None)
             release = entry.get("release", None)
 
             embed = Embed(title=title, url=url, colour=Colour.random())
@@ -80,11 +76,13 @@ class AbstractComic(ABC, DiscordCLI):
             embed.set_image(url=img_url)
             embed.set_footer(text=release)
             embeds.append(embed)
+
+        self._backup_embeds(embeds)
         return embeds
 
-    def default_send_comic(self):
+    async def default_send_comic(self):
         for embed in self.get_embeds():
-            self._logger.debug(embed.__repr__())
+            self._logger.debug(embed.to_dict())
             await self.channel.send(embed=embed)
             sleep(3)
 
@@ -100,6 +98,21 @@ class ComicReread(AbstractComic):
         super().__init__()
         self._logger = logging.getLogger(self.__class__.__name__)
 
+        self.comic_parser.add_argument(
+            "-d",
+            "--database",
+            dest="database",
+            help="Sqlite3 database with comic info.",
+            metavar="SQLITE3",
+        )
+        self.comic_parser.add_argument(
+            "-s",
+            "--schedule",
+            dest="schedule",
+            help="JSON file to load release information from.",
+            metavar="FILENAME",
+        )
+
         self.conn = None
         self.database = None
 
@@ -108,7 +121,7 @@ class ComicReread(AbstractComic):
 
         self.send_comic = False
 
-    def _top_level_args(self, args):
+    def _setup_comic(self, args):
         database_filename = args.database or getenv("DATABASE", None)
         self.schedule_filename = args.schedule or getenv("SCHEDULE", None)
 
@@ -123,7 +136,7 @@ class ComicReread(AbstractComic):
         with open(self.schedule_filename, "r") as fp:
             self.schedule = load(fp)
 
-        self.send_comic = args.send_comic
+        self.date_strings = args.day or [datetime.strftime(datetime.now(), "%Y-%m-%d")]
 
     # pylint: disable=invalid-name
     @staticmethod
@@ -156,52 +169,50 @@ class ComicReread(AbstractComic):
         return [r[0] for r in rows]
 
     def get_embeds(self) -> list[Embed]:
-        """Generated embeds of comics for a given week"""
-
-        date_string = datetime.strftime(datetime.now(), "%Y-%m-%d")
-        days = tuple(self.schedule["days"][date_string])
-        self._logger.debug("Getting comics on following days: %s", days)
-        self.database.execute(
-            f"""SELECT
-                Comic.release as release,
-                Comic.title as title,
-                Comic.image as image,
-                Comic.url as url,
-                Alt.alt as alt
-            FROM Comic
-            JOIN Alt ON Comic.release = Alt.comicId
-            WHERE release IN {days}"""
-        )
-
-        rows = self.database.fetchall()
-        self._logger.debug("%s comics from current week", len(rows))
+        """Generated embeds of comics"""
         entries = []
-        for row in rows:
-            release = row[0]
-            image = row[2].split("_", maxsplit=3)[3]
-            tags = [
-                f"[{tag}](https://www.dumbingofage.com/tag/{re.sub(' ', '-', tag)}/)"
-                for tag in self._get_tags(release)
-            ]
+        for date_string in self.date_strings:
+            days = tuple(self.schedule["days"][date_string])
+            self._logger.debug("Getting comics on following days: %s", days)
+            self.database.execute(
+                f"""SELECT
+                    Comic.release as release,
+                    Comic.title as title,
+                    Comic.image as image,
+                    Comic.url as url,
+                    Alt.alt as alt
+                FROM Comic
+                JOIN Alt ON Comic.release = Alt.comicId
+                WHERE release IN {days}"""
+            )
 
-            entries.append({
-                "title": row[1],
-                "url": row[3],
-                "alt": f"||{row[4]}||",
-                "tags": ", ".join(tags),
-                "image": f"https://www.dumbingofage.com/comics/{image}",
-                "release": release,
-            })
+            rows = self.database.fetchall()
+            self._logger.debug("%s comics from current week", len(rows))
+            for row in rows:
+                release = row[0]
+                image = row[2].split("_", maxsplit=3)[3]
+                tags = [
+                    f"[{tag}](https://www.dumbingofage.com/tag/{re.sub(' ', '-', tag)}/)"
+                    for tag in self._get_tags(release)
+                ]
 
-        self._backup_embeds(embeds)
+                entries.append({
+                    "title": row[1],
+                    "url": row[3],
+                    "alt": f"||{row[4]}||",
+                    "tags": ", ".join(tags),
+                    "image": f"https://www.dumbingofage.com/comics/{image}",
+                    "release": release,
+                })
 
         return self.default_embeds(entries)
 
     async def send_comic(self, args):
         """Send the comics for todays dates to primary channel"""
         self._logger.info("Sending comics for today.")
-        if not args.no_comic:
-            self.default_send_comic()
+        self._setup_comic(args)
+        if args.comic:
+            await self.default_send_comic()
         self.update_schedule()
 
     def update_schedule(self):
@@ -234,43 +245,13 @@ class ComicReread(AbstractComic):
 
         Closes the connection after everything is complete.
         """
-        super().on_ready()
+        await super().on_ready()
         if self.conn is not None:
             self.conn.close()
 
-    def parse(self):
-        parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
-        parser.add_argument(
-            "-d",
-            "--database",
-            dest="database",
-            help="Sqlite3 database with comic info.",
-            metavar="SQLITE3",
-        )
-        parser.add_argument(
-            "-s",
-            "--schedule",
-            dest="schedule",
-            help="JSON file to load release information from.",
-            metavar="FILENAME",
-        )
-        parser.add_argument(
-            "-n",
-            "--no-comics",
-            dest="send_comic",
-            default=True,
-            action="store_false",
-            help="Do not send the weekly comics to the server.",
-        )
-
-        args, leftovers = parser.parse_known_args(arguments)
-        self._top_level_args(args)
-        super().parse(leftovers)
-        for command in self.commands:
-            print(command)
 
 def _main():
-    ComicReread().parse()
+    ComicReread().parse().run()
 
 
 if __name__ == "__main__":

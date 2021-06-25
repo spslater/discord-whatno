@@ -256,7 +256,7 @@ class DiscordCLI(Client):
         self._refresh_parser(subs)
 
         self.parser = parser
-        self.subs = subs
+        self.subparsers = subs
         self.update_subparser_list()
 
     # pylint: disable=protected-access
