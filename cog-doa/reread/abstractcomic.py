@@ -11,14 +11,12 @@ from time import sleep
 from traceback import format_tb
 from typing import Optional
 
+from discord import Colour, Embed
+from discordcli import DiscordCLI
 from dotenv import load_dotenv
 
-from discord import Colour, Embed
-
-from discordcli import DiscordCLI
 
 class AbstractComic(ABC, DiscordCLI):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.comic_parser = self._comic_parser()

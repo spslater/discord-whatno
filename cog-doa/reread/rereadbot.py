@@ -15,11 +15,10 @@ from time import sleep
 from traceback import format_tb
 from typing import Optional
 
+from abstractcomic import AbstractComic
+from discord import Colour, Embed
 from dotenv import load_dotenv
 
-from discord import Colour, Embed
-
-from abstractcomic import AbstractComic
 
 class DoaReread(AbstractComic):
     """Comic Reread Bot
@@ -134,14 +133,16 @@ class DoaReread(AbstractComic):
                     for tag in self._get_tags(release)
                 ]
 
-                entries.append({
-                    "title": row[1],
-                    "url": row[3],
-                    "alt": f"||{row[4]}||",
-                    "tags": ", ".join(tags),
-                    "image": f"https://www.dumbingofage.com/comics/{image}",
-                    "release": release,
-                })
+                entries.append(
+                    {
+                        "title": row[1],
+                        "url": row[3],
+                        "alt": f"||{row[4]}||",
+                        "tags": ", ".join(tags),
+                        "image": f"https://www.dumbingofage.com/comics/{image}",
+                        "release": release,
+                    }
+                )
 
         return self.default_embeds(entries)
 

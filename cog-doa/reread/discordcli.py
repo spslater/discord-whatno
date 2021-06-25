@@ -14,9 +14,8 @@ from shutil import get_terminal_size
 from time import sleep
 from traceback import format_tb
 
-from dotenv import load_dotenv
-
 from discord import Client, Colour, Embed, Forbidden, HTTPException, NotFound
+from dotenv import load_dotenv
 
 
 # pylint: disable=too-many-instance-attributes
@@ -239,7 +238,7 @@ class DiscordCLI(Client):
             "filename",
             nargs="*",
             help="filename to load commands from",
-            metavar="FILE"
+            metavar="FILE",
         )
 
     def _setup_parser(self):
@@ -349,7 +348,7 @@ class DiscordCLI(Client):
 
     async def automate(self, args):
         user_args = []
-        for filename in (args.filename or []):
+        for filename in args.filename or []:
             try:
                 with open(filename, "r") as fp:
                     user_args.extend(split(fp.read()))
@@ -407,7 +406,7 @@ class DiscordCLI(Client):
             self._logger.debug("Sending a plaintext message")
             await self.channel.send(message)
 
-        for filename in (args.filename or []):
+        for filename in args.filename or []:
             self._logger.debug("Loading text from file: %s", filename)
             with open(filename, "r") as fp:
                 data = fp.read()
@@ -430,7 +429,7 @@ class DiscordCLI(Client):
             self._logger.debug("Deleting %s messages from cli", len(args.delete))
             mids.extend(args.delete)
 
-        for filename in (args.filename or []):
+        for filename in args.filename or []:
             try:
                 with open(filename, "r") as fp:
                     data = fp.readlines()
@@ -475,7 +474,7 @@ class DiscordCLI(Client):
         )
 
         entries = []
-        for filename in (args.filename or []):
+        for filename in args.filename or []:
             try:
                 with open(filename, "r") as fp:
                     data = load(fp)
@@ -550,7 +549,7 @@ class DiscordCLI(Client):
             self._logger.debug("Reloading %s messages from cli", len(args.refresh))
             mids.extend(args.refresh)
 
-        for filename in (args.filename or []):
+        for filename in args.filename or []:
             try:
                 with open(filename, "r") as fp:
                     data = fp.readlines()
@@ -608,7 +607,7 @@ class DiscordCLI(Client):
 
         columns = min(80, get_terminal_size()[0])
         for parser in completed.values():
-            print("-"*columns, file=sys.stderr)
+            print("-" * columns, file=sys.stderr)
             parser.print_help()
             print(file=sys.stderr)
         sys.exit(0)
@@ -623,7 +622,7 @@ class DiscordCLI(Client):
         Closes the connection after everything is complete.
         """
         self._logger.info("%s has connected to Discord!", self.user)
-        
+
         await self._set_discord_connection()
         for parsed_args in self.commands:
             args = self.parser.parse_args(parsed_args)
