@@ -260,6 +260,7 @@ class DiscordCLI(Client):
 
     # pylint: disable=protected-access
     def update_subparser_list(self):
+        """Update list of subparsers to help with generating help output"""
         self.subparser_list = self.parser._subparsers._actions[-1].choices
 
     def _parse_leftovers(self, leftovers):
@@ -347,6 +348,7 @@ class DiscordCLI(Client):
                 dump(data, fp, sort_keys=True, indent="\t")
 
     async def automate(self, args):
+        """Run a file to automate calls"""
         user_args = []
         for filename in args.filename or []:
             try:
@@ -587,6 +589,7 @@ class DiscordCLI(Client):
             sleep(1)
 
     def display_help(self, *parsers):
+        """Print help message to stderr"""
         if not parsers:
             self.parser.print_help()
             sys.exit(0)
@@ -649,6 +652,7 @@ class DiscordCLI(Client):
         await self.logout()
 
     def parse(self, arguments=None):
+        """Parse commands to call them"""
         parser = ArgumentParser(
             formatter_class=ArgumentDefaultsHelpFormatter,
             add_help=False,
@@ -729,7 +733,9 @@ class DiscordCLI(Client):
 
         return self
 
+    # pylint: disable=arguments-differ
     def run(self):
+        """Run the bot"""
         super().run(self.token)
 
 

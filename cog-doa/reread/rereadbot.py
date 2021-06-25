@@ -4,20 +4,14 @@ Bot publishes a weeks worth of DoA comics every day.
 """
 import logging
 import re
-from abc import ABC, abstractmethod
-from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace
 from datetime import datetime, timedelta
 from json import dump, load
 from os import getenv
-from sqlite3 import Connection, Cursor, connect
-from sys import exc_info, stdout
-from time import sleep
-from traceback import format_tb
-from typing import Optional
+from sqlite3 import connect
 
-from abstractcomic import AbstractComic
-from discord import Colour, Embed
-from dotenv import load_dotenv
+from discord import Embed
+
+from .abstractcomic import AbstractComic
 
 
 class DoaReread(AbstractComic):
@@ -53,6 +47,7 @@ class DoaReread(AbstractComic):
         self.schedule = None
 
         self.send_comic = False
+        self.date_strings = []
 
     def _setup_comic(self, args):
         database_filename = args.database or getenv("DATABASE", None)

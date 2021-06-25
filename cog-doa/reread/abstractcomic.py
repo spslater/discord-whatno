@@ -1,22 +1,15 @@
 """Abscract Comic"""
-import re
 from abc import ABC, abstractmethod
-from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace
-from datetime import datetime, timedelta
-from json import dump, load
-from os import getenv
-from sqlite3 import Connection, Cursor, connect
-from sys import exc_info, stdout
 from time import sleep
-from traceback import format_tb
-from typing import Optional
 
 from discord import Colour, Embed
-from discordcli import DiscordCLI
-from dotenv import load_dotenv
+
+from .discordcli import DiscordCLI
 
 
 class AbstractComic(ABC, DiscordCLI):
+    """Abstract class to make uploading comics for a reread to discord easy"""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.comic_parser = self._comic_parser()
@@ -48,13 +41,14 @@ class AbstractComic(ABC, DiscordCLI):
 
     @abstractmethod
     def get_embeds(self):
-        pass
+        """Get list of embeds to post with comic info"""
 
     @abstractmethod
-    def send_comic(self, args):
-        pass
+    async def send_comic(self, args):
+        """Send comics as embeds to discord"""
 
     def default_embeds(self, entries: list[dict[str, str]]):
+        """Basic way to generate the embeds"""
         embeds = []
         for entry in entries:
             title = entry.get("title", None)
@@ -74,6 +68,7 @@ class AbstractComic(ABC, DiscordCLI):
         return embeds
 
     async def default_send_comic(self):
+        """Basic way to send the comics to discord"""
         for embed in self.get_embeds():
             self._logger.debug(embed.to_dict())
             await self.channel.send(embed=embed)
