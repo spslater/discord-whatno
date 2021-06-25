@@ -1,12 +1,15 @@
 """Discord CLI Bot
 
-Bot meant to run specific commands and not stay open
-and listen to discord.
+Bot to perform specific actions on messages in Discord then close
+
+:class DiscordCLI: simple command line interface to perform basic
+    actions on Discord messages, multiple actions can be passed at
+    one time
 """
 
 import logging
 import sys
-from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
+from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace
 from json import dump, load
 from os import getenv
 from shlex import split
@@ -18,44 +21,18 @@ from discord import Client, Colour, Embed, Forbidden, HTTPException, NotFound
 from dotenv import load_dotenv
 
 
-# pylint: disable=too-many-instance-attributes
 class DiscordCLI(Client):
-    """Discord CLI
+    """simple command line interface to perform basic actions on Discord messages
 
-    Also can send messages manually to Discord.
+    Multiple actions can be passed at one time, these actions include sending
+    plaintext messages, sending embeds, editing messages / embeds, deleting messages,
+    refreshing embeds, and displaying info on the bots connected guilds / channels.
 
-    :param guild_name: name of guild to connect to, defaults to None
-    :type guild_name: str, optional
-    :param guild_id: id of guild to connect to, defaults to None
-    :type guild_id: int, optional
-    :param channel_name: name of channel to publish in, defaults to None
-    :type channel_name: str, optional
-    :param channel_id: id of channel to publish in, defaults to None
-    :type channel_id: int, optional
-    :param info: print info about connection to stdout, defaults to False
-    :type info: str, optional
-    :param info_file: filename to save info to along side stdout, defaults to None
-    :type info_file: str, optional
-    :param message: mannually set message to send to channel, defaults to None
-    :type message: str, optional
-    :param message_file: filename to read contents of to send to channel, defaults to None
-    :type message_file: str, optional
-    :param edit_file: filename to read contents of to edit different messages, defaults to None
-    :type edit_file: str, optional
-    :param delete: delete specific message previouslly sent, defaults to None
-    :type delete: int, optional
-    :param delete_file: filename containing message ids to delete, defaults to None
-    :type delete_file: str, optional
-    :param embed_file: filename to load an embed dict from, defaults to None
-    :type embed_file: str, optional
-    :param refresh: embed message ids to refresh because the images embeding, defaults to None
-    :type refresh: int, optional
-    :param refresh_file: filename with embed message ids to refresh, defaults to None
-    :type refresh_file: str, optional
-    :raises RuntimeError: Channel Name / Id missing.
+    Setup is handled via command line arguments. Help can be viewed with the `--help`
+    flag, it can be followed by a list of sub commands to see messages for, no sub
+    commands listed will display main help info
     """
 
-    # pylint: disable=too-many-arguments,too-many-locals
     def __init__(self):
         super().__init__()
         self._logger = logging.getLogger(self.__class__.__name__)
@@ -74,7 +51,13 @@ class DiscordCLI(Client):
 
         self._setup_parser()
 
-    def _top_level_args(self, args):
+    def _top_level_args(self, args: Namespace):
+        """Parser inital arguments needed to connect to Discord
+
+        This is handled by a seperate parser so that none of the
+        command arguments accidently get gobbled up (--help does not
+        work on subcommands).
+        """
         log_level = {
             "debug": logging.DEBUG,
             "info": logging.INFO,
@@ -114,7 +97,7 @@ class DiscordCLI(Client):
         if not self.given_channel:
             raise RuntimeError("Channel Id or Name not provided to Client")
 
-    def _info_parser(self, subparsers):
+    def _info_parser(self, subparsers: ArgumentParser):
         info_parser = subparsers.add_parser(
             "info",
             aliases=["i"],
@@ -137,7 +120,7 @@ class DiscordCLI(Client):
         )
         return info_parser
 
-    def _message_parser(self, subparsers):
+    def _message_parser(self, subparsers: ArgumentParser):
         message_parser = subparsers.add_parser(
             "message",
             aliases=["m", "msg"],
@@ -160,7 +143,7 @@ class DiscordCLI(Client):
         )
         return message_parser
 
-    def _delete_parser(self, subparsers):
+    def _delete_parser(self, subparsers: ArgumentParser):
         delete_parser = subparsers.add_parser(
             "delete",
             aliases=["d", "del"],
@@ -185,7 +168,7 @@ class DiscordCLI(Client):
         )
         return delete_parser
 
-    def _refresh_parser(self, subparsers):
+    def _refresh_parser(self, subparsers: ArgumentParser):
         refresh_parser = subparsers.add_parser(
             "refresh",
             aliases=["r", "re", "ref"],
@@ -210,7 +193,7 @@ class DiscordCLI(Client):
         )
         return refresh_parser
 
-    def _edit_parser(self, subparsers):
+    def _edit_parser(self, subparsers: ArgumentParser):
         edit_parser = subparsers.add_parser(
             "edit",
             aliases=["e"],
@@ -226,7 +209,7 @@ class DiscordCLI(Client):
         )
         return edit_parser
 
-    def _automate_parser(self, subparsers):
+    def _automate_parser(self, subparsers: ArgumentParser):
         auto_parser = subparsers.add_parser(
             "automate",
             aliases=["a", "auto"],
@@ -242,6 +225,7 @@ class DiscordCLI(Client):
         )
 
     def _setup_parser(self):
+        """Setup the command parser for the various subcommands available"""
         parser = ArgumentParser(
             formatter_class=ArgumentDefaultsHelpFormatter,
             add_help=False,
@@ -260,10 +244,17 @@ class DiscordCLI(Client):
 
     # pylint: disable=protected-access
     def update_subparser_list(self):
-        """Update list of subparsers to help with generating help output"""
+        """Update list of subparsers to help with generating help output
+
+        This should be called each time a new sub command is added in a
+        subclass of this class
+        """
         self.subparser_list = self.parser._subparsers._actions[-1].choices
 
-    def _parse_leftovers(self, leftovers):
+    def _parse_leftovers(self, leftovers: list[str]) -> list[list[str]]:
+        """get leftover arguments from top level parser and split them
+        into an argument list for each sub command called
+        """
         command_names = self.subparser_list.keys()
         commands = []
         current_command = []
@@ -278,6 +269,7 @@ class DiscordCLI(Client):
         return [cmd for cmd in commands if cmd]
 
     async def _set_guild_connection(self):
+        """set info for main guild connection"""
         guild_id = guild_name = None
         try:
             guild_id = int(self.given_guild)
@@ -294,6 +286,7 @@ class DiscordCLI(Client):
         self.guild = super().get_guild(guild_id)
 
     def _set_channel_connection(self):
+        """set info for main channel connection"""
         channel_id = channel_name = None
         try:
             channel_id = int(self.given_channel)
@@ -324,6 +317,7 @@ class DiscordCLI(Client):
         self.channel = super().get_channel(channel_id)
 
     async def _set_discord_connection(self):
+        """set information for main guild and channel connection"""
         await self._set_guild_connection()
         self._set_channel_connection()
 
@@ -335,7 +329,7 @@ class DiscordCLI(Client):
             )
 
     def _backup_embeds(self, embeds: list[Embed]):
-        """Save embeds to a json file"""
+        """save embeds to a json file"""
         if self.embed_file:
             data = []
             try:
@@ -347,8 +341,17 @@ class DiscordCLI(Client):
             with open(self.embed_file, "w+") as fp:
                 dump(data, fp, sort_keys=True, indent="\t")
 
-    async def automate(self, args):
-        """Run a file to automate calls"""
+    async def automate(self, args: Namespace):
+        """run a file to automate calls
+
+        Called automaticaly by the parser when the automate sub
+        command is called. No protection against an automate call inside
+        another file causeing an infinite loop.
+
+        :param filename: filename with 1 command and it's arguments per line,
+            multiple files can be passed
+        :type filename: str
+        """
         user_args = []
         for filename in args.filename or []:
             try:
@@ -361,13 +364,16 @@ class DiscordCLI(Client):
             args = self.parser.parse_args(command)
             await args.func(args)
 
-    def print_info(self, args):
+    def print_info(self, args: Namespace):
         """Print info on bot's connection to discord.
 
         This info includes the primary guild and channel, as well as the number of guilds the bot
         can connect to, their names, and the number of channels and their names in each guild.
 
-        If `filename` is set, then the information will also be saved to that filename.
+        :param filename: file to save information to
+        :type filename: str
+        :param quite: do not print info to stdout
+        :type quite: bool
         """
         self._logger.info("Printing info about Client.")
 
@@ -391,12 +397,14 @@ class DiscordCLI(Client):
             with open(args.filename, "w+") as fp:
                 fp.write(info)
 
-    async def send_message(self, args):
-        """Sends a message to the primary channel
+    async def send_message(self, args: Namespace):
+        """Sends a plaintext message to the primary channel
 
-        Message is either explicitly passed in via the `message` argument when initalizing or
-        via a filename whose whole contents are sent. If both values are set, the explicit
-        message is sent first, followed by the file contents.
+        :param message: plaintext to send to discord, multiple messages can be passed
+        :type message: str
+        :param filename: file to load message from, full contents used as one message;
+            multiple files can be passed after a single flag
+        :type filename: str
         """
         self._logger.info(
             'Sending a message to channel "%s" on guild "%s"',
@@ -414,11 +422,14 @@ class DiscordCLI(Client):
                 data = fp.read()
                 await self.channel.send(data)
 
-    async def delete_message(self, args):
+    async def delete_message(self, args: Namespace):
         """Delete message via given ids
 
-        Id is either explicitly passed in via the `delete` argument when initalizing or via a
-        filename where each line is a message id. Both values can be set at the same time.
+        :param delete: message id to delete, multiple ids can be passed
+        :type delete: str
+        :param filename: file to load ids to delete from, each line should contain 1 message id;
+            multiple files can be passed after a single flag
+        :type filename: str
         """
         self._logger.info(
             'Deleting messages in channel "%s" on guild "%s"',
@@ -461,13 +472,16 @@ class DiscordCLI(Client):
             except (NotFound, HTTPException) as e:
                 self._logger.warning('Unable to get message "%s": %s', mid, e)
 
-    async def edit_message(self, args):
+    async def edit_message(self, args: Namespace):
         """Edit messages based on JSON file given
 
-        File specifies the message id (mid) to edit. If it's a regular text message, `text` field
-        is what the new message should say. If it is an embed, `title`, `url`, `image`, `footer`
-        can be included if those values should be changed. A `field` dict with `value` and/or
-        `name` to change the first field.
+        JSON struct must be a list of dicts, each dict shoul have message id (mid) to edit.
+        If it's a regular text message, the `text` field is what the new message should say.
+        If it is an embed, `title`, `url`, `image`, `footer` can be included if those values
+        should be changed. A `field` dict with `value` and/or `name` to change the first field.
+
+        :param filename: file to load JSON from; multiple files can be passed
+        :type filename: str
         """
         self._logger.info(
             'Editing messages in channel "%s" on guild "%s"',
@@ -487,11 +501,10 @@ class DiscordCLI(Client):
 
         embeds = []
         for entry in entries:
-            mid = entry["mid"]
             try:
-                msg = await self.channel.fetch_message(mid)
+                msg = await self.channel.fetch_message(entry["mid"])
             except (NotFound, HTTPException, Forbidden) as e:
-                self._logger.warning('Unable to get message "%s": %s', mid, e)
+                self._logger.warning('Unable to get message "%s": %s', entry["mid"], e)
                 continue
 
             if msg.embeds:
@@ -515,7 +528,7 @@ class DiscordCLI(Client):
                 try:
                     await msg.edit(embed=embed)
                 except (HTTPException, Forbidden) as e:
-                    self._logger.warning('Unable to edit message "%s": %s', mid, e)
+                    self._logger.warning('Unable to edit message "%s": %s', entry["mid"], e)
                 else:
                     embeds.append(embed)
 
@@ -524,21 +537,24 @@ class DiscordCLI(Client):
                 if text == msg.content:
                     self._logger.warning(
                         'Message content the same, no edits being made for message "%s"',
-                        mid,
+                        entry["mid"],
                     )
                     continue
                 try:
                     await msg.edit(content=text)
                 except (HTTPException, Forbidden) as e:
-                    self._logger.warning('Unable to edit message "%s": %s', mid, e)
+                    self._logger.warning('Unable to edit message "%s": %s', entry["mid"], e)
             sleep(1)
         self._backup_embeds(embeds)
 
-    async def refresh_message(self, args):
-        """Refresh the color of an embed message to try and get any imbeds to load
+    async def refresh_message(self, args: Namespace):
+        """Refresh the color of an embed message to try and get any inbeds (image or video) to load
 
-        Id is either explicitly passed in via the `refresh` argument when initalizing or via a
-        filename where each line is a message id. Both values can be set at the same time.
+        :param refresh: message id to refresh, must be an embed message; multiple ids can be passed
+        :type refresh: str
+        :param filename: file to load ids to refresh from, each line should contain 1 message id;
+            multiple files can be passed after a single flag
+        :type filename: str
         """
         self._logger.info(
             'Reloading messages in channel "%s" on guild "%s"',
@@ -588,25 +604,33 @@ class DiscordCLI(Client):
                 self._logger.warning('Unable to refresh message "%s": %s', mid, e)
             sleep(1)
 
-    def display_help(self, *parsers):
-        """Print help message to stderr"""
+    def display_help(self, *parsers: str):
+        """Print help messages and exit
+
+        :param parsers: Sub commands to print help message for, if none are provided the
+            top level help message will be displayed
+        :type parsers: str
+        """
         if not parsers:
             self.parser.print_help()
             sys.exit(0)
 
         completed = {}
-        unknown = False
+        unknown = []
         for parser in parsers:
             try:
                 subparser = self.subparser_list[parser]
             except KeyError:
-                print(f"Unknown command: {parser}", file=sys.stderr)
-                unknown = True
+                unknown.append(parser)
             else:
                 if subparser.prog not in completed.keys():
                     completed[subparser.prog] = subparser
         if unknown:
-            print(file=sys.stderr)
+            print(
+                "Unable to display help for following unknown commands:\n",
+                *[f"> {cmd}\n" for cmd in unknown],
+                file=sys.stderr
+            )
 
         columns = min(80, get_terminal_size()[0])
         for parser in completed.values():
@@ -622,7 +646,7 @@ class DiscordCLI(Client):
         Can print info, send a message, delete a message, refresh an embed, or
         send the comics for today's date.
 
-        Closes the connection after everything is complete.
+        Logs out after everything is complete.
         """
         self._logger.info("%s has connected to Discord!", self.user)
 
@@ -651,7 +675,7 @@ class DiscordCLI(Client):
         )
         await self.logout()
 
-    def parse(self, arguments=None):
+    def parse(self, arguments: list[str] = None):
         """Parse commands to call them"""
         parser = ArgumentParser(
             formatter_class=ArgumentDefaultsHelpFormatter,
@@ -726,6 +750,7 @@ class DiscordCLI(Client):
             help="file to save embeds to for debugging purposes",
             metavar="EMBED",
         )
+
 
         args, leftovers = parser.parse_known_args(arguments)
         self._top_level_args(args)

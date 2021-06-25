@@ -1,4 +1,8 @@
-"""Abscract Comic"""
+"""Abscract Comic Discord Bot
+
+:class AbstractComic: abstract class to help easy publishing
+    a webcomic to discord for community rereads
+"""
 from abc import ABC, abstractmethod
 from time import sleep
 
@@ -8,7 +12,25 @@ from .discordcli import DiscordCLI
 
 
 class AbstractComic(ABC, DiscordCLI):
-    """Abstract class to make uploading comics for a reread to discord easy"""
+    """abstract class to help easy publishing a webcomic to discord
+    for community rereads
+
+    Adds a new sub parser to the DiscordCLI argument parser, `comic`
+    that accepts a list of days to publish (none listed means todays date)
+    and a flag, `--no-comic` to prevent publishing of comics when run.
+    Useful for when other maintenance actions should be run.
+
+    :method get_embeds: build the embeds Discord will publish, a simple way
+        the would be building a dictionary with the info and passing it to
+        `default_embeds` for a simple comic embed
+    :return get_embeds: list of formated Discord Embeds to publish
+    :rtype get_embeds: list[Embed]
+    :method send_comic: makes the actual send message call to Discord and
+        preform any other actions as well, method called automatically when
+        the `comic` command is parsed by the argument parser
+    :return send_comic: None
+    :rtype send_comic: None
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -16,6 +38,7 @@ class AbstractComic(ABC, DiscordCLI):
         self.update_subparser_list()
 
     def _comic_parser(self):
+        """Add the `comic` sub command to the DiscordCLI parser"""
         comic_parser = self.subparsers.add_parser(
             "comic",
             aliases=["c"],
@@ -41,11 +64,19 @@ class AbstractComic(ABC, DiscordCLI):
 
     @abstractmethod
     def get_embeds(self):
-        """Get list of embeds to post with comic info"""
+        """build the embeds Discord will publish
+
+        A simple way the would be building a dictionary with the info
+        and passing it to `default_embeds` for a simple comic embed
+        """
 
     @abstractmethod
     async def send_comic(self, args):
-        """Send comics as embeds to discord"""
+        """makes the actual send message call to Discord
+
+        method called automatically when the `comic` command is
+        parsed by the argument parser
+        """
 
     def default_embeds(self, entries: list[dict[str, str]]):
         """Basic way to generate the embeds"""
