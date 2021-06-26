@@ -68,8 +68,10 @@ class DoaReread(AbstractComic):
         super().__init__()
         self._logger = logging.getLogger(self.__class__.__name__)
 
-        self.comic_parser.description = """Database and Schedule can be set in an
-            environment file with the keys `DATABASE` and `SCHEDULE` respectively"""
+        self.comic_parser.description = (
+            "Database and Schedule can be set in an environment file "
+            "with the keys `DATABASE` and `SCHEDULE` respectively"
+        )
         self.comic_parser.add_argument(
             "-d",
             "--database",

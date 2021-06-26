@@ -14,11 +14,19 @@ from json import dump, load
 from os import getenv
 from shlex import split
 from shutil import get_terminal_size
+from textwrap import indent
 from time import sleep
 from traceback import format_tb
 
 from discord import Client, Colour, Embed, Forbidden, HTTPException, NotFound
 from dotenv import load_dotenv
+
+_HELP_MESSAGE = """usage: {prog} [-h [HELP ...]]
+{prog_indent} [--logfile LOGFILE] [-q] [--level LEVEL]
+{prog_indent} [-e ENV] [-t TOKEN] [-g GUILD] [-c CHANNEL] [--embeds EMBED]
+{prog_indent} [[COMMAND [ARGS ...]] ...]
+{tlp_help}
+"""
 
 
 class DiscordCLI(Client):
@@ -620,19 +628,29 @@ class DiscordCLI(Client):
             top level help message will be displayed
         :type parsers: str
         """
+        columns = min(80, get_terminal_size()[0])
+
         if not parsers:
+            tlp_len = len(self._top_level_parser.format_usage().splitlines())
             tlp_full = self._top_level_parser.format_help().splitlines()
-            tlp_usage = tlp_full[0].split(maxsplit=2)[2].strip()
-            tlp_help = "\n".join(tlp_full[3:])
+            tlp_help = "\n".join(tlp_full[tlp_len:])
 
-            scp_full = self.parser.format_help().splitlines()
-            scp_usage = scp_full[0].split(maxsplit=2)
-            scp_help = "\n".join(scp_full[4:])
-
-            usage = (
-                f"{' '.join(scp_usage[:2])} {tlp_usage}\n  {scp_usage[2]}\n\n"
-                f"global arguments:\n{tlp_help}\n\nsub commands:\n{scp_help}"
+            prog_indent = "".ljust(len("usage: ") + len(self.parser.prog))
+            usage = _HELP_MESSAGE.format(
+                prog=self.parser.prog,
+                prog_indent=prog_indent,
+                tlp_help=tlp_help,
             )
+            usage += "\ncommands:"
+            parsers = sorted(
+                list(set(self.subparser_list.values())),
+                key=lambda s: s.prog,
+            )
+            for parser in parsers:
+                prog = parser.prog.split()[-1]
+                usage += f"\n  {'-' * len(prog)}\n  {prog}:\n"
+                usage += indent(parser.format_help(), "    ")
+
             print(usage, file=sys.stderr)
             sys.exit(0)
 
@@ -653,7 +671,6 @@ class DiscordCLI(Client):
                 file=sys.stderr,
             )
 
-        columns = min(80, get_terminal_size()[0])
         for parser in completed.values():
             print("-" * columns, file=sys.stderr)
             parser.print_help()
@@ -702,20 +719,22 @@ class DiscordCLI(Client):
             formatter_class=ArgumentDefaultsHelpFormatter,
             add_help=False,
         )
-        parser.add_argument(
+        info_group = parser.add_argument_group("information")
+        info_group.add_argument(
             "-h",
             "--help",
             nargs="*",
             dest="help",
             help="show help message for listed subcommands or main program if none provided",
         )
-        parser.add_argument(
+        logging_group = parser.add_argument_group("logging")
+        logging_group.add_argument(
             "--logfile",
             dest="logfile",
             help="log file",
             metavar="LOGFILE",
         )
-        parser.add_argument(
+        logging_group.add_argument(
             "-q",
             "--quite",
             dest="quite",
@@ -723,7 +742,7 @@ class DiscordCLI(Client):
             action="store_true",
             help="quite output",
         )
-        parser.add_argument(
+        logging_group.add_argument(
             "--level",
             dest="level",
             default="info",
@@ -732,7 +751,10 @@ class DiscordCLI(Client):
             metavar="LEVEL",
         )
 
-        parser.add_argument(
+        discord_group = parser.add_argument_group(
+            "discord", "settings for the connection"
+        )
+        discord_group.add_argument(
             "-e",
             "--env",
             dest="envfile",
@@ -740,7 +762,7 @@ class DiscordCLI(Client):
             metavar="ENV",
         )
 
-        parser.add_argument(
+        discord_group.add_argument(
             "-t",
             "--token",
             nargs=1,
@@ -748,7 +770,7 @@ class DiscordCLI(Client):
             help="Discord API Token.",
             metavar="TOKEN",
         )
-        parser.add_argument(
+        discord_group.add_argument(
             "-g",
             "--guild",
             nargs=1,
@@ -756,7 +778,7 @@ class DiscordCLI(Client):
             help="name or id of guild to post to",
             metavar="GUILD",
         )
-        parser.add_argument(
+        discord_group.add_argument(
             "-c",
             "--channel",
             nargs=1,
@@ -765,7 +787,7 @@ class DiscordCLI(Client):
             metavar="CHANNEL",
         )
 
-        parser.add_argument(
+        discord_group.add_argument(
             "--embeds",
             dest="embedfile",
             help="file to save embeds to for debugging purposes",
