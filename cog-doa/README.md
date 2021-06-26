@@ -6,110 +6,211 @@ Discord Reread will upload comics from a week period each time it's run.
 pip install -r requirements.txt
 ```
 
+Requires:
+- `discord.py`: 1.7.3
+- `python-dotenv`: 0.18.0
+
+
 ## Running
 The bot only needs permission to Send Messages to a server to operate.
 
 Command line args will override values in the `.env` file.
 
 ```shell
-usage: rewatchbot.py [-h] [-l LOGFILE] [-q] [--mode MODE] [-e, --env ENV]
-                     [-d, --database SQLITE3] [-t TOKEN] [-gn GUILDNAME]
-                     [-gi GUILDID] [-cn CHANNELNAME] [-ci CHANNELID]
-                     [-s FILENAME] [-nc] [-i] [-if FILENAME] [-m MESSAAGE]
-                     [-mf FILENAME] [--delete [MID [MID ...]]]
-                     [--delete-file MID] [--embed-file EMBED]
-                     [--refresh [MID [MID ...]]] [--refresh-file MID]
+usage: discordcli [-h [HELP ...]]
+               [--logfile LOGFILE] [-q] [--level LEVEL]
+               [-e ENV] [-t TOKEN] [-g GUILD] [-c CHANNEL] [--embeds EMBED]
+               [[COMMAND [ARGS ...]] ...]
 
-optional arguments:
-  -h, --help            show this help message and exit
-  -l LOGFILE, --log LOGFILE
-                        Log file. (default: None)
-  -q, --quite           Quite output (default: False)
-  --mode MODE           Logging level for output (default: INFO)
-  -e, --env ENV         Environment file to load. (default: .env)
-  -d, --database SQLITE3
-                        Sqlite3 database with comic info. (default: None)
+information:
+  -h [HELP ...], --help [HELP ...]
+                        show help message for listed subcommands or main program if none provided (default: None)
+
+logging:
+  --logfile LOGFILE     log file (default: None)
+  -q, --quite           quite output (default: False)
+  --level LEVEL         logging level for output (default: info)
+
+discord:
+  settings for the connection
+
+  -e ENV, --env ENV     env file with connection info (default: None)
   -t TOKEN, --token TOKEN
                         Discord API Token. (default: None)
-  -gn GUILDNAME, --guild-name GUILDNAME
-                        Name of Guild to post to. (default: None)
-  -gi GUILDID, --guild-id GUILDID
-                        Id of Guild to post to. (default: None)
-  -cn CHANNELNAME, --channel-name CHANNELNAME
-                        Name of Guild to post to. (default: None)
-  -ci CHANNELID, --channel-id CHANNELID
-                        Id of Guild to post to. (default: None)
-  -s FILENAME, --schedule FILENAME
-                        JSON file to load release information from. (default:
-                        None)
-  -nc, --no-comics      Do not send the weekly comics to the server. (default:
-                        True)
-  -i, --info            Print out availble guilds and channels and other
-                        random info I add. Prints to stdout, not the log file.
-                        (default: False)
-  -if FILENAME, --info-file FILENAME
-                        File to save info print to, won't print to stdout if
-                        set and -i flag not used. (default: None)
-  -m MESSAAGE, --message MESSAAGE
-                        Send a plaintext message to the configured channel
-                        (default: None)
-  -mf FILENAME, --message-file FILENAME
-                        Send plaintext contents of a file as a message to the
-                        configured channel (default: None)
-  --delete [MID [MID ...]]
-                        Message ids to delete from channel (default: None)
-  --delete-file MID     Message ids to delete from channel (default: None)
-  --embed-file EMBED    File to print embeds to for debugging purposes
-                        (default: None)
-  --refresh [MID [MID ...]]
-                        Message ids to refresh from channel (default: None)
-  --refresh-file MID    Message ids to refresh from channel (default: None)
+  -g GUILD, --guild GUILD
+                        name or id of guild to post to (default: None)
+  -c CHANNEL, --channel CHANNEL
+                        name or id of channel to post to (default: None)
+  --embeds EMBED        file to save embeds to for debugging purposes (default: None)
+
+commands:
+  --------
+  automate:
+    usage: discordcli automate FILE [FILE ...]
+
+    positional arguments:
+      FILE  filename to load commands from
+
+  -----
+  comic:
+    usage: discordcli comic [-n] [-d SQLITE3] [-s FILENAME] [day ...]
+
+    Database and Schedule can be set in an environment file with the keys `DATABASE` and `SCHEDULE` respectively
+
+    positional arguments:
+      day                   what days to send
+
+    optional arguments:
+      -n, --no-comic        do not send todays comics
+      -d SQLITE3, --database SQLITE3
+                            filename of the sqlite3 database with the comic info stored in it
+      -s FILENAME, --schedule FILENAME
+                            filename of json document that contains the list of comics to publish on specific days
+
+  ------
+  delete:
+    usage: discordcli delete [-f FILE [FILE ...]] [MID ...]
+
+    positional arguments:
+      MID                   message ids to delete from channel
+
+    optional arguments:
+      -f FILE [FILE ...], --file FILE [FILE ...]
+                            message ids to delete from channel
+
+  ----
+  edit:
+    usage: discordcli edit JSON [JSON ...]
+
+    positional arguments:
+      JSON  JSON with info on what messages to edit and how
+
+  ----
+  info:
+    usage: discordcli info [-q] [filename]
+
+    positional arguments:
+      filename     file to save info print to
+
+    optional arguments:
+      -q, --quite  don't print info to stdout
+
+  -------
+  message:
+    usage: discordcli message [-f FILE [FILE ...]] [message ...]
+
+    positional arguments:
+      message               send plaintext message
+
+    optional arguments:
+      -f FILE [FILE ...], --file FILE [FILE ...]
+                            send plaintext contents of a file as a message
+
+  -------
+  refresh:
+    usage: discordcli refresh [-f FILE [FILE ...]] [MID ...]
+
+    positional arguments:
+      MID                   message ids to refresh from channel
+
+    optional arguments:
+      -f FILE [FILE ...], --file FILE [FILE ...]
+                            file with list of message ids to refresh
 ```
 
 ## Flags / Arguments
-### No Comics
-The `-nc, --no-comics` arguments prevent the comics getting sent to the server.
-This should be used for when you just want a message to be sent or to print out
-the bot info.
 
-### Information
-The `-i, --info` flag will print out guild and channel info for the bot. The
-`-if, --info-file` will save that data to the specificed file. These are
-independent actions. So passing just the `-if` flag will only save it to the file,
-passing just the `-i` flag only prints to stdout, and passing both will do both
-actions.
+### information:
+usage: `-h [HELP ...], --help [HELP ...]`  
+Passing no arguments displays full help message. Each value passed after that should be
+one of the commands. Each value passed will dispaly that specific commands help message.
 
-### Messages
-The `-m, --message` flag sends the string as a plaintext message to the configured
-channel. This follows Discords standard limited markdown formatting.
-The `-mf, --message-file` flag loads the conents of a file and sends that as a
-plaintext markdown formatted message, just like the `-m` flag. When both flags
-are used, the `-m` message gets sent first then the contents of the file.
+### logging:
+```
+--logfile LOGFILE     log file (default: None)
+-q, --quite           quite output (default: False)
+--level LEVEL         logging level for output (default: info)
+```
 
-### Delete
-The `--delete` flag can be used multiple times or have multiple args passed to it.
-It takes those message ids and sends a delete request for them. If there is an error
-it just skips over the request.
+### discord:
+```
+-e ENV, --env ENV     env file with connection info (default: None)
+-t TOKEN, --token TOKEN
+                      Discord API Token. (default: None)
+-g GUILD, --guild GUILD
+                      name or id of guild to post to (default: None)
+-c CHANNEL, --channel CHANNEL
+                      name or id of channel to post to (default: None)
+--embeds EMBED        file to save embeds to for debugging purposes (default: None)
+```
+See `environment.sample` for example env file. Keys include:
+- `DISCORD_TOKEN`: discord's api token for the bot
+- `DISCORD_GUILD`: main guild name or id
+- `DISCORD_CHANNEL`: channel name or id to send messages to
+- `EMBED`: filepath to save embed dicts to help with debugging
 
-The `--delete-file` acts the same way but is just a list of message ids, a single one
-on each line.
+### automate:
+usage: `prog automate FILE [FILE ...]`  
+Files contain 1 command and it's arguments per line to be run sequentially.
+No protection against an automate call inside another file causeing an infinite loop.
 
-The two flags can be used together.
+### comic:
+usage: `prog comic [-n] [-d SQLITE3] [-s FILENAME] [day ...]`  
+Accepts a list of days to publish (none listed means just publish todays comics)
+`--no-comic` prevents publishing of comics when run, useful for just updating the schedule
 
-### Embed
-The embed file stores the dictionary representaion of the Embed objects sent
-to help with debugging. The `--embed-file` flag will override the `EMBED` value
-in the env file.
+Database and Schedule can be set in an environment file with the
+keys `DATABASE` and `SCHEDULE` respectively
 
-### Refresh
-The `--refresh` flag can be used multiple times or have multiple args passed to it.
-It takes those message ids and edits their color to try and get the embed to load.
-If there is an error it just skips over the request.
+### delete:
+usage: `prog delete [-f FILE [FILE ...]] [MID ...]`  
+Delete message ids passed in, files contain 1 message id per line.
 
-The `--refresh-file` acts the same way but is just a list of message ids, a single one
-on each line.
+### edit:
+usage: `prog edit JSON [JSON ...]`  
+Pass in JSON file with list of message ids to edit and how to edit them.
+Plaintext message will replace old message with the value of `text`. Embeds will
+replace the values of the keys that exist with their new ones. So if only `title`
+is added only title will be updated, none of the other values will be touched.
+Currently only 1 field is supported. Color will be randomly changed.
 
-The two flags can be used together.
+```json
+[
+  {
+    "mid": 12345,
+    "text": "Totally new value"
+  },
+  {
+    "mid": 67890,
+    "title":"New Title",
+    "url": "https://example.org",
+    "image": "https://example.org/image.png",
+    "footer": "YYYY-MM-DD",
+    "field": {
+      "name": "||spoiled hover text||",
+      "value": "tag1, tag2, tag3"
+    }
+  }
+]
+```
+
+### info:
+usage: `prog info [-q] [filename]`  
+Print info on bot's connection to discord. This includes the primary guild and channel,
+as well as the number of guilds the bot can connect to, their names, and the number of
+channels and their names in each guild.
+- `filename`: file to save the info to
+- `quite`: don't print the output to stdout (ususally used in conjunction with `filename`)
+
+### message:
+usage: `prog message [-f FILE [FILE ...]] [message ...]`  
+Sends plaintext messages to the primary channel. Each value of `message` is pased as a new
+message and files have the whole contents passed as one message.
+
+### refresh:
+usage: `prog refresh [-f FILE [FILE ...]] [MID ...]`  
+Refresh the color of an embed message to try and get any inbeds (image or video) to load.
+Each MID is an embed to refresh and files have 1 message id per line to refresh.
 
 ## File / Data Setup
 ### SQL Comic Database
@@ -133,27 +234,14 @@ TABLE Tag(
 );
 ```
 
-### Env File
-To load everything from the env file the following keys are needed:
-```
-DISCORD_TOKEN=<str>
-CHANNEL_NAME=<str>
-CHANNEL_ID=<int>
-GUILD_NAME=<str>
-GUILD_ID=<int>
-DATABASE=<path>
-SCHEDULE=<path>
-EMBED=<path>
-```
-
 ### Schedule File
 Schedule File is a json file that dictates which comics get published on each day.
 ```json
 {
-  'next_week': 'YYYY-MM-DD',
-  'days': {
-    'YYYY-MM-DD': [ 'YYYY-MM-DD', 'YYYY-MM-DD', 'YYYY-MM-DD', 'YYYY-MM-DD', 'YYYY-MM-DD', 'YYYY-MM-DD', 'YYYY-MM-DD' ],
-    'YYYY-MM-DD': [ 'YYYY-MM-DD', 'YYYY-MM-DD', 'YYYY-MM-DD', 'YYYY-MM-DD', 'YYYY-MM-DD', 'YYYY-MM-DD', 'YYYY-MM-DD' ]
+  "next_week": "YYYY-MM-DD",
+  "days": {
+    "YYYY-MM-DD": [ "YYYY-MM-DD", "YYYY-MM-DD", "YYYY-MM-DD", "YYYY-MM-DD", "YYYY-MM-DD", "YYYY-MM-DD", "YYYY-MM-DD" ],
+    "YYYY-MM-DD": [ "YYYY-MM-DD", "YYYY-MM-DD", "YYYY-MM-DD", "YYYY-MM-DD", "YYYY-MM-DD", "YYYY-MM-DD", "YYYY-MM-DD" ]
   }
 }
 ```
@@ -166,9 +254,5 @@ The `days` key is a dictionary used as to lookup what comics to publish on
 the key day. The present day gets looked up and the returned list gets passed
 to the Comics database.
 
-
-
 ## License
 [The Anti-Capitalist Software License (v 1.4)](https://anticapitalist.software)
-
-
