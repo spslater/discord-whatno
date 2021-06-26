@@ -145,10 +145,10 @@ class DiscordCLI(Client):
         message_parser.add_argument(
             "-f",
             "--file",
-            nargs="*",
+            nargs="+",
             dest="filename",
             help="send plaintext contents of a file as a message",
-            metavar="FILENAME",
+            metavar="FILE",
         )
         return message_parser
 
@@ -170,10 +170,10 @@ class DiscordCLI(Client):
         delete_parser.add_argument(
             "-f",
             "--file",
-            nargs="*",
+            nargs="+",
             dest="filename",
             help="message ids to delete from channel",
-            metavar="MID",
+            metavar="FILE",
         )
         return delete_parser
 
@@ -195,7 +195,7 @@ class DiscordCLI(Client):
         refresh_parser.add_argument(
             "-f",
             "--file",
-            nargs="*",
+            nargs="+",
             dest="filename",
             help="file with list of message ids to refresh",
             metavar="FILE",
@@ -212,7 +212,7 @@ class DiscordCLI(Client):
         edit_parser.set_defaults(func=self.edit_message)
         edit_parser.add_argument(
             "filename",
-            nargs="*",
+            nargs="+",
             help="JSON with info on what messages to edit and how",
             metavar="JSON",
         )
@@ -228,7 +228,7 @@ class DiscordCLI(Client):
         auto_parser.set_defaults(func=self.automate)
         auto_parser.add_argument(
             "filename",
-            nargs="*",
+            nargs="+",
             help="filename to load commands from",
             metavar="FILE",
         )
@@ -362,7 +362,7 @@ class DiscordCLI(Client):
         :type filename: str
         """
         user_args = []
-        for filename in args.filename or []:
+        for filename in args.filename:
             try:
                 with open(filename, "r") as fp:
                     user_args.extend(split(fp.read()))
@@ -499,7 +499,7 @@ class DiscordCLI(Client):
         )
 
         entries = []
-        for filename in args.filename or []:
+        for filename in args.filename:
             try:
                 with open(filename, "r") as fp:
                     data = load(fp)
@@ -693,7 +693,7 @@ class DiscordCLI(Client):
             args = self.parser.parse_args(parsed_args)
             await args.func(args)
 
-        await self.logout()
+        await self.close()
 
     async def on_error(self, *args, **kwargs):
         """Log information when CLient encounters an error and clean up connections"""
@@ -711,7 +711,7 @@ class DiscordCLI(Client):
             err_value,
             tb_string,
         )
-        await self.logout()
+        await self.close()
 
     def parse(self, arguments: list[str] = None):
         """Parse commands to call them"""
