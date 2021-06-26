@@ -256,5 +256,5 @@ class DoaReread(AbstractComic):
 
     async def on_error(self, *args, **kwargs):
         """Calls the DiscordCLI `on_error` and closes the database afterward"""
-        super().on_error()
+        await super().on_error()
         self._close_db()
