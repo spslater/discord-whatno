@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from json import dump, load
 from os import getenv
 from sqlite3 import Connection, Cursor, connect
+from time import sleep
 from typing import Union
 
 from discord import Embed
@@ -88,6 +89,20 @@ class DoaReread(AbstractComic):
                 "of comics to publish on specific days"
             ),
             metavar="FILENAME",
+        )
+        self.comic_parser.add_argument(
+            "--duration",
+            dest="duration",
+            type=int,
+            default=60,
+            help="how long to listen messages to update, in minutes",
+        )
+        self.comic_parser.add_argument(
+            "--no-wait",
+            dest="wait",
+            default=True,
+            action="store_false",
+            help="don't wait for refresh messages, close immediately",
         )
 
         self.conn: Connection = None
@@ -204,6 +219,17 @@ class DoaReread(AbstractComic):
 
         return self.default_embeds(entries)
 
+    async def _check_refresh(self, message, checked):
+        """Listen while waiting for a new message to come in on any channel"""
+        if message.reference and message.id not in checked:
+            ref_msg = await self._get_reference_message(message.reference)
+            if ref_msg.author.id == self.user.id:
+                if "refresh" in message.content:
+                    args = Namespace(refresh=[ref_msg.id], filename=None)
+                    await self.refresh_message(args)
+                    checked.append(message.id)
+        return checked
+
     async def send_comic(self, args: Namespace):
         """Send the comics for todays given to primary channel
 
@@ -215,6 +241,16 @@ class DoaReread(AbstractComic):
         if args.comic:
             await self.default_send_comic()
         self.update_schedule()
+        if args.wait:
+            self._logger.warning("watching for %s minutes", args.duration)
+            current = datetime.utcnow()
+            done = current + timedelta(minutes=args.duration)
+            checked = []
+            while current < done:
+                async for message in self.channel.history(after=current):
+                    checked = await self._check_refresh(message, checked)
+                sleep(1)
+                current = datetime.utcnow()
 
     def update_schedule(self):
         """Update the schedule file with the week's comics that were just published

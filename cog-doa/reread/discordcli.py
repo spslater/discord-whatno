@@ -350,6 +350,13 @@ class DiscordCLI(Client):
             with open(self.embed_file, "w+") as fp:
                 dump(data, fp, sort_keys=True, indent="\t")
 
+    async def _get_reference_message(self, reference):
+        return (
+            await super()
+            .get_channel(reference.channel_id)
+            .fetch_message(reference.message_id)
+        )
+
     async def automate(self, args: Namespace):
         """run a file to automate calls
 

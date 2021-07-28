@@ -66,6 +66,8 @@ commands:
                             filename of the sqlite3 database with the comic info stored in it
       -s FILENAME, --schedule FILENAME
                             filename of json document that contains the list of comics to publish on specific days
+      --duration DURATION   how long to listen messages to update, in minutes
+      --no-wait             don't wait for refresh messages, close immediately
 
   ------
   delete:
@@ -155,12 +157,17 @@ Files contain 1 command and it's arguments per line to be run sequentially.
 No protection against an automate call inside another file causeing an infinite loop.
 
 ### comic:
-usage: `prog comic [-n] [-d SQLITE3] [-s FILENAME] [day ...]`  
+usage: `prog comic [-n] [-d SQLITE3] [-s FILENAME] [--duration DURATION] [--no-wait] [day ...]`  
 Accepts a list of days to publish (none listed means just publish todays comics)
-`--no-comic` prevents publishing of comics when run, useful for just updating the schedule
+`--no-comic` prevents publishing of comics when run, useful for just updating the schedule or
+listening for refresh messages.
 
 Database and Schedule can be set in an environment file with the
 keys `DATABASE` and `SCHEDULE` respectively
+
+`--duration` is how many minutes the client should wait checking for messages that contain "refresh"
+to reload any comics who's embed didn't load properly.
+The `--no-wait` flag is to skip the refresh checks and close immediately.
 
 ### delete:
 usage: `prog delete [-f FILE [FILE ...]] [MID ...]`  
