@@ -23,12 +23,6 @@ def main():
         metavar="YAML",
     )
     parser.add_argument(
-        "--basedir",
-        default=getcwd(),
-        help="base directory to append workdir and savedir to",
-        metavar="DIR",
-    )
-    parser.add_argument(
         "--workdir", help="working directory where resource and comic files are saved"
     )
     parser.add_argument("--savedir", help="archive directory to save cbz files")
@@ -39,8 +33,8 @@ def main():
     with open(args.yaml, "r") as yml:
         data = load(yml.read(), Loader=Loader)
 
-    workdir_raw = args.workdir if args.workdir else data.get("workdir", None)
-    savedir_raw = args.savedir if args.savedir else data.get("savedir", None)
+    workdir = args.workdir if args.workdir else data.get("workdir", None)
+    savedir = args.savedir if args.savedir else data.get("savedir", None)
     comics = data.get("comics", None)
 
     missing = []
@@ -58,9 +52,6 @@ def main():
             missing_string,
         )
         sys.exit(1)
-
-    workdir = join(args.basedir, workdir_raw)
-    savedir = join(args.basedir, savedir_raw)
 
     logs.init(args=args)
 

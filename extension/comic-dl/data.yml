@@ -1,13 +1,13 @@
-workdir: 'projects/comics/'
-savedir: 'media/reading/webcomics/'
+workdir: '/mnt/unova/comics'
+savedir: '/srv/media/reading/webcomics/'
 comics:
   DumbingOfAge:
     loc: "DumbingOfAge/"
     name: "Dumbing of Age"
     url: "https://www.dumbingofage.com/2010/comic/book-1/01-move-in-day/home/"
     home: "https://www.dumbingofage.com/"
-    cur: True
-    alt: True
+    cur: true
+    alt: true
     alt_size: 16
     alt_color: [224, 238, 239]
     db: "DumbingOfAge.db"
@@ -20,11 +20,11 @@ comics:
     img:
       - id: 'comic'
       - tag: 'img'
-    nxt: 
+    nxt:
       - id: 'comic-foot'
       - tag: 'a'
         class: 'navi navi-next'
-    prev: 
+    prev:
       - id: 'comic-foot'
       - tag: 'a'
         class: 'navi navi-prev'
@@ -33,7 +33,7 @@ comics:
     name: "Order of the Stick"
     url: "https://www.giantitp.com/comics/oots.html"
     base: "https://www.giantitp.com/"
-    cur: True
+    cur: true
     img:
       - tag: 'table'
       - tag: 'tr'
