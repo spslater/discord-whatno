@@ -1,0 +1,4 @@
+*.log
+*.env
+whatno/extension
+!whatno/extension/wntestcog.py
