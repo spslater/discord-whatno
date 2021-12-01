@@ -2,3 +2,4 @@
 *.env
 whatno/extension
 !whatno/extension/wntestcog.py
+*.service
