@@ -5,25 +5,60 @@ commands from different cogs
 :class WhatnoBot: Discord Bot
 """
 import logging
-import sys
-from argparse import ArgumentParser
-from os import getenv
+from pathlib import Path
+from sys import exc_info
 from traceback import format_tb
 
+from discord import (
+    ExtensionFailed,
+    NoEntryPointError,
+)
 from discord.ext.commands import Bot, when_mentioned_or
-from dotenv import load_dotenv
 
 
 class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
     """Bot to talk to discord"""
 
-    def __init__(self, prefix=when_mentioned_or("..")):
+    def __init__(self, token, prefix=".."):
         self._logger = logging.getLogger(self.__class__.__name__)
+        if not token:
+            raise RuntimeError("No api token provided")
+        self.token = token
+
         super().__init__(
-            command_prefix=prefix,
+            command_prefix=when_mentioned_or(prefix),
             strip_after_prefix=True,
+            case_insensitive=True,
         )
-        self.token = None
+        self.loaded_extensions = set()
+        self.load_extensions()
+
+    def load_extensions(self):
+        """Load the extensions found in the extension folder"""
+        root = "whatno/extension"
+        module = root.replace("/", ".")
+        root = Path(root).resolve()
+        for filename in root.glob("*"):
+            if filename.match("__pycache__"):
+                continue
+
+            src = Path(filename)
+            rec = src.parent.resolve() / src.name if src.is_symlink() else src.resolve()
+            rel = ".".join([module, rec.relative_to(root).stem])
+
+            self._logger.info("loading: %s", rel)
+            try:
+                self.load_extension(rel)
+            except (
+                NoEntryPointError,
+                ExtensionFailed,
+            ) as e:
+                _, _, err_traceback = exc_info()
+                tb_list = "\n".join(format_tb(err_traceback))
+                tb_str = " | ".join(tb_list.splitlines())
+                self._logger.info("load? %s: %s | %s", rel, e, tb_str)
+            else:
+                self.loaded_extensions.add(rel)
 
     async def sync_commands(self):
         pass
@@ -41,7 +76,7 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
 
     async def on_error(self, *args, **kwargs):
         """Log information when CLient encounters an error and clean up connections"""
-        err_type, err_value, err_traceback = sys.exc_info()
+        err_type, err_value, err_traceback = exc_info()
         tb_list = "\n".join(format_tb(err_traceback))
         tb_string = " | ".join(tb_list.splitlines())
         self._logger.debug(
@@ -56,86 +91,6 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
             tb_string,
         )
         await self.close()
-
-    def parse(self, arguments: list[str] = None):
-        """Parse commands to call them"""
-        parser = ArgumentParser()
-        parser.add_argument(
-            "-o",
-            "--output",
-            dest="logfile",
-            help="log file",
-            metavar="FILENAME",
-        )
-        parser.add_argument(
-            "-q",
-            "--quite",
-            dest="quite",
-            default=False,
-            action="store_true",
-            help="quite output",
-        )
-        parser.add_argument(
-            "-l",
-            "--level",
-            dest="level",
-            default="info",
-            choices=["debug", "info", "warning", "error", "critical"],
-            help="logging level for output",
-            metavar="LEVEL",
-        )
-
-        parser.add_argument(
-            "-e",
-            "--env",
-            dest="envfile",
-            help="env file with connection info",
-            metavar="ENV",
-        )
-        parser.add_argument(
-            "-t",
-            "--token",
-            nargs=1,
-            dest="token",
-            help="Discord API Token.",
-            metavar="TOKEN",
-        )
-
-        args = parser.parse_args(arguments)
-        load_dotenv(args.envfile, verbose=(args.level == "DEBUG"))
-
-        log_level = {
-            "debug": logging.DEBUG,
-            "info": logging.INFO,
-            "warning": logging.WARNING,
-            "error": logging.ERROR,
-            "critical": logging.CRITICAL,
-        }
-
-        handler_list = (
-            [logging.StreamHandler(sys.stdout), logging.FileHandler(args.logfile)]
-            if args.logfile
-            else [logging.StreamHandler(sys.stdout)]
-        )
-
-        logging.basicConfig(
-            format="%(asctime)s\t[%(levelname)s]\t{%(module)s}\t%(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
-            level=log_level[args.level],
-            handlers=handler_list,
-        )
-        logging.getLogger("discord.client").setLevel(logging.INFO)
-        logging.getLogger("discord.gateway").setLevel(logging.WARN)
-
-        if args.quite:
-            logging.disable(logging.CRITICAL)
-
-        self.token = args.token or getenv("DISCORD_TOKEN", None)
-
-        if not self.token:
-            raise RuntimeError("No api token provided")
-
-        return self
 
     # pylint: disable=arguments-differ
     def run(self):

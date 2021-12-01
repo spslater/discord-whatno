@@ -1,5 +1,5 @@
 *.log
 *.env
 whatno/extension
-!whatno/extension/wntestcog.py
+!whatno/extension/wn*cog.py
 *.service
