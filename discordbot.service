@@ -1,0 +1,16 @@
+[Unit]
+Description=Whatno Discord Bot
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=uniontown
+WorkingDirectory=/srv/projects/discord/whatno
+ExecStart=/home/uniontown/.pyenv/versions/discord/bin/python -m whatno -e ./discord.env
+
+[Install]
+WantedBy=multi-user.target
+

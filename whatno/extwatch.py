@@ -122,7 +122,7 @@ class ExtensionEventHandler(FileSystemEventHandler):
         src, suffix = self._abs_src(src)
 
         isdir = src.is_dir() or (src.is_symlink() and src.resolve().is_dir())
-        valid = str(rel) != "." and (
+        valid = str(rel) not in (".", "__pycache__") and (
             list(src.glob("*.py")) if isdir else (suffix == ".py")
         )
 
