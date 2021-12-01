@@ -1,6 +1,8 @@
 """Watch for changes in the extensions for Discord"""
 import logging
 from pathlib import Path
+from sys import exc_info
+from traceback import format_tb
 from threading import Timer
 
 from discord import (
@@ -49,6 +51,8 @@ class ExtensionEventHandler(FileSystemEventHandler):
         self.deletethis = set()
         self.movethis = set()
         for filename in self.root.glob("*"):
+            if filename.match("__pycache__"):
+                continue
             rel = self._gen_module(filename)
             self._load(rel)
         self.timer = Timer(1.0, self._update_bot)
@@ -80,7 +84,10 @@ class ExtensionEventHandler(FileSystemEventHandler):
             NoEntryPointError,
             ExtensionFailed,
         ) as e:
-            self._logger.info("load? %s: %s", module, e)
+            _, _, err_traceback = exc_info()
+            tb_list = "\n".join(format_tb(err_traceback))
+            tb_str = " | ".join(tb_list.splitlines())
+            self._logger.info("load? %s: %s | %s", module, e, tb_str)
 
     def _unload(self, module):
         try:
@@ -90,7 +97,10 @@ class ExtensionEventHandler(FileSystemEventHandler):
             ExtensionNotLoaded,
             KeyError,
         ) as e:
-            self._logger.info("unload? %s: %s", module, e)
+            _, _, err_traceback = exc_info()
+            tb_list = "\n".join(format_tb(err_traceback))
+            tb_str = " | ".join(tb_list.splitlines())
+            self._logger.info("unload? %s: %s | %s", module, e, tb_str)
 
     def _update_bot(self):
         self.loadthis = self.loadthis - self.deletethis - self.movethis
