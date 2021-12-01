@@ -6,7 +6,6 @@ comics every day as part of a community reread.
 :class DoaReread: Discord Bot that publishes a weeks
     of DoA comics every day
 """
-import asyncio
 import logging
 import re
 from datetime import datetime, timedelta
@@ -197,7 +196,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
     """Actual DoA Reread Cog"""
 
     # pylint: disable=too-many-arguments
-    async def __init__(self, bot, envfile):
+    def __init__(self, bot, envfile):
         super().__init__()
         self._logger = logging.getLogger(self.__class__.__name__)
         self.bot = bot
@@ -280,8 +279,6 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         return embed
 
     def _schedule_comic(self):
-        if self.guild is None and self.channel is None:
-            asyncio.run(self._setup_connection())
         waitdate, waitfor = TimeTravel.next_noon()
         self._logger.info(
             "Publishing next batch of comics at %s (%ss)",
@@ -294,6 +291,8 @@ class DoaRereadCog(Cog, name="DoA Reread"):
     async def send_comic(self):
         """Send the comics for todays given to primary channel"""
         self._logger.info("Sending comics for today.")
+        if self.guild is None and self.channel is None:
+            await self._setup_connection()
         for entry in self.comics.todays_reread():
             embed = self.build_comic_embed(entry)
             self._logger.debug(embed.to_dict())

@@ -1,6 +1,7 @@
 """Comic Rereading Discord Bot"""
 from .rereadbot import *
 
-async def setup(bot):
+def setup(bot):
     """Setup the DoA Cogs"""
-    bot.add_cog(DoaRereadCog(bot, envfile="./.env"))
+    cog_reread = DoaRereadCog(bot, envfile="./.env")
+    bot.add_cog(cog_reread)

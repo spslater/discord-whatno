@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 
 def calc_path(filename):
     """Calculate a filepath based off of current file"""
-    logger.info("calc_path filename: %s", filename)
     if filename is None:
         return None
     filepath = Path(filename)
