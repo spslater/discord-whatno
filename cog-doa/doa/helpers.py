@@ -51,9 +51,10 @@ class TimeTravel:
         """Calculate date and number of seconds until the next noon"""
         now = datetime.now()
         today = datetime(now.year, now.month, now.day, 12, 0, 0)
-        until_noon = (today - now).total_seconds()
-        if until_noon > 0:
-            return until_noon
+        delta = (today - now).total_seconds()
+        if delta > 0:
+            date = today.strftime("%Y-%m-%d %H:%M:%S.%f %Z")
+            return date, delta
         tomorrow = today + timedelta(days=1)
         delta = (tomorrow - now).total_seconds()
         date = tomorrow.strftime("%Y-%m-%d %H:%M:%S.%f %Z")
