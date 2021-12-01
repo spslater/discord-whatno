@@ -6,6 +6,7 @@ comics every day as part of a community reread.
 :class DoaReread: Discord Bot that publishes a weeks
     of DoA comics every day
 """
+import asyncio
 import logging
 import re
 from datetime import datetime, timedelta
@@ -285,7 +286,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
             waitdate,
             waitfor,
         )
-        self.publish = Timer(waitfor, self.send_comic)
+        self.publish = Timer(waitfor, asyncio.run, [self.send_comic()])
         self.publish.start()
 
     async def send_comic(self):
