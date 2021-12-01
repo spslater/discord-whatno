@@ -18,12 +18,11 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
     """Bot to talk to discord"""
 
     def __init__(self, prefix=when_mentioned_or("..")):
+        self._logger = logging.getLogger(self.__class__.__name__)
         super().__init__(
             command_prefix=prefix,
             strip_after_prefix=True,
         )
-        self._logger = logging.getLogger(self.__class__.__name__)
-
         self.token = None
 
     async def sync_commands(self):
@@ -103,6 +102,7 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
         )
 
         args = parser.parse_args(arguments)
+        load_dotenv(args.envfile, verbose=(args.level == "DEBUG"))
 
         log_level = {
             "debug": logging.DEBUG,
@@ -124,10 +124,12 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
             level=log_level[args.level],
             handlers=handler_list,
         )
+        logging.getLogger("discord.client").setLevel(logging.INFO)
+        logging.getLogger("discord.gateway").setLevel(logging.WARN)
+
         if args.quite:
             logging.disable(logging.CRITICAL)
 
-        load_dotenv(args.envfile, verbose=(args.level == "DEBUG"))
         self.token = args.token or getenv("DISCORD_TOKEN", None)
 
         if not self.token:

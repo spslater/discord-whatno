@@ -18,11 +18,11 @@ class ExtensionWatcher:
     """Watch discord extensions for chagnes to reload them"""
 
     def __init__(self, path, bot):
+        self._logger = logging.getLogger(self.__class__.__name__)
         self.path = path
         self.event_handler = ExtensionEventHandler(bot=bot, root=path)
         self.observer = Observer()
         self.observer.schedule(self.event_handler, path, recursive=True)
-        self._logger = logging.getLogger(self.__class__.__name__)
 
     def stop(self):
         """Stop watcher"""
