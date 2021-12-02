@@ -41,4 +41,4 @@ class WNTestCog(Cog, name="General"):
     @command()
     async def source(self, ctx):
         """Get link to source code"""
-        await ctx.send("https://git.whatno.io/discord/whatno")
+        await ctx.send("<https://git.whatno.io/discord/whatno>")

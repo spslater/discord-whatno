@@ -1,8 +1,8 @@
 """Test the bot from the CLI"""
 import logging
 import sys
-from os import getenv
 from argparse import ArgumentParser
+from os import getenv
 
 from dotenv import load_dotenv
 
