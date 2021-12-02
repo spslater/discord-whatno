@@ -1,7 +1,10 @@
 """Helper methods for the DoA Cogs"""
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
+# from os import getenv
 from pathlib import Path
+
+from pytz import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -16,13 +19,32 @@ def calc_path(filename):
     return filepath.resolve()
 
 
+TZNAME = "US/Eastern"
+TIMEZONE = timezone(TZNAME)
+
+
 class TimeTravel:
     """Helpful Time Functions"""
 
+    # pylint: disable=invalid-name
+    tz = TIMEZONE
+
     @staticmethod
-    def datestr():
+    # pylint: disable=invalid-name
+    def timeoffset(tz=TZNAME):
+        """Get the hours and minutes to add to a loacal time to
+        get it as a  naive utc time"""
+        off = datetime.now(timezone(tz)).strftime("%z")
+        mult = 1 if off[0] == "-" else -1
+        hour = int(off[1:3]) * mult
+        mins = int(off[3:5]) * mult
+        return hour, mins
+
+    @staticmethod
+    def datestr(date=None):
         """Get the current date as a YYYY-MM-DD string"""
-        return datetime.now().strftime("%Y-%m-%d")
+        display = date or datetime.now()
+        return display.strftime("%Y-%m-%d")
 
     @staticmethod
     def week_day(year: int, week: int, weekday: int) -> str:
@@ -51,16 +73,11 @@ class TimeTravel:
             cls.week_day(year, week, 7),
         ]
 
-    @staticmethod
-    def next_noon() -> int:
-        """Calculate date and number of seconds until the next noon"""
-        now = datetime.now()
-        today = datetime(now.year, now.month, now.day, 12, 0, 0)
-        delta = (today - now).total_seconds()
-        if delta > 0:
-            date = today.strftime("%Y-%m-%d %H:%M:%S.%f %Z")
-            return date, delta
-        tomorrow = today + timedelta(days=1)
-        delta = (tomorrow - now).total_seconds()
-        date = tomorrow.strftime("%Y-%m-%d %H:%M:%S.%f %Z")
-        return date, delta
+
+# def allow_slash():
+#     """Guild ids to allow slash commands for"""
+#     return [
+#         int(g.strip())
+#         for g in getenv("DISCORD_ALLOW_SLASH", "").split(",")
+#         if g.strip()
+#     ]

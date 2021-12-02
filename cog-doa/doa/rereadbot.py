@@ -6,29 +6,35 @@ comics every day as part of a community reread.
 :class DoaReread: Discord Bot that publishes a weeks
     of DoA comics every day
 """
-import asyncio
 import logging
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 from json import dump, load
 from os import getenv
 from pathlib import Path
 from sqlite3 import Row
-from threading import Timer
 from time import sleep
 from typing import Union
 
 from discord import Colour, Embed, Forbidden, HTTPException, NotFound
-from discord.commands import slash_command
+# from discord.commands import slash_command
 from discord.ext.commands import Cog, command
+from discord.ext.tasks import loop
 from dotenv import load_dotenv
 
 from .comic import ComicDB
+
+# from .helpers import TimeTravel, calc_path, allow_slash
 from .helpers import TimeTravel, calc_path
 
-ALLOW_SLASH = [365677277821796354, 248732519204126720]
+# ALLOW_SLASH = allow_slash()
 
 logger = logging.getLogger(__name__)
+
+off_hour, off_mins = TimeTravel.timeoffset()
+CP_HOUR = 12 + off_hour
+CP_MINS = 0 + off_mins
+PUBLISH_TIME = time(CP_HOUR, CP_MINS)
 
 
 class Schedule:
@@ -101,7 +107,7 @@ class ComicInfo:
     def todays_reread(self, date=None):
         """Get information for comic reread"""
         self.database = self.connection.open()
-        date_string = date or datetime.strftime(datetime.now(), "%Y-%m-%d")
+        date_string = date or TimeTravel.datestr()
         self.schedule.load()
         days = tuple(self.schedule["days"][date_string])
         self._logger.debug("Getting comics on following days: %s", days)
@@ -135,7 +141,7 @@ class ComicInfo:
         """Update the schedule every week"""
         self._logger.info("Checking schedule to see if it needs updating")
         old_week = self.schedule["next_week"]
-        now = datetime.strftime(datetime.now(), "%Y-%m-%d")
+        now = TimeTravel.datestr()
         while old_week <= now:
             new_week = datetime.strptime(old_week, "%Y-%m-%d") + timedelta(days=7)
             new_week_str = datetime.strftime(new_week, "%Y-%m-%d")
@@ -214,16 +220,15 @@ class DoaRereadCog(Cog, name="DoA Reread"):
 
         self.comics = ComicInfo(getenv("DATABASE"), getenv("SCHEDULE"))
         self.embeds = ComicEmbeds(getenv("EMBEDS"))
-        self.publish = None
-        self._schedule_comic()
-
+        # function transformed by the @loop annotation
+        # pylint: disable=no-member
+        self.schedule_comics.start()
         self._logger.info("Completed DoA Reread setup! :D")
 
     def cog_unload(self):
-        # Yes, I know this throws the RuntimeWarning
-        # because I'm not waiting for the send_comic
-        # coroutine, but I don't know how to do that
-        self.publish.cancel()
+        # function transformed by the @loop annotation
+        # pylint: disable=no-member
+        self.schedule_comics.cancel()
 
     @staticmethod
     def _parse_list(original, cast=str):
@@ -279,17 +284,19 @@ class DoaRereadCog(Cog, name="DoA Reread"):
 
         return embed
 
-    def _schedule_comic(self):
-        waitdate, waitfor = TimeTravel.next_noon()
+    @loop(time=PUBLISH_TIME)
+    async def schedule_comics(self):
+        """Schedule the comics to auto publish"""
+        await self.bot.wait_until_ready()
+        await self.send_comic()
         self._logger.info(
-            "Publishing next batch of comics at %s (%ss)",
-            waitdate,
-            waitfor,
+            "Publishing next batch of comics at %s",
+            # function transformed by the @loop annotation
+            # pylint: disable=no-member
+            self.schedule_comics.next_iteration,
         )
-        self.publish = Timer(waitfor, asyncio.run, [self.send_comic()])
-        self.publish.start()
 
-    async def send_comic(self, date=None, channel_id=None, reschedule=True):
+    async def send_comic(self, date=None, channel_id=None):
         """Send the comics for todays given to primary channel"""
         self._logger.info(
             "Sending comics for today. (%s)",
@@ -323,8 +330,6 @@ class DoaRereadCog(Cog, name="DoA Reread"):
                 self.embeds[gid][comic_date] = mid
         self.embeds.save()
         self.comics.update_schedule()
-        if reschedule:
-            self._schedule_comic()
         self._logger.info("Publish complete! :)")
 
     async def refresh_embed(self, msg, embed) -> bool:
@@ -373,22 +378,20 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         is provided will publish comics for those days"""
         if not date:
             date = TimeTravel.datestr()
-        msg = await ctx.send(
-            "\N{OK HAND SIGN} Sendings Comics (will delete when all sent)"
-        )
-        await self.send_comic(date, ctx.message.channel.id, reschedule=False)
+        msg = await ctx.send("\N{OK HAND SIGN} Sendings Comics")
+        await self.send_comic(date, ctx.message.channel.id)
         await msg.delete()
 
-    @slash_command(guild_ids=ALLOW_SLASH, name="refresh")
-    async def slash_refresh(self, ctx, date):
-        """Slash command for refresh comic"""
-        msg = self.embeds.get(date)
-        embed = msg.embeds[0] if msg else None
-        if not embed:
-            await ctx.respond("No comic with that date is available to refresh")
-            return
-        refreshed = self.refresh_embed(msg, embed)
-        if refreshed:
-            await ctx.respond("Refreshed comic :D (hopefully it reloads properly)")
-        else:
-            await ctx.respond("Unable to refresh comic :(")
+    # @slash_command(guild_ids=ALLOW_SLASH, name="refresh")
+    # async def slash_refresh(self, ctx, date):
+    #     """Slash command for refresh comic"""
+    #     msg = self.embeds.get(date)
+    #     embed = msg.embeds[0] if msg else None
+    #     if not embed:
+    #         await ctx.respond("No comic with that date is available to refresh")
+    #         return
+    #     refreshed = self.refresh_embed(msg, embed)
+    #     if refreshed:
+    #         await ctx.respond("Refreshed comic :D (hopefully it reloads properly)")
+    #     else:
+    #         await ctx.respond("Unable to refresh comic :(")
