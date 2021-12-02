@@ -14,18 +14,17 @@ from json import dump, load
 from os import getenv
 from pathlib import Path
 from sqlite3 import Row
-from time import sleep
 from threading import Timer
+from time import sleep
 from typing import Union
 
-from discord import Embed, Colour, HTTPException, Forbidden
-from discord.ext.commands import Cog, command
+from discord import Colour, Embed, Forbidden, HTTPException, NotFound
 from discord.commands import slash_command
+from discord.ext.commands import Cog, command
 from dotenv import load_dotenv
 
-from .helpers import calc_path, TimeTravel
 from .comic import ComicDB
-
+from .helpers import TimeTravel, calc_path
 
 ALLOW_SLASH = [365677277821796354, 248732519204126720]
 
@@ -99,10 +98,10 @@ class ComicInfo:
         results = self.database.fetchall()
         return results
 
-    def todays_reread(self):
+    def todays_reread(self, date=None):
         """Get information for comic reread"""
         self.database = self.connection.open()
-        date_string = datetime.strftime(datetime.now(), "%Y-%m-%d")
+        date_string = date or datetime.strftime(datetime.now(), "%Y-%m-%d")
         self.schedule.load()
         days = tuple(self.schedule["days"][date_string])
         self._logger.debug("Getting comics on following days: %s", days)
@@ -177,6 +176,11 @@ class ComicEmbeds:
             self.load()
         del self.data[key]
 
+    def __contains__(self, key):
+        if self.data is None:
+            self.load()
+        return key in self.data
+
     def get(self, key, default=None):
         """Get value or default from data"""
         return self.data.get(key, default=default)
@@ -215,52 +219,48 @@ class DoaRereadCog(Cog, name="DoA Reread"):
 
         self._logger.info("Completed DoA Reread setup! :D")
 
+    def cog_unload(self):
+        # Yes, I know this throws the RuntimeWarning
+        # because I'm not waiting for the send_comic
+        # coroutine, but I don't know how to do that
+        self.publish.cancel()
+
+    @staticmethod
+    def _parse_list(original, cast=str):
+        return [cast(g.strip()) for g in original.split(",") if g.strip()]
+
     async def _setup_connection(self):
-        given_guild = getenv("DISCORD_GUILD")
-        guild_id = guild_name = None
-        try:
-            guild_id = int(given_guild)
-        except (TypeError, ValueError):
-            guild_name = given_guild
-
-        if guild_id is None and guild_name is not None:
-            async for guild in self.fetch_guilds():
-                if guild.name == guild_name:
-                    guild_id = int(guild.id)
-                    break
-        if guild_id is None:
-            raise RuntimeError("Provided Guild is not an available guild")
-        self.guild = self.get_guild(guild_id)
-
-        given_channel = getenv("DISCORD_CHANNEL")
-        channel_id = channel_name = None
-        try:
-            channel_id = int(given_channel)
-        except (TypeError, ValueError):
-            channel_name = given_channel
-
-        if channel_id is None:
-            self._logger.debug("Getting channel.")
-            channels = []
+        given_channels = []
+        for given_channel in self._parse_list(getenv("COMIC_CHANNELS")):
+            channel_id = channel_name = None
             try:
-                self._logger.debug("Trying to get channel from specific guild.")
-                channels = self.guild.fetch_channels()
-            except RuntimeError:
-                self._logger.debug(
-                    (
-                        "Error getting channels from guild, "
-                        "trying to get from all availible channels."
-                    )
-                )
-                channels = self.get_all_channels()
+                channel_id = int(given_channel)
+            except (TypeError, ValueError):
+                channel_name = given_channel
 
-            for channel in channels:
-                if channel.name == channel_name:
-                    channel_id = int(channel.id)
-                    break
             if channel_id is None:
-                raise RuntimeError("Provided channel is not an available channels")
-        self.channel = self.get_channel(channel_id)
+                self._logger.debug("Getting channel.")
+                channels = []
+                try:
+                    self._logger.debug("Trying to get channel from specific guild.")
+                    channels = self.guild.fetch_channels()
+                except RuntimeError:
+                    self._logger.debug(
+                        (
+                            "Error getting channels from guild, "
+                            "trying to get from all availible channels."
+                        )
+                    )
+                    channels = self.get_all_channels()
+
+                for channel in channels:
+                    if channel.name == channel_name:
+                        channel_id = int(channel.id)
+                        break
+                if channel_id is None:
+                    raise RuntimeError("Provided channel is not an available channels")
+            given_channels.append(channel_id)
+        self.channel = given_channels
 
     @staticmethod
     def build_comic_embed(entry: dict[str, str]) -> Embed:
@@ -289,19 +289,43 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         self.publish = Timer(waitfor, asyncio.run, [self.send_comic()])
         self.publish.start()
 
-    async def send_comic(self):
+    async def send_comic(self, date=None, channel_id=None, reschedule=True):
         """Send the comics for todays given to primary channel"""
-        self._logger.info("Sending comics for today.")
-        if self.guild is None and self.channel is None:
-            await self._setup_connection()
-        for entry in self.comics.todays_reread():
-            embed = self.build_comic_embed(entry)
-            self._logger.debug(embed.to_dict())
-            msg = await self.channel.send(embed=embed)
-            self.embeds[entry["release"]] = msg
-            sleep(3)
+        self._logger.info(
+            "Sending comics for today. (%s)",
+            (date or TimeTravel.datestr()),
+        )
+        if channel_id is None:
+            if self.channel is None:
+                await self._setup_connection()
+            channels = self.channel
+        elif not isinstance(channel_id, list):
+            channels = [int(channel_id)]
+        else:
+            channels = channel_id
+        comics = [
+            (e["release"], self.build_comic_embed(e))
+            for e in self.comics.todays_reread(date)
+        ]
+        self.embeds.load()
+        for cid in channels:
+            channel = self.bot.get_channel(cid)
+            embed_ids = []
+            for release, comic in comics:
+                self._logger.debug(comic.to_dict())
+                msg = await channel.send(embed=comic)
+                embed_ids.append((release, msg.id))
+                sleep(1)
+            gid = str(channel.guild.id)
+            for comic_date, mid in embed_ids:
+                if gid not in self.embeds:
+                    self.embeds[gid] = {}
+                self.embeds[gid][comic_date] = mid
+        self.embeds.save()
         self.comics.update_schedule()
-        self._schedule_comic()
+        if reschedule:
+            self._schedule_comic()
+        self._logger.info("Publish complete! :)")
 
     async def refresh_embed(self, msg, embed) -> bool:
         """Perform embed refresh"""
@@ -320,7 +344,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
 
     @command()
     async def refresh(self, ctx, date=None):
-        """Prefix Command for refreshing comic"""
+        """Refresh the comic to get the embed working"""
         if not (ctx.message.reference or date):
             await ctx.send(
                 (
@@ -329,13 +353,31 @@ class DoaRereadCog(Cog, name="DoA Reread"):
                 )
             )
             return
-        with ctx.typing():
-            ref = ctx.message.reference
-            mid = ref.message_id if ref else self.embeds.get(date)
-            msg = await ctx.channel.fetch_message(mid)
-            embed = msg.embeds[0] if msg else None
-            if embed:
-                await self.refresh_embed(msg, embed)
+        ref = ctx.message.reference
+        message_ids = [ref.message_id] if ref else self.embeds.get(date)
+        msg = None
+        for mid in message_ids:
+            try:
+                msg = await ctx.channel.fetch_message(mid)
+            except (Forbidden, NotFound):
+                pass
+            else:
+                break
+        embed = msg.embeds[0] if msg else None
+        if embed:
+            await self.refresh_embed(msg, embed)
+
+    @command(name="publish")
+    async def force_publish(self, ctx, date=None):
+        """Publish the days comics, date (YYYY-MM-DD)
+        is provided will publish comics for those days"""
+        if not date:
+            date = TimeTravel.datestr()
+        msg = await ctx.send(
+            "\N{OK HAND SIGN} Sendings Comics (will delete when all sent)"
+        )
+        await self.send_comic(date, ctx.message.channel.id, reschedule=False)
+        await msg.delete()
 
     @slash_command(guild_ids=ALLOW_SLASH, name="refresh")
     async def slash_refresh(self, ctx, date):

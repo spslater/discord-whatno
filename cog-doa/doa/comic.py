@@ -1,7 +1,7 @@
 """Manipulation of the DoA Comics database"""
 import logging
 from pathlib import Path
-from sqlite3 import Connection, Cursor, connect, Row
+from sqlite3 import Connection, Cursor, Row, connect
 
 from .helpers import calc_path
 
@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 class ComicDB:
     """Comic DB Interface"""
+
     def __init__(self, dbfile):
         self.filename: Path = calc_path(dbfile)
         if not self.filename:
@@ -19,9 +20,9 @@ class ComicDB:
 
     def open(self):
         """Open a connection to the database and return a cursor"""
-        self.conn: Connection = connect(f"file:{self.filename}?mode=ro", url=True)
-        self.database: Cursor = self.conn.cursor()
+        self.conn: Connection = connect(f"file:{self.filename}?mode=ro", uri=True)
         self.conn.row_factory = Row
+        self.database: Cursor = self.conn.cursor()
         return self.database
 
     def close(self):
