@@ -16,7 +16,8 @@ from sqlite3 import Row
 from time import sleep
 from typing import Union
 
-from discord import Colour, Embed, Forbidden, HTTPException, NotFound
+from discord import Colour, Embed, Emoji, Forbidden, HTTPException, NotFound
+
 # from discord.commands import slash_command
 from discord.ext.commands import Cog, command
 from discord.ext.tasks import loop
@@ -162,6 +163,7 @@ class ComicEmbeds:
     """Embed information for when refreshing comics"""
 
     def __init__(self, embeds):
+        self._logger = logging.getLogger(self.__class__.__name__)
         self.filename: Path = calc_path(embeds)
         if not self.filename:
             raise ValueError("No embeds file for previously publish comics provided")
@@ -170,26 +172,26 @@ class ComicEmbeds:
     def __getitem__(self, key):
         if self.data is None:
             self.load()
-        return self.data[key]
+        return self.data[str(key)]
 
     def __setitem__(self, key, value):
         if self.data is None:
             self.load()
-        self.data[key] = value
+        self.data[str(key)] = value
 
     def __delitem__(self, key):
         if self.data is None:
             self.load()
-        del self.data[key]
+        del self.data[str(key)]
 
     def __contains__(self, key):
         if self.data is None:
             self.load()
-        return key in self.data
+        return str(key) in self.data
 
     def get(self, key, default=None):
         """Get value or default from data"""
-        return self.data.get(key, default=default)
+        return self.data.get(str(key), default=default)
 
     def load(self):
         """Load data from file"""
@@ -219,6 +221,11 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         self.channel = None
 
         self.comics = ComicInfo(getenv("DATABASE"), getenv("SCHEDULE"))
+        self._logger.info(
+            "embed file: %s -> %s",
+            getenv("EMBEDS"),
+            calc_path(getenv("EMBEDS")),
+        )
         self.embeds = ComicEmbeds(getenv("EMBEDS"))
         # function transformed by the @loop annotation
         # pylint: disable=no-member
@@ -348,8 +355,9 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         return False
 
     @command()
-    async def refresh(self, ctx, date=None):
+    async def refresh(self, ctx, *date):
         """Refresh the comic to get the embed working"""
+        self._logger.info("dates: %s", date)
         if not (ctx.message.reference or date):
             await ctx.send(
                 (
@@ -359,7 +367,12 @@ class DoaRereadCog(Cog, name="DoA Reread"):
             )
             return
         ref = ctx.message.reference
-        message_ids = [ref.message_id] if ref else self.embeds.get(date)
+        message_ids = (
+            [ref.message_id]
+            if ref
+            else [self.embeds.get(ctx.guild.id, {}).get(d) for d in date]
+        )
+        self._logger.info("mids: %s", message_ids)
         msg = None
         for mid in message_ids:
             try:
@@ -367,10 +380,11 @@ class DoaRereadCog(Cog, name="DoA Reread"):
             except (Forbidden, NotFound):
                 pass
             else:
-                break
-        embed = msg.embeds[0] if msg else None
-        if embed:
-            await self.refresh_embed(msg, embed)
+                embed = msg.embeds[0] if msg else None
+                if embed:
+                    self._logger.info("Refreshing Embed: %s", embed.to_dict())
+                    await self.refresh_embed(msg, embed)
+        await ctx.message.add_reaction("\N{OK HAND SIGN}")
 
     @command(name="publish")
     async def force_publish(self, ctx, date=None):
