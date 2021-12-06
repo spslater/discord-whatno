@@ -24,6 +24,16 @@ class WNTestCog(Cog, name="General"):
         self.bot = bot
 
     @command()
+    async def ping(self, ctx):
+        """ping"""
+        return await ctx.send("pong")
+
+    @command()
+    async def pong(self, ctx):
+        """pong"""
+        return await ctx.send("ping")
+
+    @command()
     async def test(self, ctx):
         """Send a message to test this command is working
 
