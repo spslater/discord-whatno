@@ -220,13 +220,13 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         self.guild = None
         self.channel = None
 
-        self.comics = ComicInfo(getenv("DATABASE"), getenv("SCHEDULE"))
+        self.comics = ComicInfo(getenv("DOA_DATABASE"), getenv("DOA_SCHEDULE"))
         self._logger.info(
             "embed file: %s -> %s",
-            getenv("EMBEDS"),
-            calc_path(getenv("EMBEDS")),
+            getenv("DOA_EMBEDS"),
+            calc_path(getenv("DOA_EMBEDS")),
         )
-        self.embeds = ComicEmbeds(getenv("EMBEDS"))
+        self.embeds = ComicEmbeds(getenv("DOA_EMBEDS"))
         # function transformed by the @loop annotation
         # pylint: disable=no-member
         self.schedule_comics.start()
