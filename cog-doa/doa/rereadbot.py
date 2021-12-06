@@ -384,7 +384,11 @@ class DoaRereadCog(Cog, name="DoA Reread"):
                 if embed:
                     self._logger.info("Refreshing Embed: %s", embed.to_dict())
                     await self.refresh_embed(msg, embed)
-        await ctx.message.add_reaction("\N{OK HAND SIGN}")
+        #await ctx.message.add_reaction("\N{OK HAND SIGN}")
+        try:
+            await ctx.message.add_reaction("<:wave_Joyce:780682895907618907>")
+        except:
+            await ctx.message.add_reaction("\N{OK HAND SIGN}")
 
     @command(name="publish")
     async def force_publish(self, ctx, date=None):
