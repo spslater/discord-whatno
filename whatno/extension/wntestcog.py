@@ -1,6 +1,7 @@
 """Test and general functions Cog"""
 import logging
 
+from discord.ui import Button, View
 from discord.commands import slash_command
 from discord.ext.commands import Cog, command
 
@@ -41,4 +42,17 @@ class WNTestCog(Cog, name="General"):
     @command()
     async def source(self, ctx):
         """Get link to source code"""
-        await ctx.send("<https://git.whatno.io/discord/whatno>")
+        await ctx.send(
+            "The source code to the whatno bot and other things it can do",
+            view=SourceLink(),
+        )
+
+
+class SourceLink(View):
+    """Create ui button to link to the source code"""
+
+    def __init__(self):
+        super().__init__()
+        self.add_item(
+            Button(label="Source Code", url="https://git.whatno.io/discord/whatno")
+        )
