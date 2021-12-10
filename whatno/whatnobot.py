@@ -99,7 +99,18 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
         await self.close()
 
     async def on_command_error(self, context, exception):
-        self._logger.warning("%s", exception)
+        self._logger.warning(
+            "%s; guild %s (%s); channel %s (%s); mid: %s; author: %s (%s); message: %s",
+            exception,
+            context.guild.name,
+            context.guild.id,
+            context.channel.name,
+            context.channel.id,
+            context.message.id,
+            context.author.nick,
+            context.author.id,
+            context.message.content,
+        )
 
     # pylint: disable=arguments-differ
     def run(self):
