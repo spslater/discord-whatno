@@ -21,6 +21,7 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
         if not token:
             raise RuntimeError("No api token provided")
         self.token = token
+        self.prefix = prefix
 
         super().__init__(
             command_prefix=when_mentioned_or(prefix),
@@ -68,6 +69,10 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
 
     async def sync_commands(self):
         pass
+
+    async def on_message(self, message):
+        if message.content.startswith(self.prefix) or message.content.startswith(f"<@!{self.user.id}>"):
+            await self.process_commands(message)
 
     async def on_ready(self):
         """Called by the Client after all prep data has been recieved from Discord
