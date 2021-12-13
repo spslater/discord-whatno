@@ -67,11 +67,34 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
             else:
                 self.loaded_extensions.add(module)
 
+    # pylint: disable=too-many-arguments
+    async def get_history(
+        self,
+        channel_id,
+        user_id=None,
+        before=None,
+        after=None,
+        oldest_first=True,
+    ):
+        """Get history as a list from a channel"""
+        channel = await self.fetch_channel(channel_id)
+        history = channel.history(
+            limit=None,
+            before=before,
+            after=after,
+            oldest_first=oldest_first,
+        )
+        if user_id:
+            history = history.filter(lambda msg: msg.author.id == user_id)
+        return history
+
     async def sync_commands(self):
         pass
 
     async def on_message(self, message):
-        if message.content.startswith(self.prefix) or message.content.startswith(f"<@!{self.user.id}>"):
+        if message.content.startswith(self.prefix) or message.content.startswith(
+            f"<@!{self.user.id}>"
+        ):
             await self.process_commands(message)
 
     async def on_ready(self):
