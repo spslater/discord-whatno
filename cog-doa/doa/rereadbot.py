@@ -16,17 +16,13 @@ from time import sleep
 
 from discord import Colour, Embed, Forbidden, HTTPException, NotFound
 
-# from discord.commands import slash_command
 from discord.ext.commands import Cog, command, is_owner
 from discord.ext.tasks import loop
 from dotenv import load_dotenv
 
 from .comic import ComicInfo
-
-# from .helpers import TimeTravel, calc_path, allow_slash
 from .helpers import TimeTravel, calc_path
 
-# ALLOW_SLASH = allow_slash()
 
 logger = logging.getLogger(__name__)
 
@@ -374,17 +370,3 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         msg = await ctx.send("\N{OK HAND SIGN} Sendings Comics")
         await self.send_comic(date, ctx.message.channel.id)
         await msg.delete()
-
-    # @slash_command(guild_ids=ALLOW_SLASH, name="refresh")
-    # async def slash_refresh(self, ctx, date):
-    #     """Slash command for refresh comic"""
-    #     msg = self.embeds.get(date)
-    #     embed = msg.embeds[0] if msg else None
-    #     if not embed:
-    #         await ctx.respond("No comic with that date is available to refresh")
-    #         return
-    #     refreshed = self.refresh_embed(msg, embed)
-    #     if refreshed:
-    #         await ctx.respond("Refreshed comic :D (hopefully it reloads properly)")
-    #     else:
-    #         await ctx.respond("Unable to refresh comic :(")

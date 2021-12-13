@@ -1,8 +1,6 @@
 """Helper methods for the DoA Cogs"""
 import logging
 from datetime import datetime, timedelta
-
-# from os import getenv
 from pathlib import Path
 
 from pytz import timezone
@@ -91,12 +89,3 @@ class TimeTravel:
             cls.week_day(year, week, 6),
             cls.week_day(year, week, 7),
         ]
-
-
-# def allow_slash():
-#     """Guild ids to allow slash commands for"""
-#     return [
-#         int(g.strip())
-#         for g in getenv("DISCORD_ALLOW_SLASH", "").split(",")
-#         if g.strip()
-#     ]
