@@ -31,13 +31,9 @@ from .helpers import TimeTravel, calc_path
 logger = logging.getLogger(__name__)
 
 off_hour, off_mins = TimeTravel.timeoffset()
-CP_HOUR = 13 + off_hour
-CP_MINS = 27 + off_mins
-PUBLISH_TIME = [
-    time(CP_HOUR, CP_MINS, 0),
-    time(CP_HOUR, CP_MINS, 20),
-    time(CP_HOUR, CP_MINS, 40),
-]
+CP_HOUR = 12 + off_hour
+CP_MINS = 0 + off_mins
+PUBLISH_TIME = time(CP_HOUR, CP_MINS)
 
 
 class ComicEmbeds:
