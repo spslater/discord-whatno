@@ -123,21 +123,19 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         is_bot = message.author.id == self.latest_bot
         return is_channel and is_bot
 
-    # @Cog.listener()
-    # async def on_raw_reaction_add(self, payload):
-    #     """Watch for reacts to things in the servers"""
-    #     msg = await self.fetch_message(payload.channel_id, payload.message_id)
-    #     latest_react = self._is_latest_react(msg)
-    #     if latest_react:
-    #         self._logger.info("add %s | %s",payload.emoji,payload.user_id)
+    @Cog.listener()
+    async def on_raw_reaction_add(self, payload):
+        """Watch for reacts to things in the servers"""
+        msg = await self.fetch_message(payload.channel_id, payload.message_id)
+        if self._is_latest_react(msg):
+            self._logger.info("react add %s | %s",payload.emoji,payload.user_id)
 
-    # @Cog.listener()
-    # async def on_raw_reaction_remove(self, payload):
-    #     """Watch for reacts to things in the servers"""
-    #     msg = await self.fetch_message(payload.channel_id, payload.message_id)
-    #     latest_react = self._is_latest_react(msg)
-    #     if latest_react:
-    #         self._logger.info("rmv %s | %s",payload.emoji,payload.user_id)
+    @Cog.listener()
+    async def on_raw_reaction_remove(self, payload):
+        """Watch for reacts to things in the servers"""
+        msg = await self.fetch_message(payload.channel_id, payload.message_id)
+        if self._is_latest_react(msg):
+            self._logger.info("react remove %s | %s",payload.emoji,payload.user_id)
 
     async def _save_reacts(self, message):
         """Save react info to database"""
