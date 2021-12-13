@@ -97,11 +97,6 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         self.latest_bot = int(getenv("DOA_LATEST_BOT"))
 
         self.comics = ComicInfo(getenv("DOA_DATABASE"), getenv("DOA_SCHEDULE"))
-        self._logger.info(
-            "embed file: %s -> %s",
-            getenv("DOA_EMBEDS"),
-            calc_path(getenv("DOA_EMBEDS")),
-        )
         self.embeds = ComicEmbeds(getenv("DOA_EMBEDS"))
         # function transformed by the @loop annotation
         # pylint: disable=no-member
