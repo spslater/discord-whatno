@@ -1,2 +1,2 @@
-git+https://github.com/Pycord-Development/pycord
+git+https://github.com/Pycord-Development/pycord@16370371989d9045d2f8d8d21981ed073be9e796
 python-dotenv==0.19.2
