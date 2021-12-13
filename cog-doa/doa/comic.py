@@ -16,7 +16,6 @@ class ComicDB:
     """Comic DB Interface"""
 
     def __init__(self, dbfile, readonly=True):
-        self._logger = logging.getLogger(self.__class__.__name__)
         self.readonly = readonly
         self.filename: Path = calc_path(dbfile)
         if not self.filename:
@@ -90,7 +89,6 @@ class ComicInfo:
     """Manage and get Comic information"""
 
     def __init__(self, database, schedule):
-        self._logger = logging.getLogger(self.__class__.__name__)
         self.database_file = database
         self.schedule_file = schedule
 
@@ -163,11 +161,11 @@ class ComicInfo:
         with self._schedule() as schedule:
             date_string = date or TimeTravel.datestr()
             days = tuple(schedule["days"][date_string])
-            self._logger.debug("Getting comics on following days: %s", days)
+            logger.debug("Getting comics on following days: %s", days)
 
         entries = []
         comics = self.released_on(days)
-        self._logger.debug("%s comics from current week", len(comics))
+        logger.debug("%s comics from current week", len(comics))
         for comic in comics:
             release = comic["release"]
             image = comic["image"].split("_", maxsplit=3)[3]
@@ -190,7 +188,7 @@ class ComicInfo:
 
     def update_schedule(self):
         """Update the schedule every week"""
-        self._logger.info("Checking schedule to see if it needs updating")
+        logger.info("Checking schedule to see if it needs updating")
         with self._schedule() as schedule:
             old_week = schedule["next_week"]
             now = TimeTravel.datestr()

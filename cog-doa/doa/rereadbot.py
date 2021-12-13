@@ -36,7 +36,6 @@ class ComicEmbeds:
     """Embed information for when refreshing comics"""
 
     def __init__(self, embeds):
-        self._logger = logging.getLogger(self.__class__.__name__)
         self.filename: Path = calc_path(embeds)
         if not self.filename:
             raise ValueError("No embeds file for previously publish comics provided")
@@ -81,10 +80,8 @@ class ComicEmbeds:
 class DoaRereadCog(Cog, name="DoA Reread"):
     """Actual DoA Reread Cog"""
 
-    # pylint: disable=too-many-arguments
     def __init__(self, bot, envfile):
         super().__init__()
-        self._logger = logging.getLogger(self.__class__.__name__)
         self.bot = bot
 
         envpath = calc_path(envfile)
@@ -101,7 +98,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         # function transformed by the @loop annotation
         # pylint: disable=no-member
         self.schedule_comics.start()
-        self._logger.info("Completed DoA Reread setup! :D")
+        logger.info("Completed DoA Reread setup! :D")
 
     def cog_unload(self):
         # function transformed by the @loop annotation
@@ -123,14 +120,14 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         """Watch for reacts to things in the servers"""
         msg = await self.fetch_message(payload.channel_id, payload.message_id)
         if self._is_latest_react(msg):
-            self._logger.info("react add %s | %s",payload.emoji,payload.user_id)
+            logger.debug("react add %s | %s",payload.emoji,payload.user_id)
 
     @Cog.listener()
     async def on_raw_reaction_remove(self, payload):
         """Watch for reacts to things in the servers"""
         msg = await self.fetch_message(payload.channel_id, payload.message_id)
         if self._is_latest_react(msg):
-            self._logger.info("react remove %s | %s",payload.emoji,payload.user_id)
+            logger.debug("react remove %s | %s",payload.emoji,payload.user_id)
 
     async def _save_reacts(self, message):
         """Save react info to database"""
@@ -145,7 +142,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
                 try:
                     uid = re.match(r"<@!*([0-9]+)>", user.mention).group(1)
                 except AttributeError:
-                    self._logger.info(
+                    logger.debug(
                         "no user id match in %s for %s: %s",
                         mid,
                         user,
@@ -154,8 +151,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
                 else:
                     if uid != self.latest_bot:
                         reacts.append((mid, uid, emoji))
-        self.comics.save_reacts(reacts)
-        self._logger.info(
+        logger.info(
             "Saving %s reacts from %s for comic %s | %s",
             len(reacts),
             message.created_at,
@@ -168,7 +164,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         """Saving the reacts for the previous days comic"""
         if not self._is_latest_react(message):
             return
-        self._logger.info("Saving the reacts for the previous days comic")
+        logger.info("Saving the reacts for the previous days comic")
         now = TimeTravel.timestamp()
         before = TimeTravel.utcfromtimestamp(now - 3600)
         after = before - timedelta(days=1, hours=12)
@@ -190,7 +186,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
             fromstr = "2021-08-01 00:00:00"
         else:
             fromstr = f"{fromstr.strip()} 00:00:00"
-        self._logger.info("Manually saving reacts since %s", fromstr)
+        logger.info("Manually saving reacts since %s", fromstr)
         after = TimeTravel.fromstr(fromstr)
         async for message in (
             await self.bot.get_history(
@@ -216,13 +212,13 @@ class DoaRereadCog(Cog, name="DoA Reread"):
                 channel_name = given_channel
 
             if channel_id is None:
-                self._logger.debug("Getting channel.")
+                logger.debug("Getting channel.")
                 channels = []
                 try:
-                    self._logger.debug("Trying to get channel from specific guild.")
+                    logger.debug("Trying to get channel from specific guild.")
                     channels = self.guild.fetch_channels()
                 except RuntimeError:
-                    self._logger.debug(
+                    logger.debug(
                         (
                             "Error getting channels from guild, "
                             "trying to get from all availible channels."
@@ -261,7 +257,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         """Schedule the comics to auto publish"""
         await self.bot.wait_until_ready()
         await self.send_comic()
-        self._logger.info(
+        logger.info(
             "Publishing next batch of comics at %s",
             # function transformed by the @loop annotation
             # pylint: disable=no-member
@@ -270,7 +266,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
 
     async def send_comic(self, date=None, channel_id=None):
         """Send the comics for todays given to primary channel"""
-        self._logger.info(
+        logger.info(
             "Sending comics for today. (%s)",
             (date or TimeTravel.datestr()),
         )
@@ -291,7 +287,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
             channel = self.bot.get_channel(cid)
             embed_ids = []
             for release, comic in comics:
-                self._logger.debug(comic.to_dict())
+                logger.debug(comic.to_dict())
                 msg = await channel.send(embed=comic)
                 embed_ids.append((release, msg.id))
                 sleep(1)
@@ -302,7 +298,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
                 self.embeds[gid][comic_date] = mid
         self.embeds.save()
         self.comics.update_schedule()
-        self._logger.info("Publish complete! :)")
+        logger.info("Publish complete! :)")
 
     async def refresh_embed(self, msg, embed) -> bool:
         """Perform embed refresh"""
@@ -312,7 +308,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
                 await msg.edit(embed=embed)
                 return True
             except (HTTPException, Forbidden) as e:
-                self._logger.warning(
+                logger.warning(
                     'Unable to refresh message "%s": %s',
                     msg.id,
                     e,
@@ -322,7 +318,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
     @command()
     async def refresh(self, ctx, *date):
         """Refresh the comic to get the embed working"""
-        self._logger.info("dates: %s", date)
+        logger.info("refreshing dates: %s", date)
         if not (ctx.message.reference or date):
             await ctx.send(
                 (
@@ -337,7 +333,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
             if ref
             else [self.embeds.get(ctx.guild.id, {}).get(d) for d in date]
         )
-        self._logger.info("mids: %s", message_ids)
+        logger.debug("refresh message ids: %s", message_ids)
         msg = None
         for mid in message_ids:
             try:
@@ -347,9 +343,8 @@ class DoaRereadCog(Cog, name="DoA Reread"):
             else:
                 embed = msg.embeds[0] if msg else None
                 if embed:
-                    self._logger.info("Refreshing Embed: %s", embed.to_dict())
+                    logger.debug("Refreshing Embed: %s", embed.to_dict())
                     await self.refresh_embed(msg, embed)
-        # await ctx.message.add_reaction("\N{OK HAND SIGN}")
         try:
             await ctx.message.add_reaction("<:wave_Joyce:780682895907618907>")
         except:
@@ -361,6 +356,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         is provided will publish comics for those days"""
         if not date:
             date = TimeTravel.datestr()
+        logger.info("manually publishing comics for date %s", date)
         msg = await ctx.send("\N{OK HAND SIGN} Sendings Comics")
         await self.send_comic(date, ctx.message.channel.id)
         await msg.delete()
