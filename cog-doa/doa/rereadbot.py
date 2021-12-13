@@ -8,22 +8,20 @@ comics every day as part of a community reread.
 """
 import logging
 import re
-from datetime import datetime, time, timedelta
+from datetime import time, timedelta
 from json import dump, load
 from os import getenv
 from pathlib import Path
-from sqlite3 import Row
 from time import sleep
-from typing import Union
 
-from discord import Colour, Embed, Emoji, Forbidden, HTTPException, NotFound
+from discord import Colour, Embed, Forbidden, HTTPException, NotFound
 
 # from discord.commands import slash_command
-from discord.ext.commands import Cog, command
+from discord.ext.commands import Cog, command, is_owner
 from discord.ext.tasks import loop
 from dotenv import load_dotenv
 
-from .comic import ComicDB
+from .comic import ComicInfo
 
 # from .helpers import TimeTravel, calc_path, allow_slash
 from .helpers import TimeTravel, calc_path
@@ -33,130 +31,13 @@ from .helpers import TimeTravel, calc_path
 logger = logging.getLogger(__name__)
 
 off_hour, off_mins = TimeTravel.timeoffset()
-CP_HOUR = 12 + off_hour
-CP_MINS = 0 + off_mins
-PUBLISH_TIME = time(CP_HOUR, CP_MINS)
-
-
-class Schedule:
-    """Manage schedule database"""
-
-    def __init__(self, schedule):
-        self.schedule_filename: Path = calc_path(schedule)
-        if not self.schedule_filename:
-            raise ValueError("No schedule for when to publish comics provided")
-        self.schedule = None
-
-    def __getitem__(self, key):
-        if self.schedule is None:
-            self.load()
-        return self.schedule[key]
-
-    def __setitem__(self, key, value):
-        if self.schedule is None:
-            self.load()
-        self.schedule[key] = value
-
-    def load(self):
-        """Load schedule from file"""
-        with open(self.schedule_filename, "r") as fp:
-            self.schedule = load(fp)
-
-    def save(self):
-        """Save schedule to file"""
-        if self.schedule:
-            with open(self.schedule_filename, "w+") as fp:
-                dump(self.schedule, fp, sort_keys=True, indent="\t")
-
-
-class ComicInfo:
-    """Manage and get Comic information"""
-
-    def __init__(self, database, schedule):
-        self._logger = logging.getLogger(self.__class__.__name__)
-        self.connection: ComicDB = ComicDB(database)
-        self.database = None
-        self.schedule: Schedule = Schedule(schedule)
-
-    def _get_tags(self, date_string: str) -> list[str]:
-        """Comma seperated tags from a comic"""
-        self.database.execute(
-            "SELECT tag FROM Tag WHERE comicId = ?",
-            (date_string,),
-        )
-        rows = self.database.fetchall()
-        return [r["tag"] for r in rows]
-
-    def released_on(self, dates: Union[str, list[str]]) -> list[Row]:
-        """Get database rows for comics released on given dates"""
-        if isinstance(dates, str):
-            dates = [dates]
-        self.database.execute(
-            f"""SELECT
-                Comic.release as release,
-                Comic.title as title,
-                Comic.image as image,
-                Comic.url as url,
-                Alt.alt as alt
-            FROM Comic
-            JOIN Alt ON Comic.release = Alt.comicId
-            WHERE release IN {dates}"""
-        )
-        results = self.database.fetchall()
-        return results
-
-    def todays_reread(self, date=None):
-        """Get information for comic reread"""
-        self.database = self.connection.open()
-        date_string = date or TimeTravel.datestr()
-        self.schedule.load()
-        days = tuple(self.schedule["days"][date_string])
-        self._logger.debug("Getting comics on following days: %s", days)
-
-        entries = []
-        comics = self.released_on(days)
-        self._logger.debug("%s comics from current week", len(comics))
-        for comic in comics:
-            release = comic["release"]
-            image = comic["image"].split("_", maxsplit=3)[3]
-            tags = [
-                f"[{tag}](https://www.dumbingofage.com/tag/{re.sub(' ', '-', tag)}/)"
-                for tag in self._get_tags(release)
-            ]
-
-            entries.append(
-                {
-                    "title": comic["title"],
-                    "url": comic["url"],
-                    "alt": f"||{comic['alt']}||",
-                    "tags": ", ".join(tags),
-                    "image": f"https://www.dumbingofage.com/comics/{image}",
-                    "release": release,
-                }
-            )
-
-        self.database = self.connection.close()
-        return entries
-
-    def update_schedule(self):
-        """Update the schedule every week"""
-        self._logger.info("Checking schedule to see if it needs updating")
-        old_week = self.schedule["next_week"]
-        now = TimeTravel.datestr()
-        while old_week <= now:
-            new_week = datetime.strptime(old_week, "%Y-%m-%d") + timedelta(days=7)
-            new_week_str = datetime.strftime(new_week, "%Y-%m-%d")
-            self.schedule["next_week"] = new_week_str
-
-            last_day = sorted(self.schedule["days"].keys())[-1]
-            next_day = datetime.strptime(last_day, "%Y-%m-%d") + timedelta(days=1)
-            next_day_str = datetime.strftime(next_day, "%Y-%m-%d")
-
-            self.schedule["days"][next_day_str] = TimeTravel.week_dates(new_week_str)
-
-            old_week = self.schedule["next_week"]
-
-        self.schedule.save()
+CP_HOUR = 13 + off_hour
+CP_MINS = 27 + off_mins
+PUBLISH_TIME = [
+    time(CP_HOUR, CP_MINS, 0),
+    time(CP_HOUR, CP_MINS, 20),
+    time(CP_HOUR, CP_MINS, 40),
+]
 
 
 class ComicEmbeds:
@@ -220,6 +101,9 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         self.guild = None
         self.channel = None
 
+        self.latest_channel = int(getenv("DOA_LATEST_CHANNEL"))
+        self.latest_bot = int(getenv("DOA_LATEST_BOT"))
+
         self.comics = ComicInfo(getenv("DOA_DATABASE"), getenv("DOA_SCHEDULE"))
         self._logger.info(
             "embed file: %s -> %s",
@@ -236,6 +120,101 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         # function transformed by the @loop annotation
         # pylint: disable=no-member
         self.schedule_comics.cancel()
+
+    async def fetch_message(self, channel_id, message_id):
+        """Get message from channel and message ids"""
+        channel = self.bot.get_channel(channel_id)
+        return await channel.fetch_message(message_id)
+
+    def _is_latest_react(self, message):
+        is_channel = message.channel.id == self.latest_channel
+        is_bot = message.author.id == self.latest_bot
+        return is_channel and is_bot
+
+    # @Cog.listener()
+    # async def on_raw_reaction_add(self, payload):
+    #     """Watch for reacts to things in the servers"""
+    #     msg = await self.fetch_message(payload.channel_id, payload.message_id)
+    #     latest_react = self._is_latest_react(msg)
+    #     if latest_react:
+    #         self._logger.info("add %s | %s",payload.emoji,payload.user_id)
+
+    # @Cog.listener()
+    # async def on_raw_reaction_remove(self, payload):
+    #     """Watch for reacts to things in the servers"""
+    #     msg = await self.fetch_message(payload.channel_id, payload.message_id)
+    #     latest_react = self._is_latest_react(msg)
+    #     if latest_react:
+    #         self._logger.info("rmv %s | %s",payload.emoji,payload.user_id)
+
+    async def _save_reacts(self, message):
+        """Save react info to database"""
+        mid = message.id
+        url = message.embeds[0].url
+        self.comics.new_latest(mid, url)
+
+        reacts = []
+        for react in message.reactions:
+            emoji = str(react.emoji)
+            async for user in react.users():
+                try:
+                    uid = re.match(r"<@!*([0-9]+)>", user.mention).group(1)
+                except AttributeError:
+                    self._logger.info(
+                        "no user id match in %s for %s: %s",
+                        mid,
+                        user,
+                        user.mention,
+                    )
+                else:
+                    if uid != self.latest_bot:
+                        reacts.append((mid, uid, emoji))
+        self._logger.info(
+            "Saving %s reacts from %s for comic %s | %s",
+            len(reacts),
+            message.created_at,
+            mid,
+            url,
+        )
+        self.comics.save_reacts(reacts)
+
+    @Cog.listener("on_message")
+    async def latest_publish(self, message):
+        """Saving the reacts for the previous days comic"""
+        if not self._is_latest_react(message):
+            return
+        self._logger.info("Saving the reacts for the previous days comic")
+        now = TimeTravel.timestamp()
+        before = TimeTravel.utcfromtimestamp(now - 1)
+        after = before - timedelta(days=1, hours=12)
+        message = await self.bot.get_history(
+            channel_id=self.latest_channel,
+            user_id=self.latest_bot,
+            before=before,
+            after=after,
+            oldest_first=False,
+        ).flatten()[0]
+        await self._save_reacts(message)
+
+    @is_owner()
+    @command()
+    async def save_reacts(self, ctx, fromstr=None):
+        """When the bot connects to discord and is ready"""
+        if fromstr is None:
+            fromstr = "2021-08-01 00:00:00"
+        else:
+            fromstr = f"{fromstr.strip()} 00:00:00"
+        self._logger.info("Manually saving reacts since %s", fromstr)
+        after = TimeTravel.fromstr(fromstr)
+        async for message in (
+            await self.bot.get_history(
+                channel_id=self.latest_channel,
+                user_id=self.latest_bot,
+                after=after,
+            )
+        ):
+            await self._save_reacts(message)
+        await ctx.send(f"Saved reacts on comics since {fromstr} \N{OK HAND SIGN}")
 
     @staticmethod
     def _parse_list(original, cast=str):
@@ -384,7 +363,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
                 if embed:
                     self._logger.info("Refreshing Embed: %s", embed.to_dict())
                     await self.refresh_embed(msg, embed)
-        #await ctx.message.add_reaction("\N{OK HAND SIGN}")
+        # await ctx.message.add_reaction("\N{OK HAND SIGN}")
         try:
             await ctx.message.add_reaction("<:wave_Joyce:780682895907618907>")
         except:

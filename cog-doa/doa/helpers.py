@@ -1,6 +1,7 @@
 """Helper methods for the DoA Cogs"""
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
+
 # from os import getenv
 from pathlib import Path
 
@@ -30,6 +31,16 @@ class TimeTravel:
     tz = TIMEZONE
 
     @staticmethod
+    def timestamp():
+        """Get current utc timestamp"""
+        return datetime.now().timestamp()
+
+    @staticmethod
+    def utcfromtimestamp(timestamp):
+        """Convert utc timestamp to datetime"""
+        return datetime.utcfromtimestamp(timestamp)
+
+    @staticmethod
     # pylint: disable=invalid-name
     def timeoffset(tz=TZNAME):
         """Get the hours and minutes to add to a loacal time to
@@ -39,6 +50,14 @@ class TimeTravel:
         hour = int(off[1:3]) * mult
         mins = int(off[3:5]) * mult
         return hour, mins
+
+    @classmethod
+    def fromstr(cls, date_string):
+        """Get offset from local string"""
+        hour, mins = cls.timeoffset()
+        offset = timedelta(hours=hour, minutes=mins)
+        date = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+        return date + offset
 
     @staticmethod
     def datestr(date=None):
