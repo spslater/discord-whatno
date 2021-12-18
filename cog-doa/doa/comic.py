@@ -78,7 +78,8 @@ class Schedule:
                 dump(self.schedule, fp, sort_keys=True, indent="\t")
 
     def __enter__(self):
-        return self.load()
+        self.load()
+        return self.schedule
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.save()

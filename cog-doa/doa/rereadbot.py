@@ -154,6 +154,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
                 else:
                     if uid != self.latest_bot:
                         reacts.append((mid, uid, emoji))
+        self.comics.save_reacts(reacts)
         self._logger.info(
             "Saving %s reacts from %s for comic %s | %s",
             len(reacts),
@@ -161,7 +162,6 @@ class DoaRereadCog(Cog, name="DoA Reread"):
             mid,
             url,
         )
-        self.comics.save_reacts(reacts)
 
     @Cog.listener("on_message")
     async def latest_publish(self, message):
@@ -170,15 +170,16 @@ class DoaRereadCog(Cog, name="DoA Reread"):
             return
         self._logger.info("Saving the reacts for the previous days comic")
         now = TimeTravel.timestamp()
-        before = TimeTravel.utcfromtimestamp(now - 1)
+        before = TimeTravel.utcfromtimestamp(now - 3600)
         after = before - timedelta(days=1, hours=12)
-        message = await self.bot.get_history(
+        history = await self.bot.get_history(
             channel_id=self.latest_channel,
             user_id=self.latest_bot,
             before=before,
             after=after,
             oldest_first=False,
-        ).flatten()[0]
+        )
+        message = (await history.flatten())[0]
         await self._save_reacts(message)
 
     @is_owner()
