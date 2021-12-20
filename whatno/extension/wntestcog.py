@@ -2,11 +2,10 @@
 import logging
 
 from discord.ui import Button, View
-from discord.commands import slash_command
 from discord.ext.commands import Cog, command
 
-# pylint: disable=relative-beyond-top-level
-from ..helpers import allow_slash
+
+logger = logging.getLogger(__name__)
 
 
 def setup(bot):
@@ -18,8 +17,6 @@ class WNTestCog(Cog, name="General"):
     """Test commands for the WhatnoBot"""
 
     def __init__(self, bot):
-        self._logger = logging.getLogger(self.__class__.__name__)
-
         super().__init__()
         self.bot = bot
 
@@ -41,14 +38,6 @@ class WNTestCog(Cog, name="General"):
         """
         return await ctx.send("Test recieved! :D")
 
-    @slash_command(guild_ids=allow_slash(), name="test")
-    async def slashtest(self, ctx):
-        """Send a message to test slash command is working
-
-        this is extra info... shh!
-        """
-        await ctx.respond("Slash test recieved! :D")
-
     @command()
     async def source(self, ctx):
         """Get link to source code"""
@@ -64,5 +53,8 @@ class SourceLink(View):
     def __init__(self):
         super().__init__()
         self.add_item(
-            Button(label="Source Code", url="https://git.whatno.io/discord/whatno")
+            Button(
+                label="Source Code",
+                url="https://git.whatno.io/discord/whatno",
+            )
         )

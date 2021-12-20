@@ -12,12 +12,12 @@ from traceback import format_tb
 from discord import ExtensionFailed, NoEntryPointError
 from discord.ext.commands import Bot, when_mentioned_or
 
+logger = logging.getLogger(__name__)
 
 class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
     """Bot to talk to discord"""
 
     def __init__(self, token, prefix=".."):
-        self._logger = logging.getLogger(self.__class__.__name__)
         if not token:
             raise RuntimeError("No api token provided")
         self.token = token
@@ -53,7 +53,7 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
         module = root.replace("/", ".")
         root = Path(root).resolve()
         for module in self.get_available_extensions():
-            self._logger.info("loading: %s", module)
+            logger.info("loading: %s", module)
             try:
                 self.load_extension(module)
             except (
@@ -63,7 +63,7 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
                 _, _, err_traceback = exc_info()
                 tb_list = "\n".join(format_tb(err_traceback))
                 tb_str = " | ".join(tb_list.splitlines())
-                self._logger.info("load? %s: %s | %s", module, e, tb_str)
+                logger.error("load %s: %s | %s", module, e, tb_str)
             else:
                 self.loaded_extensions.add(module)
 
@@ -95,6 +95,19 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
         if message.content.startswith(self.prefix) or message.content.startswith(
             f"<@!{self.user.id}>"
         ):
+            ctx = await self.get_context(message)
+            logger.debug(
+                "%s.%s | %s %s; %s.%s.%s | %s (%s)",
+                ctx.command.cog.__class__.__name__,
+                ctx.command.name,
+                ctx.guild.name,
+                ctx.channel.name,
+                ctx.guild.id,
+                ctx.channel.id,
+                ctx.message.id,
+                ctx.author.nick,
+                ctx.author.id,
+            )
             await self.process_commands(message)
 
     async def on_ready(self):
@@ -106,19 +119,19 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
 
         Logs out after everything is complete.
         """
-        self._logger.info("%s has connected to Discord!", self.user)
+        logger.info("%s has connected to Discord!", self.user)
 
     async def on_error(self, *args, **kwargs):
         """Log information when CLient encounters an error and clean up connections"""
         err_type, err_value, err_traceback = exc_info()
         tb_list = "\n".join(format_tb(err_traceback))
         tb_string = " | ".join(tb_list.splitlines())
-        self._logger.debug(
+        logger.debug(
             "Error cause by call with args and kwargs: %s %s",
             args,
             kwargs,
         )
-        self._logger.error(
+        logger.error(
             "%s: %s | Traceback: %s",
             err_type.__name__,
             err_value,
@@ -126,13 +139,14 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
         )
         await self.close()
 
-    async def on_command_error(self, context, exception):
-        self._logger.warning(
-            "%s; guild %s (%s); channel %s (%s); mid: %s; author: %s (%s); message: %s",
+    @staticmethod
+    async def on_command_error(context, exception):
+        logger.warning(
+            "%s | %s %s; %s.%s.%s | %s (%s): %s",
             exception,
             context.guild.name,
-            context.guild.id,
             context.channel.name,
+            context.guild.id,
             context.channel.id,
             context.message.id,
             context.author.nick,

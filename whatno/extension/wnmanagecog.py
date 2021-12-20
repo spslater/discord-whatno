@@ -4,6 +4,7 @@ import logging
 from discord import ExtensionError
 from discord.ext.commands import Cog, group, is_owner
 
+logger = logging.getLogger(__name__)
 
 def setup(bot):
     """Add the Test Cog to the Bot"""
@@ -14,8 +15,6 @@ class WNManageCog(Cog, name="Manage Extensions"):
     """Manage commands for the WhatnoBot"""
 
     def __init__(self, bot):
-        self._logger = logging.getLogger(self.__class__.__name__)
-
         super().__init__()
         self.bot = bot
 
@@ -119,7 +118,7 @@ class WNManageCog(Cog, name="Manage Extensions"):
     async def reload(self, ctx, *, module="all"):
         """Reloads a module."""
         if module == "all":
-            self._logger.info("Reloading: %s", ', '.join(self.bot.loaded_extensions))
+            logger.info("Reloading: %s", ', '.join(self.bot.loaded_extensions))
             good = 0
             total = len(self.bot.loaded_extensions)
             for mod in self.bot.loaded_extensions:
@@ -133,7 +132,7 @@ class WNManageCog(Cog, name="Manage Extensions"):
         if module not in self.bot.loaded_extensions:
             await ctx.send("\N{THUMBS DOWN SIGN} Module is not loaded dummy")
             return
-        self._logger.info("Reloading: %s", module)
+        logger.info("Reloading: %s", module)
         success = await self._reload_module(ctx, module)
         if success:
             await ctx.send("\N{OK HAND SIGN} Reload successful! \N{GRINNING FACE}")
