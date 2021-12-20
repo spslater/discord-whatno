@@ -22,6 +22,15 @@ class ComicDB:
             raise ValueError("No database to pull comic info from provided")
         self.conn = None
 
+    def setup(self):
+        logger.debug("running setup on the comic database")
+        script = calc_path("./database.sql")
+        with open(script, "r", encoding="utf-8") as fp:
+            sql_script = fp.read()
+
+        with self as db:
+            db.executescript(sql_script)
+
     def open(self):
         """Open a connection to the database and return a cursor"""
         self.conn: Connection = (
@@ -91,6 +100,7 @@ class ComicInfo:
     def __init__(self, database, schedule):
         self.database_file = database
         self.schedule_file = schedule
+        ComicDB(self.database_file, False).setup()
 
     def _database(self, readonly=True):
         return ComicDB(self.database_file, readonly)
@@ -108,35 +118,44 @@ class ComicInfo:
         return [r["tag"] for r in rows]
 
     def new_latest(self, mid, url):
-        """Save latest comic published to latest channel
-
-        CREATE TABLE Latest (
-            mid PRIMARY KEY,
-            url TEXT NOT NULL
-        );
-        """
+        """Save latest comic published to latest channel"""
         with self._database(readonly=False) as database:
+            if url.endswith(".png"):
+                og = url
+                img = f"%{url.split('/')[-1]}"
+                res = database.execute("SELECT url FROM Comic WHERE image LIKE ?", (img,))
+                url = res.fetchone()['url']
+                logger.debug("latest comic directly linked the image instead of the url | %s | %s", og, url)
             try:
                 database.execute("INSERT INTO Latest VALUES (?,?)", (mid, url))
             except IntegrityError:
                 pass
 
     def save_reacts(self, reacts):
-        """Save live reacts from recent comic
-
-        CREATE TABLE React (
-            mid INTEGER NOT NULL REFERENCES Latest(mid),
-            uid INTEGER,
-            reaction TEXT,
-            CONSTRAINT one_react UNIQUE (mid, uid, reaction)
-        );
-        """
+        """Save live reacts from recent comic"""
         with self._database(readonly=False) as database:
             for react in reacts:
                 try:
                     database.execute("INSERT INTO React VALUES (?,?,?)", react)
                 except IntegrityError:
                     pass
+
+    def save_discussion(self, comic, message):
+        """Save the message that was part of a comics discussion"""
+        with self._database(readonly=False) as database:
+            try:
+                database.execute(
+                    "INSERT INTO Discussion VALUES (?,?,?,?,?)",
+                    (
+                        message.id,
+                        message.created_at.timestamp(),
+                        message.author.id,
+                        comic,
+                        message.content,
+                    ),
+                )
+            except IntegrityError:
+                pass
 
     def released_on(self, dates: Union[str, list[str]]) -> list[Row]:
         """Get database rows for comics released on given dates"""

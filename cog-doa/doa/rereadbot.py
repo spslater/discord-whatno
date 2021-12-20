@@ -120,17 +120,20 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         """Watch for reacts to things in the servers"""
         msg = await self.fetch_message(payload.channel_id, payload.message_id)
         if self._is_latest_react(msg):
-            logger.debug("react add %s | %s",payload.emoji,payload.user_id)
+            logger.debug("react add %s | %s", payload.emoji, payload.user_id)
 
     @Cog.listener()
     async def on_raw_reaction_remove(self, payload):
         """Watch for reacts to things in the servers"""
         msg = await self.fetch_message(payload.channel_id, payload.message_id)
         if self._is_latest_react(msg):
-            logger.debug("react remove %s | %s",payload.emoji,payload.user_id)
+            logger.debug("react remove %s | %s", payload.emoji, payload.user_id)
 
     async def _save_reacts(self, message):
         """Save react info to database"""
+        if not message.embeds:
+            return
+
         mid = message.id
         url = message.embeds[0].url
         self.comics.new_latest(mid, url)
@@ -140,17 +143,37 @@ class DoaRereadCog(Cog, name="DoA Reread"):
             emoji = str(react.emoji)
             async for user in react.users():
                 if user.id != self.latest_bot:
-                    logger.debug("human reacts, saving: %s vs %s | %s", user.id, self.latest_bot, emoji)
+                    logger.debug("human react, saving: %s", emoji)
                     reacts.append((mid, user.id, emoji))
                 else:
                     logger.debug("bot react, not saving: %s", emoji)
-        logger.info(
-            "Saving %s reacts from %s for comic %s | %s",
+        self.comics.save_reacts(reacts)
+        logger.debug(
+            "Saved %s reacts from %s for comic %s | %s",
             len(reacts),
             message.created_at,
             mid,
             url,
         )
+
+    async def _process_comic(self, after, before=None):
+        logger.debug("Processing comics after %s and before %s", after, before)
+        history = await self.bot.get_history(
+            channel_id=self.latest_channel,
+            after=after,
+            before=before,
+        )
+        processed = 0
+        prev = None
+        async for message in history:
+            if message.author.id == self.latest_bot:
+                await self._save_reacts(message)
+                prev = message.id
+                processed += 1
+            elif prev:
+                logger.debug("saving discussion for %s: %s", prev, message)
+                self.comics.save_discussion(prev, message)
+        logger.info("Processed %s comics after %s and before %s", processed, after, before)
 
     @Cog.listener("on_message")
     async def latest_publish(self, message):
@@ -158,46 +181,25 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         if not self._is_latest_react(message):
             return
         logger.info("Saving the reacts for the previous days comic")
-        now = TimeTravel.timestamp()
-        before = TimeTravel.utcfromtimestamp(now - 3600)
-        after = before - timedelta(days=1, hours=12)
-        history = await self.bot.get_history(
-            channel_id=self.latest_channel,
-            user_id=self.latest_bot,
-            before=before,
-            after=after,
-            oldest_first=True,
-        )
-        messages = await history.flatten()
-        logger.debug(
-            "History returned %s messages between %s and %s | %s",
-            len(messages),
-            before,
-            after,
-            messages
-        )
-        message = messages[0]
-        await self._save_reacts(message)
+        after = TimeTravel.timestamp() - timedelta(days=1, hours=12)
+        await self._process_comic(after)
 
     @is_owner()
-    @command()
-    async def save_reacts(self, ctx, fromstr=None):
-        """When the bot connects to discord and is ready"""
-        if fromstr is None:
-            fromstr = "2021-08-01 00:00:00"
-        else:
-            fromstr = f"{fromstr.strip()} 00:00:00"
-        logger.info("Manually saving reacts since %s", fromstr)
-        after = TimeTravel.fromstr(fromstr)
-        async for message in (
-            await self.bot.get_history(
-                channel_id=self.latest_channel,
-                user_id=self.latest_bot,
-                after=after,
-            )
-        ):
-            await self._save_reacts(message)
-        await ctx.send(f"Saved reacts on comics since {fromstr} \N{OK HAND SIGN}")
+    @command(name="latest")
+    async def save_latest_comic(self, ctx, after_str, before_str=None):
+        """Save info about the comic from date provided"""
+        logger.info(
+            "Manually saving reacts after %s and before %s",
+            after_str,
+            before_str,
+        )
+        after_str = f"{after_str.strip()} 00:00:00"
+        after = TimeTravel.fromstr(after_str) - timedelta(hours=6)
+        if before_str:
+            before_str = f"{before_str.strip()} 00:00:00"
+            before = TimeTravel.fromstr(before_str) + timedelta(hours=6)
+        await self._process_comic(after, before)
+        await ctx.send(f"Saved comics after {after} and before {before} \N{OK HAND SIGN}")
 
     @staticmethod
     def _parse_list(original, cast=str):
