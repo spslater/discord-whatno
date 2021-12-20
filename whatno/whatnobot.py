@@ -14,10 +14,11 @@ from discord.ext.commands import Bot, when_mentioned_or
 
 logger = logging.getLogger(__name__)
 
+
 class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
     """Bot to talk to discord"""
 
-    def __init__(self, token, prefix=".."):
+    def __init__(self, token, prefix="%"):
         if not token:
             raise RuntimeError("No api token provided")
         self.token = token
@@ -72,16 +73,16 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
         self,
         channel_id,
         user_id=None,
-        before=None,
         after=None,
+        before=None,
         oldest_first=True,
     ):
         """Get history as a list from a channel"""
         channel = await self.fetch_channel(channel_id)
         history = channel.history(
             limit=None,
-            before=before,
             after=after,
+            before=before,
             oldest_first=oldest_first,
         )
         if user_id:
@@ -96,10 +97,12 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
             f"<@!{self.user.id}>"
         ):
             ctx = await self.get_context(message)
+            cog = ctx.command.cog.__class__.__name__ if ctx.command else None
+            cmd = ctx.command.name if ctx.command else None
             logger.debug(
                 "%s.%s | %s %s; %s.%s.%s | %s (%s)",
-                ctx.command.cog.__class__.__name__,
-                ctx.command.name,
+                cog,
+                cmd,
                 ctx.guild.name,
                 ctx.channel.name,
                 ctx.guild.id,
@@ -153,6 +156,10 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
             context.author.id,
             context.message.content,
         )
+        original = exception.original
+        tb_list = "\n".join(format_tb(original.__traceback__))
+        tb_string = " | ".join(tb_list.splitlines())
+        logger.debug("Command error from: %s | %s", original, tb_string)
 
     # pylint: disable=arguments-differ
     def run(self):
