@@ -139,18 +139,11 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         for react in message.reactions:
             emoji = str(react.emoji)
             async for user in react.users():
-                try:
-                    uid = re.match(r"<@!*([0-9]+)>", user.mention).group(1)
-                except AttributeError:
-                    logger.debug(
-                        "no user id match in %s for %s: %s",
-                        mid,
-                        user,
-                        user.mention,
-                    )
+                if user.id != self.latest_bot:
+                    logger.debug("human reacts, saving: %s vs %s | %s", user.id, self.latest_bot, emoji)
+                    reacts.append((mid, user.id, emoji))
                 else:
-                    if uid != self.latest_bot:
-                        reacts.append((mid, uid, emoji))
+                    logger.debug("bot react, not saving: %s", emoji)
         logger.info(
             "Saving %s reacts from %s for comic %s | %s",
             len(reacts),
