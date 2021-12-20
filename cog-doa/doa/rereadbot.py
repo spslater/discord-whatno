@@ -166,9 +166,17 @@ class DoaRereadCog(Cog, name="DoA Reread"):
             user_id=self.latest_bot,
             before=before,
             after=after,
-            oldest_first=False,
+            oldest_first=True,
         )
-        message = (await history.flatten())[0]
+        messages = await history.flatten()
+        logger.debug(
+            "History returned %s messages between %s and %s | %s",
+            len(messages),
+            before,
+            after,
+            messages
+        )
+        message = messages[0]
         await self._save_reacts(message)
 
     @is_owner()

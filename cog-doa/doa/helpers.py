@@ -64,6 +64,12 @@ class TimeTravel:
         return display.strftime("%Y-%m-%d")
 
     @staticmethod
+    def timestr(date=None):
+        """Get the current date as a YYYY-MM-DD string"""
+        display = date or datetime.now()
+        return display.strftime("%Y-%m-%d %H:%M:%S")
+
+    @staticmethod
     def week_day(year: int, week: int, weekday: int) -> str:
         """Generate YYYY-MM-DD from year, week number, day number"""
         ywd = f"{year}-{week}-{weekday}"
