@@ -8,7 +8,7 @@ comics every day as part of a community reread.
 """
 import logging
 import re
-from datetime import time, timedelta
+from datetime import time, timedelta, datetime
 from json import dump, load
 from os import getenv
 from pathlib import Path
@@ -181,7 +181,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         if not self._is_latest_react(message):
             return
         logger.info("Saving the reacts for the previous days comic")
-        after = TimeTravel.timestamp() - timedelta(days=1, hours=12)
+        after = datetime.now() - timedelta(days=1, hours=12)
         await self._process_comic(after)
 
     @is_owner()
