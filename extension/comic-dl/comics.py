@@ -38,9 +38,9 @@ def main():
     comics = data.get("comics", None)
 
     missing = []
-    if workdir_raw is None:
+    if workdir is None:
         missing.append("workdir")
-    if savedir_raw is None:
+    if savedir is None:
         missing.append("savedir")
     if comics is None:
         missing.append("comics")
