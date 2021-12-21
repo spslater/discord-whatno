@@ -123,9 +123,11 @@ class ComicInfo:
             if url.endswith(".png"):
                 og = url
                 img = f"%{url.split('/')[-1]}"
-                res = database.execute("SELECT url FROM Comic WHERE image LIKE ?", (img,))
-                url = res.fetchone()['url']
-                logger.debug("latest comic directly linked the image instead of the url | %s | %s", og, url)
+                res = database.execute(
+                    "SELECT url FROM Comic WHERE image LIKE ?",
+                    (img,),
+                )
+                url = res.fetchone()["url"]
             try:
                 database.execute("INSERT INTO Latest VALUES (?,?)", (mid, url))
             except IntegrityError:
@@ -142,20 +144,42 @@ class ComicInfo:
 
     def save_discussion(self, comic, message):
         """Save the message that was part of a comics discussion"""
+        content = message.content if message.content.strip() else None
+        if message.attachments:
+            logger.debug("%s attaches: %s", message.id, message.attachments)
+        attach = message.attachments[0].url if message.attachments else None
+        embed = str(message.embeds[0].to_dict()) if message.embeds else None
         with self._database(readonly=False) as database:
+            data = (
+                message.id,
+                message.created_at.timestamp(),
+                message.author.id,
+                comic,
+                content,
+                attach,
+                embed,
+            )
             try:
                 database.execute(
-                    "INSERT INTO Discussion VALUES (?,?,?,?,?)",
-                    (
-                        message.id,
-                        message.created_at.timestamp(),
-                        message.author.id,
-                        comic,
-                        message.content,
-                    ),
+                    "INSERT INTO Discussion VALUES (?,?,?,?,?,?,?)",
+                    data,
                 )
             except IntegrityError:
-                pass
+                database.execute(
+                    """
+                    UPDATE Discussion
+                    SET
+                        msg = ?,
+                        time = ?,
+                        user = ?,
+                        comic = ?,
+                        content = ?,
+                        attach = ?,
+                        embed = ?
+                    WHERE msg = ?
+                    """,
+                    (*data, message.id),
+                )
 
     def released_on(self, dates: Union[str, list[str]]) -> list[Row]:
         """Get database rows for comics released on given dates"""

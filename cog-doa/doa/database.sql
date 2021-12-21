@@ -55,12 +55,14 @@ CREATE TABLE IF NOT EXISTS Discussion(
     msg INTEGER PRIMARY KEY,
     time INTEGER NOT NULL,
     user INTEGER NOT NULL,
-    comic 
+    comic
         REFERENCES Latest(msg)
         ON DELETE CASCADE
         ON UPDATE CASCADE
         NOT NULL,
-    content TEXT NOT NULL
+    content TEXT,
+    attach TEXT,
+    embed TEXT
 );
 
 CREATE TABLE IF NOT EXISTS History(

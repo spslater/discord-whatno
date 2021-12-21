@@ -195,6 +195,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         )
         after_str = f"{after_str.strip()} 00:00:00"
         after = TimeTravel.fromstr(after_str) - timedelta(hours=6)
+        before = None
         if before_str:
             before_str = f"{before_str.strip()} 00:00:00"
             before = TimeTravel.fromstr(before_str) + timedelta(hours=6)
@@ -215,7 +216,6 @@ class DoaRereadCog(Cog, name="DoA Reread"):
                 channel_name = given_channel
 
             if channel_id is None:
-                logger.debug("Getting channel.")
                 channels = []
                 try:
                     logger.debug("Trying to get channel from specific guild.")
