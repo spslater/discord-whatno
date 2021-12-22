@@ -47,6 +47,7 @@ class WNManageCog(Cog, name="Manage Extensions"):
     @exts.command()
     async def load(self, ctx, *, module):
         """Loads a module."""
+        await ctx.message.add_reaction("<:wave_Joyce:780682895907618907>")
         module = self._module_name(module)
         try:
             self.bot.load_extension(module)
@@ -69,6 +70,7 @@ class WNManageCog(Cog, name="Manage Extensions"):
                 )
             )
             return
+        await ctx.message.add_reaction("<:wave_Joyce:780682895907618907>")
         try:
             self.bot.unload_extension(module)
         except (ExtensionError, KeyError) as e:
@@ -117,6 +119,7 @@ class WNManageCog(Cog, name="Manage Extensions"):
     @exts.command(name="reload")
     async def reload(self, ctx, *, module="all"):
         """Reloads a module."""
+        await ctx.message.add_reaction("<:wave_Joyce:780682895907618907>")
         if module == "all":
             logger.info("Reloading: %s", ', '.join(self.bot.loaded_extensions))
             good = 0
@@ -136,3 +139,4 @@ class WNManageCog(Cog, name="Manage Extensions"):
         success = await self._reload_module(ctx, module)
         if success:
             await ctx.send("\N{OK HAND SIGN} Reload successful! \N{GRINNING FACE}")
+
