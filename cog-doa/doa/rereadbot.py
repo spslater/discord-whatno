@@ -193,6 +193,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
             after_str,
             before_str,
         )
+        await ctx.message.add_reaction("<:wave_Joyce:780682895907618907>")
         after_str = f"{after_str.strip()} 00:00:00"
         after = TimeTravel.fromstr(after_str) - timedelta(hours=6)
         before = None
@@ -362,4 +363,4 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         logger.info("manually publishing comics for date %s", date)
         msg = await ctx.send("\N{OK HAND SIGN} Sendings Comics")
         await self.send_comic(date, ctx.message.channel.id)
-        await msg.delete()
+
