@@ -1,6 +1,7 @@
 """Helper methods for the DoA Cogs"""
 import logging
 from datetime import datetime, timedelta
+from math import floor
 from pathlib import Path
 
 from pytz import timezone
@@ -20,6 +21,21 @@ def calc_path(filename):
 
 TZNAME = "US/Eastern"
 TIMEZONE = timezone(TZNAME)
+
+
+def sec_to_human(secs):
+    """Convert duration from seconds to days / hrs / mins / secs"""
+    secs = floor(float(secs))
+    in_day = 60 * 60 * 24
+    in_hour = 60 * 60
+    in_minute = 60
+
+    days = secs // in_day
+    hours = (secs - (days * in_day)) // in_hour
+    minutes = (secs - (days * in_day) - (hours * in_hour)) // in_minute
+    seconds = secs % 60
+
+    return days, hours, minutes, seconds
 
 
 class TimeTravel:

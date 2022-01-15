@@ -9,7 +9,7 @@ from discord.ext.commands import Cog, command, is_owner
 from discord.ext.tasks import loop
 from dotenv import load_dotenv
 
-from .helpers import calc_path, TimeTravel
+from .helpers import calc_path, sec_to_human, TimeTravel
 from .database import VoiceDB
 
 logger = logging.getLogger(__name__)
@@ -257,12 +257,32 @@ class StatsCog(Cog):
                 results[row["voicestate"]] = row["total"]
 
         in_voice = user in [vc.user for vc in self.current.keys()]
+        stats = None
+        for k, v in self.current.items():
+            if k.user == user:
+                stats = v
+                break
 
         output = "```\n"
-        if in_voice:
-            output += "Currently in Voice 🟢\n"
         for state, value in results.items():
-            output += f"{state}: {value}\n"
+            d, h, m, s = sec_to_human(value)
+            val = ""
+            if d:
+                val += f"{d} day{'s' if d > 1 else ''}"
+            if d and (h or m or s):
+                val += ", "
+            if not d and h:
+                val += f"{h} hr{'s' if h > 1 else ''}"
+            if h and (m or s):
+                val += ", "
+            if (not d or not h) and m:
+                val += f"{m} min{'s' if m > 1 else ''}"
+            if m and s:
+                val += ", "
+            if s:
+                val += f"{s} sec{'s' if s > 1 else ''}"
+            print(stats)
+            output += f"{state}{' 🟢' if in_voice and (getattr(stats, state, False) or state == 'voice') else ''}: {val}\n"
         output += "```"
         await ctx.send(output)
 
