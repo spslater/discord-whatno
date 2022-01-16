@@ -5,6 +5,7 @@ from collections import namedtuple
 from json import dump
 from os import getenv
 
+from discord import NotFound
 from discord.ext.commands import Cog, command, is_owner
 from discord.ext.tasks import loop
 from dotenv import load_dotenv
@@ -324,8 +325,12 @@ class StatsCog(Cog):
         users = [(r["user"], r["total"]) for r in rows]
         output = "```\n"
         for idx, (user, value) in enumerate(users):
-            member = await guild.fetch_member(user)
-            name = member.nick or member.name
+            try:
+                member = await guild.fetch_member(user)
+            except NotFound:
+                name = user
+            else:
+                name = member.nick or member.name
             val = self._display_duration(value)
             output += f"{idx+1}. {name}: {val}\n"
         output += "```"
