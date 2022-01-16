@@ -221,6 +221,26 @@ class StatsCog(Cog):
         self._save_current()
         await ctx.send("saved :)")
 
+    @staticmethod
+    def _display_duration(value):
+        d, h, m, s = sec_to_human(value)
+        val = ""
+        if d:
+            val += f"{d} day{'s' if d > 1 else ''}"
+        if d and (h or m or s):
+            val += ", "
+        if not d and h:
+            val += f"{h} hr{'s' if h > 1 else ''}"
+        if h and (m or s):
+            val += ", "
+        if (not d or not h) and m:
+            val += f"{m} min{'s' if m > 1 else ''}"
+        if m and s:
+            val += ", "
+        if s:
+            val += f"{s} sec{'s' if s > 1 else ''}"
+        return val
+
     @command(name="vc")
     async def single_voice_stat(self, ctx, all_=None):
         """get info about the user"""
@@ -265,26 +285,52 @@ class StatsCog(Cog):
 
         output = "```\n"
         for state, value in results.items():
-            d, h, m, s = sec_to_human(value)
-            val = ""
-            if d:
-                val += f"{d} day{'s' if d > 1 else ''}"
-            if d and (h or m or s):
-                val += ", "
-            if not d and h:
-                val += f"{h} hr{'s' if h > 1 else ''}"
-            if h and (m or s):
-                val += ", "
-            if (not d or not h) and m:
-                val += f"{m} min{'s' if m > 1 else ''}"
-            if m and s:
-                val += ", "
-            if s:
-                val += f"{s} sec{'s' if s > 1 else ''}"
-            print(stats)
-            output += f"{state}{' 🟢' if in_voice and (getattr(stats, state, False) or state == 'voice') else ''}: {val}\n"
+            val = self._display_duration(value)
+            green = ' 🟢' if in_voice and (getattr(stats, state, False) or state == 'voice') else ''
+            output += f"{state}{green}: {val}\n"
         output += "```"
         await ctx.send(output)
+
+    @command(name="vct")
+    async def voice_top(self, ctx, all_=None):
+        """Get top 10 users from each guild"""
+        guild = ctx.channel.guild
+
+        rows = []
+        with self._database() as db:
+            if all_:
+                rows = db.execute(
+                    """
+                    SELECT user, sum(duration) as total
+                    FROM History
+                    WHERE voicestate = "voice"
+                    GROUP BY user
+                    ORDER BY total DESC
+                    LIMIT 10
+                    """,
+                ).fetchall()
+            else:
+                rows = db.execute(
+                    """
+                    SELECT user, sum(duration) as total
+                    FROM History
+                    WHERE guild = ? AND voicestate = "voice"
+                    GROUP BY user
+                    ORDER BY total DESC
+                    LIMIT 10
+                    """,
+                    (guild.id,),
+                ).fetchall()
+        users = [(r["user"], r["total"]) for r in rows]
+        output = "```\n"
+        for idx, (user, value) in enumerate(users):
+            member = await guild.fetch_member(user)
+            name = member.nick or member.name
+            val = self._display_duration(value)
+            output += f"{idx+1}. {name}: {val}\n"
+        output += "```"
+        await ctx.send(output)
+
 
     @is_owner()
     @command(name="kbh")
