@@ -1,4 +1,4 @@
-*.log
+logs/
 *.env
 whatno/extension
 !whatno/extension/wn*cog.py
