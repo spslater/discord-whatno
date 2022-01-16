@@ -6,12 +6,13 @@ from json import dump
 from os import getenv
 
 from discord import NotFound
-from discord.ext.commands import Cog, command, is_owner
+from discord.ext.commands import Cog, command, group, is_owner
 from discord.ext.tasks import loop
 from dotenv import load_dotenv
 
 from .helpers import calc_path, sec_to_human, TimeTravel
 from .database import VoiceDB
+from .historic import get_data
 
 logger = logging.getLogger(__name__)
 
@@ -141,6 +142,84 @@ class StatsCog(Cog):
             after_info,
         )
 
+    def _check_entry(self, uid, cid, state, ts):
+        logger.info("checking: %s", (uid, cid, state, ts))
+        with self._database() as db:
+            states = db.execute(
+                """
+                SELECT *
+                FROM History
+                WHERE user = ?
+                  AND channel = ?
+                  AND voicestate = ?
+                  AND strftime('%Y-%m-%dT%H:%M:%f', starttime, 'unixepoch', 'localtime') = ?
+                ;
+                """,
+                (uid, cid, state, ts),
+            ).fetchall()
+        return bool(states)
+
+    def _update_state(self, id_, before, after):
+        diff = self._diff_state(before, after)
+
+        uid = id_.user
+        gid = id_.guild
+        cid = id_.channel
+        bts = before.jointime
+        tsc = TimeTravel.sqlts(before.jointime)
+
+        voice = (uid, cid, "voice", tsc)
+        mute = (uid, cid, "mute", tsc)
+        deaf = (uid, cid, "deaf", tsc)
+        stream = (uid, cid, "stream", tsc)
+        video = (uid, cid, "video", tsc)
+
+        updates = []
+        inserts = []
+        if self._check_entry(*voice):
+            updates.append((diff.voice, *voice))
+        elif diff.voice:
+            inserts.append((uid, gid, cid, "voice", bts, diff.voice, False))
+
+        if self._check_entry(*mute):
+            updates.append((diff.mute, *mute))
+        elif diff.mute:
+            inserts.append((uid, gid, cid, "mute", bts, diff.mute, False))
+
+        if self._check_entry(*deaf):
+            updates.append((diff.deaf, *deaf))
+        elif diff.deaf:
+            inserts.append((uid, gid, cid, "deaf", bts, diff.deaf, False))
+
+        if self._check_entry(*stream):
+            updates.append((diff.stream, *stream))
+        elif diff.stream:
+            inserts.append((uid, gid, cid, "stream", bts, diff.stream, False))
+
+        if self._check_entry(*video):
+            updates.append((diff.video, *video))
+        elif diff.video:
+            inserts.append((uid, gid, cid, "video", bts, diff.video, False))
+
+        logger.info("update: %s", updates)
+        logger.info("insert: %s", inserts)
+        with self._database() as db:
+            db.executemany(
+                """
+                UPDATE History
+                SET duration = ?
+                WHERE user = ?
+                  AND channel = ?
+                  AND voicestate = ?
+                  AND strftime('%Y-%m-%dT%H:%M:%f', starttime, 'unixepoch', 'localtime') = ?
+                ;
+                """,
+                updates,
+            )
+        with self._database() as db:
+            db.executemany("INSERT INTO History VALUES (?,?,?,?,?,?,?)", inserts)
+
+
     def _save_state_change(self, id_, before, after):
         diff = self._diff_state(before, after)
 
@@ -150,18 +229,18 @@ class StatsCog(Cog):
         time = before.jointime
 
         history = []
-        history.append((name, guild, channel, "voice", time, diff.voice))
+        history.append((name, guild, channel, "voice", time, diff.voice, False))
         if diff.mute:
-            history.append((name, guild, channel, "mute", time, diff.mute))
+            history.append((name, guild, channel, "mute", time, diff.mute, False))
         if diff.deaf:
-            history.append((name, guild, channel, "deaf", time, diff.deaf))
+            history.append((name, guild, channel, "deaf", time, diff.deaf, False))
         if diff.stream:
-            history.append((name, guild, channel, "stream", time, diff.stream))
+            history.append((name, guild, channel, "stream", time, diff.stream, False))
         if diff.video:
-            history.append((name, guild, channel, "video", time, diff.video))
+            history.append((name, guild, channel, "video", time, diff.video, False))
 
         with self._database() as db:
-            db.executemany("INSERT INTO History VALUES (?,?,?,?,?,?)", history)
+            db.executemany("INSERT INTO History VALUES (?,?,?,?,?,?,?)", history)
 
     @Cog.listener("on_voice_state_update")
     async def voice_change(self, member, before, after):
@@ -199,10 +278,12 @@ class StatsCog(Cog):
         for id_, data in self.current_voice():
             if id_ in self.current:
                 prev = self.current[id_]
-                self._save_state_change(id_, prev, data)
-            self.current[id_] = data
+                self._update_state(id_, prev, data)
+            else:
+                self.current[id_] = data
 
-    @loop(minutes=1)
+    #@loop(minutes=1)
+    @loop(seconds=5)
     async def periodic_save(self):
         """periodically save the voice stats"""
         await self.bot.wait_until_ready()
@@ -242,34 +323,25 @@ class StatsCog(Cog):
             val += f"{s} sec{'s' if s > 1 else ''}"
         return val
 
-    @command(name="vc")
-    async def single_voice_stat(self, ctx, all_=None):
+    @group(name="vc")
+    async def voice_stat(self, ctx):
         """get info about the user"""
+        if ctx.invoked_subcommand:
+            return
         user = ctx.author.id
         guild = ctx.channel.guild.id
 
         rows = None
         with self._database() as db:
-            if all_:
-                rows = db.execute(
-                    """
-                    SELECT voicestate, sum(duration) as total
-                    FROM History
-                    WHERE user = ?
-                    GROUP BY voicestate
-                    """,
-                    (user,),
-                ).fetchall()
-            else:
-                rows = db.execute(
-                    """
-                    SELECT voicestate, sum(duration) as total
-                    FROM History
-                    WHERE user = ? and guild = ?
-                    GROUP BY voicestate
-                    """,
-                    (user, guild),
-                ).fetchall()
+            rows = db.execute(
+                """
+                SELECT voicestate, sum(duration) as total
+                FROM History
+                WHERE user = ? and guild = ?
+                GROUP BY voicestate
+                """,
+                (user, guild),
+            ).fetchall()
         results = {}
         for row in rows:
             if row["voicestate"] in results:
@@ -293,6 +365,10 @@ class StatsCog(Cog):
         await ctx.send(output)
 
     @command(name="vct")
+    async def voice_top_single(self, ctx):
+        return self.voice_top(ctx)
+
+    @voice_stat.command(name="top")
     async def voice_top(self, ctx, all_=None):
         """Get top 10 users from each guild"""
         guild = ctx.channel.guild
@@ -390,3 +466,25 @@ class StatsCog(Cog):
         with open(calc_path("../historic.json"), "w+") as fp:
             dump(acts, fp)
         logger.info("done dumping")
+
+
+    @is_owner()
+    @command(name="kba")
+    async def add_kuibot_history(self, _):
+        logger.info("adding historic data")
+        tsdata, gid, cid = get_data()
+
+        entries = []
+        for user, data in tsdata.items():
+            logger.info("%s: #data %s", user, len(data))
+            user_entries = []
+            for sin in data:
+                entry = (user, gid, cid, *sin, True)
+                user_entries.append(entry)
+            logger.info("num entries: %s", len(user_entries))
+            entries.extend(user_entries)
+
+        logger.info("adding %s to db", len(entries))
+        with self._database() as db:
+            db.executemany("INSERT INTO History VALUES (?,?,?,?,?,?,?)", entries)
+        logger.info("done entries")

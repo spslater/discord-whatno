@@ -44,6 +44,11 @@ class TimeTravel:
     # pylint: disable=invalid-name
     tz = TIMEZONE
 
+    @classmethod
+    def sqlts(cls, ts):
+        """Convert timestamp to sqlite database time string check"""
+        return datetime.fromtimestamp(ts, tz=cls.tz).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
+
     @staticmethod
     def timestamp():
         """Get current utc timestamp"""
