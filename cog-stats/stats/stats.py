@@ -16,26 +16,16 @@ from .historic import get_data
 
 logger = logging.getLogger(__name__)
 
+STATES = ["voice", "mute", "deaf", "stream", "video"]
+
 VoiceCon = namedtuple("VoiceCon", ["user", "guild", "channel"])
-VoiceData = namedtuple(
-    "VoiceData",
-    [
-        "jointime",
-        "mute",
-        "mutetime",
-        "deaf",
-        "deaftime",
-        "stream",
-        "streamtime",
-        "video",
-        "videotime",
-    ],
-)
+VoiceState = namedtuple("VoiceState", ["state", "time"])
 VoiceDiff = namedtuple("VoiceDiff", ["voice", "mute", "deaf", "stream", "video"])
+Voice = namedtuple("Voice", ["voice", "mute", "deaf", "stream", "video"])
 
 
 class StatsCog(Cog):
-    """Actual DoA Reread Cog"""
+    """Voice Stats Cog"""
 
     def __init__(self, bot, envfile):
         super().__init__()
@@ -56,51 +46,53 @@ class StatsCog(Cog):
         return VoiceDB(self.database_file, readonly)
 
     def cog_unload(self):
+        self._save_current()
         # function transformed by the @loop annotation
         # pylint: disable=no-member
         self.periodic_save.cancel()
 
     @Cog.listener("on_ready")
     async def load_current(self):
+        """Load current voice users into memory"""
         self._save_current()
 
     @staticmethod
-    def _state_data(state, timestamp):
-        return VoiceData(
-            timestamp,
-            state.self_mute,
-            timestamp if state.self_mute else None,
-            state.self_deaf,
-            timestamp if state.self_deaf else None,
-            state.self_stream,
-            timestamp if state.self_stream else None,
-            state.self_video,
-            timestamp if state.self_video else None,
+    def _start_state(state, timestamp):
+        return Voice(
+            voice=VoiceState("voice", timestamp),
+            mute=VoiceState("mute", timestamp) if state.self_mute else None,
+            deaf=VoiceState("deaf", timestamp) if state.self_deaf else None,
+            stream=VoiceState("stream", timestamp) if state.self_stream else None,
+            video=VoiceState("video", timestamp) if state.self_video else None,
         )
 
     @staticmethod
-    def _diff_state(first: VoiceData, second: VoiceData):
-        voicediff = second.jointime - first.jointime
+    def _diff_state(first, second, now):
+        voicediff = second.voice.time - first.voice.time
 
-        mute = second.mute and first.mute
         mutediff = None
-        if mute:
-            mutediff = second.mutetime - first.mutetime
+        if second.mute and first.mute:
+            mutediff = second.mute.time - first.mute.time
+        elif second.mute is None and first.mute:
+            mutediff = now - first.mute.time
 
-        deaf = second.deaf and first.deaf
         deafdiff = None
-        if deaf:
-            deafdiff = second.deaftime - first.deaftime
+        if second.deaf and first.deaf:
+            deafdiff = second.deaf.time - first.deaf.time
+        elif second.deaf is None and first.deaf:
+            deafdiff = now - first.deaf.time
 
-        stream = second.stream and first.stream
         streamdiff = None
-        if stream:
-            streamdiff = second.streamtime - first.streamtime
+        if second.stream and first.stream:
+            streamdiff = second.stream.time - first.stream.time
+        elif second.stream is None and first.stream:
+            streamdiff = now - first.stream.time
 
-        video = second.video and first.video
         videodiff = None
-        if video:
-            videodiff = second.videotime - first.videotime
+        if second.video and first.video:
+            videodiff = second.video.time - first.video.time
+        elif second.video is None and first.video:
+            videodiff = now - first.video.time
 
         return VoiceDiff(voicediff, mutediff, deafdiff, streamdiff, videodiff)
 
@@ -112,7 +104,7 @@ class StatsCog(Cog):
             for channel in guild.voice_channels:
                 for user, state in channel.voice_states.items():
                     id_ = VoiceCon(user, guild.id, channel.id)
-                    data = self._state_data(state, now)
+                    data = self._start_state(state, now)
                     current.append((id_, data))
         return current
 
@@ -121,20 +113,20 @@ class StatsCog(Cog):
         before_info = (
             before.channel.id if before.channel else None,
             before.channel.name if before.channel else None,
-            before.self_deaf,
             before.self_mute,
+            before.self_deaf,
             before.self_stream,
             before.self_video,
         )
         after_info = (
             after.channel.id if after.channel else None,
             after.channel.name if after.channel else None,
-            after.self_deaf,
             after.self_mute,
+            after.self_deaf,
             after.self_stream,
             after.self_video,
         )
-        logger.info(
+        logger.debug(
             "%s (%s): %s -> %s",
             member.name,
             member.id,
@@ -142,8 +134,7 @@ class StatsCog(Cog):
             after_info,
         )
 
-    def _check_entry(self, uid, cid, state, ts):
-        logger.info("checking: %s", (uid, cid, state, ts))
+    def _check_entry(self, uid, cid, state, tss):
         with self._database() as db:
             states = db.execute(
                 """
@@ -155,54 +146,46 @@ class StatsCog(Cog):
                   AND strftime('%Y-%m-%dT%H:%M:%f', starttime, 'unixepoch', 'localtime') = ?
                 ;
                 """,
-                (uid, cid, state, ts),
-            ).fetchall()
+                (uid, cid, state, tss),
+            ).fetchone()
         return bool(states)
 
-    def _update_state(self, id_, before, after):
-        diff = self._diff_state(before, after)
+    def _update_state(self, id_, before, after, now):
+        diff = self._diff_state(before, after, now)
 
         uid = id_.user
         gid = id_.guild
         cid = id_.channel
-        bts = before.jointime
-        tsc = TimeTravel.sqlts(before.jointime)
-
-        voice = (uid, cid, "voice", tsc)
-        mute = (uid, cid, "mute", tsc)
-        deaf = (uid, cid, "deaf", tsc)
-        stream = (uid, cid, "stream", tsc)
-        video = (uid, cid, "video", tsc)
+        bts = before.voice.time
+        tsc = TimeTravel.sqlts(before.voice.time)
 
         updates = []
         inserts = []
-        if self._check_entry(*voice):
-            updates.append((diff.voice, *voice))
+        if diff.voice and self._check_entry(uid, cid, "voice", tsc):
+            updates.append((diff.voice, uid, cid, "voice", tsc))
         elif diff.voice:
             inserts.append((uid, gid, cid, "voice", bts, diff.voice, False))
 
-        if self._check_entry(*mute):
-            updates.append((diff.mute, *mute))
+        if diff.mute and self._check_entry(uid, cid, "mute", tsc):
+            updates.append((diff.mute, uid, cid, "mute", tsc))
         elif diff.mute:
             inserts.append((uid, gid, cid, "mute", bts, diff.mute, False))
 
-        if self._check_entry(*deaf):
-            updates.append((diff.deaf, *deaf))
+        if diff.deaf and self._check_entry(uid, cid, "deaf", tsc):
+            updates.append((diff.deaf, uid, cid, "deaf", tsc))
         elif diff.deaf:
             inserts.append((uid, gid, cid, "deaf", bts, diff.deaf, False))
 
-        if self._check_entry(*stream):
-            updates.append((diff.stream, *stream))
+        if diff.stream and self._check_entry(uid, cid, "stream", tsc):
+            updates.append((diff.stream, uid, cid, "stream", tsc))
         elif diff.stream:
             inserts.append((uid, gid, cid, "stream", bts, diff.stream, False))
 
-        if self._check_entry(*video):
-            updates.append((diff.video, *video))
+        if diff.video and self._check_entry(uid, cid, "video", tsc):
+            updates.append((diff.video, uid, cid, "video", tsc))
         elif diff.video:
             inserts.append((uid, gid, cid, "video", bts, diff.video, False))
 
-        logger.info("update: %s", updates)
-        logger.info("insert: %s", inserts)
         with self._database() as db:
             db.executemany(
                 """
@@ -219,28 +202,25 @@ class StatsCog(Cog):
         with self._database() as db:
             db.executemany("INSERT INTO History VALUES (?,?,?,?,?,?,?)", inserts)
 
+    @staticmethod
+    def _new_state(status, before, after):
+        state = getattr(before, status)
+        if not state and getattr(after, status):
+            state = VoiceState(status, getattr(after, status).time)
+        elif state and not getattr(after, status):
+            state = None
+        return state
 
-    def _save_state_change(self, id_, before, after):
-        diff = self._diff_state(before, after)
+    def _save_state_change(self, id_, before, after, now):
+        self._update_state(id_, before, after, now)
 
-        name = id_.user
-        guild = id_.guild
-        channel = id_.channel
-        time = before.jointime
+        voice = self._new_state("voice", before, after)
+        mute = self._new_state("mute", before, after)
+        deaf = self._new_state("deaf", before, after)
+        stream = self._new_state("stream", before, after)
+        video = self._new_state("video", before, after)
 
-        history = []
-        history.append((name, guild, channel, "voice", time, diff.voice, False))
-        if diff.mute:
-            history.append((name, guild, channel, "mute", time, diff.mute, False))
-        if diff.deaf:
-            history.append((name, guild, channel, "deaf", time, diff.deaf, False))
-        if diff.stream:
-            history.append((name, guild, channel, "stream", time, diff.stream, False))
-        if diff.video:
-            history.append((name, guild, channel, "video", time, diff.video, False))
-
-        with self._database() as db:
-            db.executemany("INSERT INTO History VALUES (?,?,?,?,?,?,?)", history)
+        return Voice(voice=voice, mute=mute, deaf=deaf, stream=stream, video=video)
 
     @Cog.listener("on_voice_state_update")
     async def voice_change(self, member, before, after):
@@ -259,36 +239,34 @@ class StatsCog(Cog):
         channel = before.channel.id if not join else after.channel.id
         id_ = VoiceCon(member.id, guild, channel)
 
-        after_data = self._state_data(after, now)
-
         if join:
-            self.current[id_] = after_data
+            self.current[id_] = self._start_state(after, now)
             return
 
         prev_state = self.current[id_]
-        new_state = self._state_data(before, now)
-        self._save_state_change(id_, prev_state, new_state)
+        new_state = self._start_state(after, now)
+        updated = self._save_state_change(id_, prev_state, new_state, now)
 
         if leave:
             del self.current[id_]
         else:
-            self.current[id_] = after_data
+            self.current[id_] = updated
 
     def _save_current(self):
+        now = TimeTravel.timestamp()
         for id_, data in self.current_voice():
             if id_ in self.current:
                 prev = self.current[id_]
-                self._update_state(id_, prev, data)
+                self._update_state(id_, prev, data, now)
             else:
                 self.current[id_] = data
 
-    #@loop(minutes=1)
     @loop(seconds=5)
     async def periodic_save(self):
         """periodically save the voice stats"""
         await self.bot.wait_until_ready()
         self._save_current()
-        logger.info(
+        logger.debug(
             "periodically save the voice stats, next at %s",
             # function transformed by the @loop annotation
             # pylint: disable=no-member
@@ -349,73 +327,79 @@ class StatsCog(Cog):
             else:
                 results[row["voicestate"]] = row["total"]
 
-        in_voice = user in [vc.user for vc in self.current.keys()]
+        in_voice = user in [vc.user for vc in self.current]
         stats = None
-        for k, v in self.current.items():
-            if k.user == user:
-                stats = v
+        for key, value in self.current.items():
+            if key.user == user:
+                stats = value
                 break
 
         output = "```\n"
         for state, value in results.items():
             val = self._display_duration(value)
-            green = ' 🟢' if in_voice and (getattr(stats, state, False) or state == 'voice') else ''
+            green = (
+                " 🟢"
+                if in_voice and (getattr(stats, state, False) or state == "voice")
+                else ""
+            )
             output += f"{state}{green}: {val}\n"
         output += "```"
         await ctx.send(output)
 
     @command(name="vct")
-    async def voice_top_single(self, ctx):
-        return self.voice_top(ctx)
+    async def voice_top_single(self, ctx, all_=None):
+        """Short name command to get top VC users"""
+        return await self.voice_top(ctx, all_=all_)
 
     @voice_stat.command(name="top")
     async def voice_top(self, ctx, all_=None):
         """Get top 10 users from each guild"""
-        guild = ctx.channel.guild
+        async with ctx.typing():
+            guild = ctx.channel.guild
 
-        rows = []
-        with self._database() as db:
-            if all_:
-                rows = db.execute(
-                    """
-                    SELECT user, sum(duration) as total
-                    FROM History
-                    WHERE voicestate = "voice"
-                    GROUP BY user
-                    ORDER BY total DESC
-                    LIMIT 10
-                    """,
-                ).fetchall()
-            else:
-                rows = db.execute(
-                    """
-                    SELECT user, sum(duration) as total
-                    FROM History
-                    WHERE guild = ? AND voicestate = "voice"
-                    GROUP BY user
-                    ORDER BY total DESC
-                    LIMIT 10
-                    """,
-                    (guild.id,),
-                ).fetchall()
-        users = [(r["user"], r["total"]) for r in rows]
-        output = "```\n"
-        for idx, (user, value) in enumerate(users):
-            try:
-                member = await guild.fetch_member(user)
-            except NotFound:
-                name = user
-            else:
-                name = member.nick or member.name
-            val = self._display_duration(value)
-            output += f"{idx+1}. {name}: {val}\n"
-        output += "```"
-        await ctx.send(output)
-
+            rows = []
+            with self._database() as db:
+                if all_:
+                    rows = db.execute(
+                        """
+                        SELECT user, sum(duration) as total
+                        FROM History
+                        WHERE voicestate = "voice"
+                        GROUP BY user
+                        ORDER BY total DESC
+                        LIMIT 10
+                        """,
+                    ).fetchall()
+                else:
+                    rows = db.execute(
+                        """
+                        SELECT user, sum(duration) as total
+                        FROM History
+                        WHERE guild = ? AND voicestate = "voice"
+                        GROUP BY user
+                        ORDER BY total DESC
+                        LIMIT 10
+                        """,
+                        (guild.id,),
+                    ).fetchall()
+            users = [(r["user"], r["total"]) for r in rows]
+            output = "```\n"
+            for idx, (user, value) in enumerate(users):
+                try:
+                    member = await guild.fetch_member(user)
+                except NotFound:
+                    name = user
+                else:
+                    name = member.nick or member.name
+                val = self._display_duration(value)
+                output += f"{idx+1}. {name}: {val}\n"
+            output += "```"
+            await ctx.send(output)
 
     @is_owner()
     @command(name="kbh")
-    async def download_kuibot_history(self, _, date=None):
+    async def download_kuibot_history(self, ctx, date=None):
+        """Download historical kuibot messages"""
         kuibot = 639324610772467714
         vctcccc = 620013384049623080
         if date is None:
@@ -461,16 +445,17 @@ class StatsCog(Cog):
                     user = match.group("user")
                     timestamp = msg.created_at.timestamp()
                     data = (user, timestamp, act)
-                    logger.info(data)
+                    logger.debug(data)
                     acts.append(data)
         with open(calc_path("../historic.json"), "w+") as fp:
             dump(acts, fp)
         logger.info("done dumping")
-
+        await ctx.message.add_reaction("👍")
 
     @is_owner()
     @command(name="kba")
-    async def add_kuibot_history(self, _):
+    async def add_kuibot_history(self, ctx):
+        """Load historical data into the database"""
         logger.info("adding historic data")
         tsdata, gid, cid = get_data()
 
@@ -481,10 +466,10 @@ class StatsCog(Cog):
             for sin in data:
                 entry = (user, gid, cid, *sin, True)
                 user_entries.append(entry)
-            logger.info("num entries: %s", len(user_entries))
+            logger.debug("num entries: %s", len(user_entries))
             entries.extend(user_entries)
 
         logger.info("adding %s to db", len(entries))
         with self._database() as db:
             db.executemany("INSERT INTO History VALUES (?,?,?,?,?,?,?)", entries)
-        logger.info("done entries")
+        await ctx.message.add_reaction("👍")

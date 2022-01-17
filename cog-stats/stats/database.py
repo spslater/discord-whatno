@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class VoiceDB:
     """Voice DB Interface"""
 
-    def __init__(self, dbfile, readonly=True):
+    def __init__(self, dbfile, readonly=False):
         self.readonly = readonly
         self.filename: Path = calc_path(dbfile)
         if not self.filename:
