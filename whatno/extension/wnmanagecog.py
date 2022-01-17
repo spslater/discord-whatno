@@ -29,19 +29,20 @@ class WNManageCog(Cog, name="Manage Extensions"):
     @group(name="exts")
     async def exts(self, ctx):
         """Manage bot about extensions"""
-        if not ctx.invoked_subcommand:
-            msg = "```\n"
-            if self.bot.loaded_extensions:
-                loaded = "\n".join(self.bot.loaded_extensions)
-                msg += f"Loaded\n{loaded}\n"
-            unload_exts = (
-                self.bot.get_available_extensions() - self.bot.loaded_extensions
-            )
-            if unload_exts:
-                unloaded = "\n".join(unload_exts)
-                msg += f"Unloaded\n{unloaded}\n"
-            msg += "```"
-            await ctx.send(msg)
+        if ctx.invoked_subcommand:
+            return
+        msg = "```\n"
+        if self.bot.loaded_extensions:
+            loaded = "\n".join(self.bot.loaded_extensions)
+            msg += f"Loaded\n{loaded}\n"
+        unload_exts = (
+            self.bot.get_available_extensions() - self.bot.loaded_extensions
+        )
+        if unload_exts:
+            unloaded = "\n".join(unload_exts)
+            msg += f"Unloaded\n{unloaded}\n"
+        msg += "```"
+        await ctx.send(msg)
 
     @is_owner()
     @exts.command()
