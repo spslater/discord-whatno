@@ -573,7 +573,7 @@ class StatsCog(Cog):
             "periodically compress that database of duplicate data, next at %s",
             # function transformed by the @loop annotation
             # pylint: disable=no-member
-            self._compress_database.next_iteration,
+            self.periodic_compress.next_iteration,
         )
 
     @is_owner()
