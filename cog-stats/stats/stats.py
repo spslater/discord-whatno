@@ -71,27 +71,27 @@ class StatsCog(Cog):
         voicediff = second.voice.time - first.voice.time
 
         mutediff = None
-        if second.mute and first.mute:
+        if second.mute is not None and first.mute is not None:
             mutediff = second.mute.time - first.mute.time
-        elif second.mute is None and first.mute:
+        elif second.mute is None and first.mute is not None:
             mutediff = now - first.mute.time
 
         deafdiff = None
-        if second.deaf and first.deaf:
+        if second.deaf is not None and first.deaf is not None:
             deafdiff = second.deaf.time - first.deaf.time
-        elif second.deaf is None and first.deaf:
+        elif second.deaf is None and first.deaf is not None:
             deafdiff = now - first.deaf.time
 
         streamdiff = None
-        if second.stream and first.stream:
+        if second.stream is not None and first.stream is not None:
             streamdiff = second.stream.time - first.stream.time
-        elif second.stream is None and first.stream:
+        elif second.stream is None and first.stream is not None:
             streamdiff = now - first.stream.time
 
         videodiff = None
-        if second.video and first.video:
+        if second.video is not None and first.video is not None:
             videodiff = second.video.time - first.video.time
-        elif second.video is None and first.video:
+        elif second.video is None and first.video is not None:
             videodiff = now - first.video.time
 
         return VoiceDiff(voicediff, mutediff, deafdiff, streamdiff, videodiff)
@@ -156,35 +156,48 @@ class StatsCog(Cog):
         uid = id_.user
         gid = id_.guild
         cid = id_.channel
-        bts = before.voice.time
-        tsc = TimeTravel.sqlts(before.voice.time)
 
         updates = []
         inserts = []
-        if diff.voice and self._check_entry(uid, cid, "voice", tsc):
-            updates.append((diff.voice, uid, cid, "voice", tsc))
-        elif diff.voice:
-            inserts.append((uid, gid, cid, "voice", bts, diff.voice, False))
+        if diff.voice is not None:
+            bts = before.voice.time
+            tsc = TimeTravel.sqlts(bts)
+            if self._check_entry(uid, cid, "voice", tsc):
+                updates.append((diff.voice, uid, cid, "voice", tsc))
+            else:
+                inserts.append((uid, gid, cid, "voice", bts, diff.voice, False))
 
-        if diff.mute and self._check_entry(uid, cid, "mute", tsc):
-            updates.append((diff.mute, uid, cid, "mute", tsc))
-        elif diff.mute:
-            inserts.append((uid, gid, cid, "mute", bts, diff.mute, False))
+        if diff.mute is not None:
+            bts = before.mute.time
+            tsc = TimeTravel.sqlts(bts)
+            if self._check_entry(uid, cid, "mute", tsc):
+                updates.append((diff.mute, uid, cid, "mute", tsc))
+            else:
+                inserts.append((uid, gid, cid, "mute", bts, diff.mute, False))
 
-        if diff.deaf and self._check_entry(uid, cid, "deaf", tsc):
-            updates.append((diff.deaf, uid, cid, "deaf", tsc))
-        elif diff.deaf:
-            inserts.append((uid, gid, cid, "deaf", bts, diff.deaf, False))
+        if diff.deaf is not None:
+            bts = before.deaf.time
+            tsc = TimeTravel.sqlts(bts)
+            if self._check_entry(uid, cid, "deaf", tsc):
+                updates.append((diff.deaf, uid, cid, "deaf", tsc))
+            else:
+                inserts.append((uid, gid, cid, "deaf", bts, diff.deaf, False))
 
-        if diff.stream and self._check_entry(uid, cid, "stream", tsc):
-            updates.append((diff.stream, uid, cid, "stream", tsc))
-        elif diff.stream:
-            inserts.append((uid, gid, cid, "stream", bts, diff.stream, False))
+        if diff.stream is not None:
+            bts = before.stream.time
+            tsc = TimeTravel.sqlts(bts)
+            if self._check_entry(uid, cid, "stream", tsc):
+                updates.append((diff.stream, uid, cid, "stream", tsc))
+            else:
+                inserts.append((uid, gid, cid, "stream", bts, diff.stream, False))
 
-        if diff.video and self._check_entry(uid, cid, "video", tsc):
-            updates.append((diff.video, uid, cid, "video", tsc))
-        elif diff.video:
-            inserts.append((uid, gid, cid, "video", bts, diff.video, False))
+        if diff.video is not None:
+            bts = before.video.time
+            tsc = TimeTravel.sqlts(bts)
+            if self._check_entry(uid, cid, "video", tsc):
+                updates.append((diff.video, uid, cid, "video", tsc))
+            elif diff.video is not None:
+                inserts.append((uid, gid, cid, "video", bts, diff.video, False))
 
         with self._database() as db:
             db.executemany(
@@ -204,12 +217,14 @@ class StatsCog(Cog):
 
     @staticmethod
     def _new_state(status, before, after):
-        state = getattr(before, status)
-        if not state and getattr(after, status):
-            state = VoiceState(status, getattr(after, status).time)
-        elif state and not getattr(after, status):
-            state = None
-        return state
+        bstate = getattr(before, status)
+        astate = getattr(after, status)
+        nstate = bstate
+        if bstate is None and astate is not None:
+            nstate = astate
+        elif bstate is not None and astate is None:
+            nstate = None
+        return nstate
 
     def _save_state_change(self, id_, before, after, now):
         self._update_state(id_, before, after, now)
@@ -398,34 +413,43 @@ class StatsCog(Cog):
 
     @is_owner()
     @command(name="kbh")
-    async def download_kuibot_history(self, ctx, date=None):
+    async def download_kuibot_history(self, ctx, start=None, stop=None):
         """Download historical kuibot messages"""
         kuibot = 639324610772467714
         vctcccc = 620013384049623080
-        if date is None:
-            date = "2019-11-30"
-        date = f"{date.strip()} 00:00:00"
-        since = TimeTravel.fromstr(date)
-        history = await self.bot.get_history(vctcccc, user_id=kuibot, after=since)
+        if start is None:
+            start = "2019-11-30"
+        start = f"{start.strip()} 00:00:00"
+        after = TimeTravel.fromstr(start)
+        if stop is None:
+            stop = "2022-01-15"
+        stop = f"{stop.strip()} 00:00:00"
+        before = TimeTravel.fromstr(stop)
+        history = await self.bot.get_history(
+            vctcccc,
+            user_id=kuibot,
+            after=after,
+            before=before,
+        )
 
         pats = [
             (re.compile(r"(?P<user>.*?) joined .*?"), "join"),  # pat_join
             (re.compile(r"(?P<user>.*?) left .*?"), "left"),  # pat_left
             (re.compile(r"(?P<user>.*?) moved from .*? to .*?"), "move"),  # pat_move
             (
-                re.compile(r"(?P<user>.*?) un(deafen|defeat)ed"),
+                re.compile(r"(?P<user>.*?) (deafen|defeat)ed"),
                 "deaf_on",
             ),  # pat_deaf_on
             (
-                re.compile(r"(?P<user>.*?) (deafen|defeat)ed"),
+                re.compile(r"(?P<user>.*?) un(deafen|defeat)ed"),
                 "deaf_off",
             ),  # pat_deaf_off
             (
-                re.compile(r"(?P<user>.*?) turned off video"),
+                re.compile(r"(?P<user>.*?) turned on video"),
                 "video_on",
             ),  # pat_video_on
             (
-                re.compile(r"(?P<user>.*?) turned on video"),
+                re.compile(r"(?P<user>.*?) turned off video"),
                 "video_off",
             ),  # pat_video_off
             (
@@ -433,7 +457,7 @@ class StatsCog(Cog):
                 "stream_on",
             ),  # pat_stream_on
             (
-                re.compile(r"(?P<user>.*?) started (stream|scream)ing"),
+                re.compile(r"(?P<user>.*?) stopped (stream|scream)ing"),
                 "stream_off",
             ),  # pat_stream_off
         ]

@@ -4,6 +4,9 @@ from json import load
 
 from .helpers import calc_path
 
+MAX_TIME = 10*3600
+
+
 def get_data():
     guild = 248732519204126720
     channel = 248732519204126721
@@ -42,51 +45,57 @@ def get_data():
         for event in sorted(events, key=lambda x: x[1]):
             ets = event[1]
             act = event[2]
+
             if act in ("join", "left"):
-                if join is None and act == "join":
+                if act == "join":
                     join = event[1]
                 elif join is not None and act == "left":
-                    info.append(("voice", join, (ets - join)))
+                    diff = min(ets-join, MAX_TIME)
+                    info.append(("voice", join, diff))
                     if deaf:
-                        info.append(("deaf", join, (ets - join)))
+                        info.append(("deaf", join, diff))
                         deaf = None
                     if video:
-                        info.append(("video", join, (ets - join)))
+                        info.append(("video", join, diff))
                         video = None
                     if stream:
-                        info.append(("stream", join, (ets - join)))
+                        info.append(("stream", join, diff))
                         stream = None
                     join = None
                 continue
 
             if act in ("deaf_on", "deaf_off"):
-                if deaf is None and act == "deaf_on":
+                if join is None:
+                    deaf = None
+                elif act == "deaf_on":
                     deaf = ets
                 elif deaf is not None and act == "deaf_off":
-                    info.append(("deaf", deaf, (ets - deaf)))
+                    diff = min(ets-deaf, MAX_TIME)
+
+                    info.append(("deaf", deaf, diff))
                     deaf = None
-                elif join is not None and act == "deaf_off":
-                    info.append(("deaf", join, (ets - join)))
                 continue
 
             if act in ("video_on", "video_off"):
-                if video is None and act == "video_on":
-                    video = event[1]
-                elif video is not None and act == "video_off":
-                    info.append(("video", video, (event[1] - video)))
+                if join is None:
                     video = None
-                # elif join is not None and act == "video_off":
-                #     info.append(("video", join, (event[1] - join)))
+                elif act == "video_on":
+                    video = ets
+                elif video is not None and act == "video_off":
+                    diff = min(ets-video, MAX_TIME)
+                    info.append(("video", video, diff))
+                    video = None
                 continue
 
             if act in("stream_on", "stream_off"):
-                if stream is None and act == "stream_on":
-                    stream = event[1]
-                elif stream is not None and act == "stream_off":
-                    info.append(("stream", stream, (event[1] - stream)))
+                if join is None:
                     stream = None
-                # elif join is not None and act == "stream_off":
-                #     info.append(("stream", join, (event[1] - join)))
+                elif stream is None and act == "stream_on":
+                    stream = ets
+                elif stream is not None and act == "stream_off":
+                    diff = min(ets-stream, MAX_TIME)
+                    info.append(("stream", stream, diff))
+                    stream = None
                 continue
         tsdata[user] = info
     return tsdata, guild, channel
