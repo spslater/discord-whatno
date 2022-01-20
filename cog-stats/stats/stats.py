@@ -41,6 +41,7 @@ class StatsCog(Cog):
         # function transformed by the @loop annotation
         # pylint: disable=no-member
         self.periodic_save.start()
+        self.periodic_compress.start()
 
     def _database(self, readonly=False):
         return VoiceDB(self.database_file, readonly)
@@ -50,6 +51,7 @@ class StatsCog(Cog):
         # function transformed by the @loop annotation
         # pylint: disable=no-member
         self.periodic_save.cancel()
+        self.periodic_compress.cancel()
 
     @Cog.listener("on_ready")
     async def load_current(self):
@@ -145,7 +147,6 @@ class StatsCog(Cog):
                   AND channel = ?
                   AND voicestate = ?
                   AND h_time = ?
-                ;
                 """,
                 (uid, cid, state, tss),
             ).fetchone()
@@ -214,7 +215,6 @@ class StatsCog(Cog):
                   AND channel = ?
                   AND voicestate = ?
                   AND h_time = ?
-                ;
                 """,
                 updates,
             )
@@ -512,4 +512,58 @@ class StatsCog(Cog):
         with self._database() as db:
             db.executemany("INSERT INTO History VALUES (?,?,?,?,?,?,?)", entries)
 
+        await ctx.message.add_reaction("👍")
+
+    def _compress_database(self):
+        with self._database() as db:
+            max_durs = db.execute(
+                """
+                SELECT user, channel, voicestate, h_time, max(duration) as maxdur
+                FROM History
+                GROUP BY user, channel, voicestate, h_time
+                """
+            ).fetchall()
+        deletes = []
+        for max_dur in max_durs:
+            deletes.append(
+                (
+                    max_dur["user"],
+                    max_dur["channel"],
+                    max_dur["voicestate"],
+                    max_dur["h_time"],
+                    max_dur["maxdur"],
+                )
+            )
+        with self._database() as db:
+            db.executemany(
+                """
+                DELETE FROM History
+                WHERE
+                    user = ? AND
+                    channel = ? AND
+                    voicestate = ? AND
+                    h_time = ? AND
+                    duration != ?
+                """,
+                deletes,
+            )
+
+    @loop(hours=(7 * 24))
+    async def periodic_compress(self):
+        """periodically compress that database of duplicate data"""
+        await self.bot.wait_until_ready()
+        self._compress_database()
+        logger.debug(
+            "periodically compress that database of duplicate data, next at %s",
+            # function transformed by the @loop annotation
+            # pylint: disable=no-member
+            self._compress_database.next_iteration,
+        )
+
+    @is_owner()
+    @historic_data.command("compress")
+    async def compress_duplicates(self, ctx):
+        """Remove duplicate duration entries"""
+        logger.info("removing duplicate duration entries")
+        self._compress_database()
         await ctx.message.add_reaction("👍")
