@@ -335,14 +335,7 @@ class StatsCog(Cog):
         output += "```"
         return output
 
-    @group(name="vc")
-    async def voice_stat(self, ctx):
-        """get info about the user"""
-        if ctx.invoked_subcommand:
-            return
-        user = ctx.author.id
-        guild = ctx.channel.guild.id
-
+    def _user_stat(self, user, guild):
         rows = None
         with self._database() as db:
             rows = db.execute(
@@ -368,13 +361,36 @@ class StatsCog(Cog):
                 stats = value
                 break
 
-        output = self._generate_voice_output(results, stats, in_voice)
+        return self._generate_voice_output(results, stats, in_voice)
+
+    @group(name="vc")
+    async def voice_stat(self, ctx):
+        """get info about the user"""
+        if ctx.invoked_subcommand:
+            return
+
+        output = self._user_stat(ctx.author.id, ctx.channel.guild.id)
         await ctx.send(output)
 
-    @command(name="vct")
-    async def voice_top_single(self, ctx, all_=None):
-        """Short name command to get top VC users"""
-        return await self.voice_top(ctx, all_=all_)
+    @voice_stat.command(name="user")
+    async def voice_stat_user(self, ctx, user, *extra):
+        """get info about any user by id"""
+        try:
+            user_id = int(user)
+        except ValueError:
+            user = user + " " + " ".join(extra)
+            logger.info("user: %s", user)
+            users = await ctx.channel.guild.query_members(user)
+            if len(users) == 0:
+                await ctx.send("sorry, no user with that name found")
+                return
+            if len(users) > 1:
+                await ctx.send("more than one users found, be more specific: %s", [u.nick or u.name for u in users])
+                return
+            user_id = users[0].id
+
+        output = self._user_stat(user_id, ctx.channel.guild.id)
+        await ctx.send(output)
 
     @voice_stat.command(name="top")
     async def voice_top(self, ctx, all_=None):
