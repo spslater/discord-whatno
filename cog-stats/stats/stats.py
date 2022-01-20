@@ -135,6 +135,7 @@ class StatsCog(Cog):
         )
 
     def _check_entry(self, uid, cid, state, tss):
+        logger.info((uid, cid, state, tss))
         with self._database() as db:
             states = db.execute(
                 """
@@ -143,7 +144,7 @@ class StatsCog(Cog):
                 WHERE user = ?
                   AND channel = ?
                   AND voicestate = ?
-                  AND strftime('%Y-%m-%dT%H:%M:%f', starttime, 'unixepoch', 'localtime') = ?
+                  AND h_time = ?
                 ;
                 """,
                 (uid, cid, state, tss),
@@ -199,6 +200,11 @@ class StatsCog(Cog):
             elif diff.video is not None:
                 inserts.append((uid, gid, cid, "video", bts, diff.video, False))
 
+        if updates:
+            logger.debug("db updates: %s", updates)
+        if inserts:
+            logger.debug("db inserts: %s", inserts)
+
         with self._database() as db:
             db.executemany(
                 """
@@ -207,7 +213,7 @@ class StatsCog(Cog):
                 WHERE user = ?
                   AND channel = ?
                   AND voicestate = ?
-                  AND strftime('%Y-%m-%dT%H:%M:%f', starttime, 'unixepoch', 'localtime') = ?
+                  AND h_time = ?
                 ;
                 """,
                 updates,
@@ -316,6 +322,19 @@ class StatsCog(Cog):
             val += f"{s} sec{'s' if s > 1 else ''}"
         return val
 
+    def _generate_voice_output(self, results, stats, in_voice):
+        output = "```\n"
+        for state, value in results.items():
+            val = self._display_duration(value)
+            green = (
+                " 🟢"
+                if in_voice and (getattr(stats, state, False) or state == "voice")
+                else ""
+            )
+            output += f"{state}{green}: {val}\n"
+        output += "```"
+        return output
+
     @group(name="vc")
     async def voice_stat(self, ctx):
         """get info about the user"""
@@ -349,16 +368,7 @@ class StatsCog(Cog):
                 stats = value
                 break
 
-        output = "```\n"
-        for state, value in results.items():
-            val = self._display_duration(value)
-            green = (
-                " 🟢"
-                if in_voice and (getattr(stats, state, False) or state == "voice")
-                else ""
-            )
-            output += f"{state}{green}: {val}\n"
-        output += "```"
+        output = self._generate_voice_output(results, stats, in_voice)
         await ctx.send(output)
 
     @command(name="vct")
@@ -411,59 +421,62 @@ class StatsCog(Cog):
             output += "```"
             await ctx.send(output)
 
-    @is_owner()
-    @command(name="kbh")
-    async def download_kuibot_history(self, ctx, start=None, stop=None):
-        """Download historical kuibot messages"""
+    @voice_stat.group("hist")
+    async def historic_data(self, ctx):
+        """Collect and add historic data"""
+        if ctx.invoked_subcommand:
+            return
+
+    async def _get_kuibot_history(self, start, stop):
         kuibot = 639324610772467714
         vctcccc = 620013384049623080
-        if start is None:
-            start = "2019-11-30"
         start = f"{start.strip()} 00:00:00"
         after = TimeTravel.fromstr(start)
-        if stop is None:
-            stop = "2022-01-15"
         stop = f"{stop.strip()} 00:00:00"
         before = TimeTravel.fromstr(stop)
-        history = await self.bot.get_history(
+        return await self.bot.get_history(
             vctcccc,
             user_id=kuibot,
             after=after,
             before=before,
         )
 
+    @is_owner()
+    @historic_data.command(name="collect")
+    async def download_kuibot_history(self, ctx, start="2019-11-30", stop="2022-01-15"):
+        """Download historical kuibot messages"""
         pats = [
-            (re.compile(r"(?P<user>.*?) joined .*?"), "join"),  # pat_join
-            (re.compile(r"(?P<user>.*?) left .*?"), "left"),  # pat_left
-            (re.compile(r"(?P<user>.*?) moved from .*? to .*?"), "move"),  # pat_move
+            (re.compile(r"(?P<user>.*?) joined .*?"), "join"),
+            (re.compile(r"(?P<user>.*?) left .*?"), "left"),
+            (re.compile(r"(?P<user>.*?) moved from .*? to .*?"), "move"),
             (
                 re.compile(r"(?P<user>.*?) (deafen|defeat)ed"),
                 "deaf_on",
-            ),  # pat_deaf_on
+            ),
             (
                 re.compile(r"(?P<user>.*?) un(deafen|defeat)ed"),
                 "deaf_off",
-            ),  # pat_deaf_off
+            ),
             (
                 re.compile(r"(?P<user>.*?) turned on video"),
                 "video_on",
-            ),  # pat_video_on
+            ),
             (
                 re.compile(r"(?P<user>.*?) turned off video"),
                 "video_off",
-            ),  # pat_video_off
+            ),
             (
                 re.compile(r"(?P<user>.*?) started (stream|scream)ing"),
                 "stream_on",
-            ),  # pat_stream_on
+            ),
             (
                 re.compile(r"(?P<user>.*?) stopped (stream|scream)ing"),
                 "stream_off",
-            ),  # pat_stream_off
+            ),
         ]
 
         acts = []
-        async for msg in history:
+        async for msg in self._get_kuibot_history(start, stop):
             for pat, act in pats:
                 if match := pat.match(msg.content):
                     user = match.group("user")
@@ -471,13 +484,15 @@ class StatsCog(Cog):
                     data = (user, timestamp, act)
                     logger.debug(data)
                     acts.append(data)
+
         with open(calc_path("../historic.json"), "w+") as fp:
             dump(acts, fp)
+
         logger.info("done dumping")
         await ctx.message.add_reaction("👍")
 
     @is_owner()
-    @command(name="kba")
+    @historic_data.command(name="add")
     async def add_kuibot_history(self, ctx):
         """Load historical data into the database"""
         logger.info("adding historic data")
@@ -496,4 +511,5 @@ class StatsCog(Cog):
         logger.info("adding %s to db", len(entries))
         with self._database() as db:
             db.executemany("INSERT INTO History VALUES (?,?,?,?,?,?,?)", entries)
+
         await ctx.message.add_reaction("👍")
