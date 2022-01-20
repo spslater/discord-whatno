@@ -166,7 +166,7 @@ class StatsCog(Cog):
             if self._check_entry(uid, cid, "voice", tsc):
                 updates.append((diff.voice, uid, cid, "voice", tsc))
             else:
-                inserts.append((uid, gid, cid, "voice", bts, diff.voice, False))
+                inserts.append((uid, gid, cid, "voice", bts, diff.voice, False, tsc))
 
         if diff.mute is not None:
             bts = before.mute.time
@@ -174,7 +174,7 @@ class StatsCog(Cog):
             if self._check_entry(uid, cid, "mute", tsc):
                 updates.append((diff.mute, uid, cid, "mute", tsc))
             else:
-                inserts.append((uid, gid, cid, "mute", bts, diff.mute, False))
+                inserts.append((uid, gid, cid, "mute", bts, diff.mute, False, tsc))
 
         if diff.deaf is not None:
             bts = before.deaf.time
@@ -182,7 +182,7 @@ class StatsCog(Cog):
             if self._check_entry(uid, cid, "deaf", tsc):
                 updates.append((diff.deaf, uid, cid, "deaf", tsc))
             else:
-                inserts.append((uid, gid, cid, "deaf", bts, diff.deaf, False))
+                inserts.append((uid, gid, cid, "deaf", bts, diff.deaf, False, tsc))
 
         if diff.stream is not None:
             bts = before.stream.time
@@ -190,7 +190,7 @@ class StatsCog(Cog):
             if self._check_entry(uid, cid, "stream", tsc):
                 updates.append((diff.stream, uid, cid, "stream", tsc))
             else:
-                inserts.append((uid, gid, cid, "stream", bts, diff.stream, False))
+                inserts.append((uid, gid, cid, "stream", bts, diff.stream, False, tsc))
 
         if diff.video is not None:
             bts = before.video.time
@@ -198,7 +198,7 @@ class StatsCog(Cog):
             if self._check_entry(uid, cid, "video", tsc):
                 updates.append((diff.video, uid, cid, "video", tsc))
             elif diff.video is not None:
-                inserts.append((uid, gid, cid, "video", bts, diff.video, False))
+                inserts.append((uid, gid, cid, "video", bts, diff.video, False, tsc))
 
         if updates:
             logger.debug("db updates: %s", updates)
@@ -219,7 +219,7 @@ class StatsCog(Cog):
                 updates,
             )
         with self._database() as db:
-            db.executemany("INSERT INTO History VALUES (?,?,?,?,?,?,?)", inserts)
+            db.executemany("INSERT INTO History VALUES (?,?,?,?,?,?,?,?)", inserts)
 
     @staticmethod
     def _new_state(status, before, after):
