@@ -304,11 +304,11 @@ class StatsCog(Cog):
             val += f"{d} day{'s' if d > 1 else ''}"
         if d and (h or m or s):
             val += ", "
-        if not d and h:
+        if h:
             val += f"{h} hr{'s' if h > 1 else ''}"
         if h and (m or s):
             val += ", "
-        if (not d or not h) and m:
+        if m:
             val += f"{m} min{'s' if m > 1 else ''}"
         if m and s:
             val += ", "
