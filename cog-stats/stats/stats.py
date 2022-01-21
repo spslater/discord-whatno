@@ -387,7 +387,7 @@ class StatsCog(Cog):
     @staticmethod
     async def _get_member(guild, user):
         pat = re.compile(r".*?" + user + r".*?")
-        async for member in guild.fetch_members(limit=None):
+        for member in guild.fetch_members(limit=None):
             if member.nick and pat.search(member.nick):
                 return member.id
             if member.name and pat.search(member.name):
@@ -397,6 +397,7 @@ class StatsCog(Cog):
     @voice_stat.command(name="user")
     async def voice_stat_user(self, ctx, user, *extra):
         """get info about any user by id"""
+        logger.info("geting specific user vc data")
         user_id = None
         try:
             # bad if user's name is an number
@@ -416,6 +417,7 @@ class StatsCog(Cog):
     @voice_stat.command(name="top")
     async def voice_top(self, ctx, all_=None):
         """Get top 10 users from each guild"""
+        logger.info("getting top users for guild")
         async with ctx.typing():
             guild = ctx.channel.guild
 
@@ -482,6 +484,7 @@ class StatsCog(Cog):
     @historic_data.command(name="collect")
     async def download_kuibot_history(self, ctx, start="2019-11-30", stop="2022-01-15"):
         """Download historical kuibot messages"""
+        logger.info("collecting kuibot messages")
         acts = await get_acts(self.bot, start, stop)
         with open(calc_path("../historic.json"), "w+") as fp:
             dump(acts, fp)

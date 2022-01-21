@@ -41,7 +41,7 @@ async def _get_history(bot, start, stop):
 async def get_acts(bot, start, stop):
     """get the actions listed by kuibot in voice chat"""
     acts = []
-    async for msg in _get_history(bot, start, stop):
+    async for msg in await _get_history(bot, start, stop):
         for pat, act in PATS:
             if match := pat.match(msg.content):
                 user = match.group("user")
