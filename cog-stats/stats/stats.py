@@ -334,8 +334,9 @@ class StatsCog(Cog):
             val += f"{s} sec{'s' if s > 1 else ''}"
         return val
 
-    def _generate_voice_output(self, results, stats, in_voice):
-        output = "```\n"
+    async def _generate_voice_output(self, results, stats, in_voice, user, guild):
+        member = await guild.fetch_member(user)
+        output = f"```\n{member.nick or member.name}\n"
         for state, value in results.items():
             val = self._display_duration(value)
             green = (
@@ -347,7 +348,7 @@ class StatsCog(Cog):
         output += "```"
         return output
 
-    def _user_stat(self, user, guild):
+    async def _user_stat(self, user, guild):
         rows = None
         with self._database() as db:
             rows = db.execute(
@@ -357,7 +358,7 @@ class StatsCog(Cog):
                 WHERE user = ? and guild = ?
                 GROUP BY voicestate
                 """,
-                (user, guild),
+                (user, guild.id),
             ).fetchall()
         results = {}
         for row in rows:
@@ -373,7 +374,7 @@ class StatsCog(Cog):
                 stats = value
                 break
 
-        return self._generate_voice_output(results, stats, in_voice)
+        return await self._generate_voice_output(results, stats, in_voice, user, guild)
 
     @group(name="vc")
     async def voice_stat(self, ctx):
@@ -381,13 +382,13 @@ class StatsCog(Cog):
         if ctx.invoked_subcommand:
             return
 
-        output = self._user_stat(ctx.author.id, ctx.channel.guild.id)
+        output = await self._user_stat(ctx.author.id, ctx.channel.guild)
         await ctx.send(output)
 
     @staticmethod
     async def _get_member(guild, user):
-        pat = re.compile(r".*?" + user + r".*?")
-        for member in guild.fetch_members(limit=None):
+        pat = re.compile(r".*?" + user + r".*?", flags=re.IGNORECASE)
+        async for member in guild.fetch_members(limit=None):
             if member.nick and pat.search(member.nick):
                 return member.id
             if member.name and pat.search(member.name):
@@ -411,7 +412,7 @@ class StatsCog(Cog):
             await ctx.send("sorry, no user with that name found")
             return
 
-        output = self._user_stat(user_id, ctx.channel.guild.id)
+        output = await self._user_stat(user_id, ctx.channel.guild)
         await ctx.send(output)
 
     @voice_stat.command(name="top")
