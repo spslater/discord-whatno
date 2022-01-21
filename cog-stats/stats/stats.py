@@ -1,6 +1,5 @@
 """Stats Bot for Voice and Messages"""
 import logging
-import re
 from collections import namedtuple
 from json import dump
 from os import getenv
@@ -12,7 +11,7 @@ from dotenv import load_dotenv
 
 from .helpers import calc_path, sec_to_human, TimeTravel
 from .database import VoiceDB
-from .historic import get_data
+from .historic import get_acts, get_data
 
 logger = logging.getLogger(__name__)
 
@@ -461,46 +460,7 @@ class StatsCog(Cog):
     @historic_data.command(name="collect")
     async def download_kuibot_history(self, ctx, start="2019-11-30", stop="2022-01-15"):
         """Download historical kuibot messages"""
-        pats = [
-            (re.compile(r"(?P<user>.*?) joined .*?"), "join"),
-            (re.compile(r"(?P<user>.*?) left .*?"), "left"),
-            (re.compile(r"(?P<user>.*?) moved from .*? to .*?"), "move"),
-            (
-                re.compile(r"(?P<user>.*?) (deafen|defeat)ed"),
-                "deaf_on",
-            ),
-            (
-                re.compile(r"(?P<user>.*?) un(deafen|defeat)ed"),
-                "deaf_off",
-            ),
-            (
-                re.compile(r"(?P<user>.*?) turned on video"),
-                "video_on",
-            ),
-            (
-                re.compile(r"(?P<user>.*?) turned off video"),
-                "video_off",
-            ),
-            (
-                re.compile(r"(?P<user>.*?) started (stream|scream)ing"),
-                "stream_on",
-            ),
-            (
-                re.compile(r"(?P<user>.*?) stopped (stream|scream)ing"),
-                "stream_off",
-            ),
-        ]
-
-        acts = []
-        async for msg in self._get_kuibot_history(start, stop):
-            for pat, act in pats:
-                if match := pat.match(msg.content):
-                    user = match.group("user")
-                    timestamp = msg.created_at.timestamp()
-                    data = (user, timestamp, act)
-                    logger.debug(data)
-                    acts.append(data)
-
+        acts = await get_acts(self.bot, start, stop)
         with open(calc_path("../historic.json"), "w+") as fp:
             dump(acts, fp)
 
@@ -512,14 +472,15 @@ class StatsCog(Cog):
     async def add_kuibot_history(self, ctx):
         """Load historical data into the database"""
         logger.info("adding historic data")
-        tsdata, gid, cid = get_data()
+        tsdata, gid = get_data(ctx.channel.guild)
 
         entries = []
         for user, data in tsdata.items():
             logger.info("%s: #data %s", user, len(data))
             user_entries = []
             for sin in data:
-                entry = (user, gid, cid, *sin, True)
+                tsc = TimeTravel.sqlts(sin[-1])
+                entry = (user, gid, *sin, True, tsc)
                 user_entries.append(entry)
             logger.debug("num entries: %s", len(user_entries))
             entries.extend(user_entries)
