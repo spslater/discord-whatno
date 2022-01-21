@@ -9,9 +9,6 @@ This cog tracks when and how long a user's voice state changes.
 - video
 
 # todo
-- check if exists is failing, inserting instead of updating data
-
-- running sums not working? (kui deaf for 182 min)
 - get all messages (walk xela thru unique minutes)
 - historic sums audit
 

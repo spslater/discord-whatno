@@ -1,5 +1,6 @@
 """Stats Bot for Voice and Messages"""
 import logging
+import re
 from collections import namedtuple
 from json import dump
 from os import getenv
@@ -136,7 +137,6 @@ class StatsCog(Cog):
         )
 
     def _check_entry(self, uid, cid, state, tss):
-        logger.info((uid, cid, state, tss))
         with self._database() as db:
             states = db.execute(
                 """
@@ -242,6 +242,11 @@ class StatsCog(Cog):
 
         return Voice(voice=voice, mute=mute, deaf=deaf, stream=stream, video=video)
 
+    def _get_new_state(self, id_, state, now):
+        prev_state = self.current[id_]
+        new_state = self._start_state(state, now)
+        return self._save_state_change(id_, prev_state, new_state, now)
+
     @Cog.listener("on_voice_state_update")
     async def voice_change(self, member, before, after):
         """log the new voice status of a user"""
@@ -256,6 +261,16 @@ class StatsCog(Cog):
             return
 
         guild = before.channel.guild.id if not join else after.channel.guild.id
+        if before.channel and after.channel and before.channel.id != after.channel.id:
+            b_id = VoiceCon(member.id, guild, before.channel.guild.id)
+            a_id = VoiceCon(member.id, guild, after.channel.guild.id)
+            # "leave" previous channel
+            updated = self._get_new_state(b_id, after, now)
+            del self.current[b_id]
+            # "join" new channel
+            self.current[a_id] = updated
+            return
+
         channel = before.channel.id if not join else after.channel.id
         id_ = VoiceCon(member.id, guild, channel)
 
@@ -263,9 +278,7 @@ class StatsCog(Cog):
             self.current[id_] = self._start_state(after, now)
             return
 
-        prev_state = self.current[id_]
-        new_state = self._start_state(after, now)
-        updated = self._save_state_change(id_, prev_state, new_state, now)
+        updated = self._get_new_state(id_, after, now)
 
         if leave:
             del self.current[id_]
@@ -371,22 +384,31 @@ class StatsCog(Cog):
         output = self._user_stat(ctx.author.id, ctx.channel.guild.id)
         await ctx.send(output)
 
+    @staticmethod
+    async def _get_member(guild, user):
+        pat = re.compile(r".*?" + user + r".*?")
+        async for member in guild.fetch_members(limit=None):
+            if member.nick and pat.search(member.nick):
+                return member.id
+            if member.name and pat.search(member.name):
+                return member.id
+        return None
+
     @voice_stat.command(name="user")
     async def voice_stat_user(self, ctx, user, *extra):
         """get info about any user by id"""
+        user_id = None
         try:
+            # bad if user's name is an number
+            # but that's their fault
             user_id = int(user)
         except ValueError:
-            user = user + " " + " ".join(extra)
-            logger.info("user: %s", user)
-            users = await ctx.channel.guild.query_members(user)
-            if len(users) == 0:
-                await ctx.send("sorry, no user with that name found")
-                return
-            if len(users) > 1:
-                await ctx.send("more than one users found, be more specific: %s", [u.nick or u.name for u in users])
-                return
-            user_id = users[0].id
+            user = (user + " " + " ".join(extra)).strip()
+            user_id = await self._get_member(ctx.channel.guild, user)
+
+        if user_id is None:
+            await ctx.send("sorry, no user with that name found")
+            return
 
         output = self._user_stat(user_id, ctx.channel.guild.id)
         await ctx.send(output)
