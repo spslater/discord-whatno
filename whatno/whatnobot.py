@@ -9,7 +9,7 @@ from pathlib import Path
 from sys import exc_info
 from traceback import format_tb
 
-from discord import ExtensionFailed, NoEntryPointError
+from discord import ExtensionFailed, NoEntryPointError, Intents
 from discord.ext.commands import Bot, when_mentioned_or
 
 logger = logging.getLogger(__name__)
@@ -28,6 +28,7 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
             command_prefix=when_mentioned_or(prefix),
             strip_after_prefix=True,
             case_insensitive=True,
+            intents=Intents.all(),
         )
         self.loaded_extensions = set()
         self.load_extensions()
