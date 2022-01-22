@@ -262,8 +262,8 @@ class StatsCog(Cog):
 
         guild = before.channel.guild.id if not join else after.channel.guild.id
         if before.channel and after.channel and before.channel.id != after.channel.id:
-            b_id = VoiceCon(member.id, guild, before.channel.guild.id)
-            a_id = VoiceCon(member.id, guild, after.channel.guild.id)
+            b_id = VoiceCon(member.id, guild, before.channel.id)
+            a_id = VoiceCon(member.id, guild, after.channel.id)
             # "leave" previous channel
             updated = self._get_new_state(b_id, after, now)
             del self.current[b_id]
