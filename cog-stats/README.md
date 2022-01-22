@@ -25,4 +25,10 @@ ORDER BY duration DESC;
 SELECT user, channel, voicestate, starttime, max(duration)
 FROM History
 GROUP BY user, channel, voicestate, starttime;
+
+SELECT voicestate, sum(duration) as total
+    FROM History
+    WHERE user = ? and guild = ?
+    GROUP BY voicestate
+;
 ```

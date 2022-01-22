@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS History(
     starttime TIMESTAMP NOT NULL,
     duration REAL NOT NULL,
     historic BOOLEAN,
-    h_time TEXT
+    h_time TEXT,
+    UNIQUE(user, channel, voicestate, starttime)
 );
 
 CREATE TABLE IF NOT EXISTS Total(

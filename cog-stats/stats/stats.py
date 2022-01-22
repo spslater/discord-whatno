@@ -136,21 +136,6 @@ class StatsCog(Cog):
             after_info,
         )
 
-    def _check_entry(self, uid, cid, state, tss):
-        with self._database() as db:
-            states = db.execute(
-                """
-                SELECT *
-                FROM History
-                WHERE user = ?
-                  AND channel = ?
-                  AND voicestate = ?
-                  AND h_time = ?
-                """,
-                (uid, cid, state, tss),
-            ).fetchone()
-        return bool(states)
-
     def _update_state(self, id_, before, after, now):
         diff = self._diff_state(before, after, now)
 
@@ -158,67 +143,42 @@ class StatsCog(Cog):
         gid = id_.guild
         cid = id_.channel
 
-        updates = []
-        inserts = []
+        changes = []
         if diff.voice is not None:
             bts = before.voice.time
             tsc = TimeTravel.sqlts(bts)
-            if self._check_entry(uid, cid, "voice", tsc):
-                updates.append((diff.voice, uid, cid, "voice", tsc))
-            else:
-                inserts.append((uid, gid, cid, "voice", bts, diff.voice, False, tsc))
+            changes.append((uid, gid, cid, "voice", bts, diff.voice, False, tsc, diff.voice))
 
         if diff.mute is not None:
             bts = before.mute.time
             tsc = TimeTravel.sqlts(bts)
-            if self._check_entry(uid, cid, "mute", tsc):
-                updates.append((diff.mute, uid, cid, "mute", tsc))
-            else:
-                inserts.append((uid, gid, cid, "mute", bts, diff.mute, False, tsc))
+            changes.append((uid, gid, cid, "mute", bts, diff.mute, False, tsc, diff.mute))
 
         if diff.deaf is not None:
             bts = before.deaf.time
             tsc = TimeTravel.sqlts(bts)
-            if self._check_entry(uid, cid, "deaf", tsc):
-                updates.append((diff.deaf, uid, cid, "deaf", tsc))
-            else:
-                inserts.append((uid, gid, cid, "deaf", bts, diff.deaf, False, tsc))
+            changes.append((uid, gid, cid, "deaf", bts, diff.deaf, False, tsc, diff.deaf))
 
         if diff.stream is not None:
             bts = before.stream.time
             tsc = TimeTravel.sqlts(bts)
-            if self._check_entry(uid, cid, "stream", tsc):
-                updates.append((diff.stream, uid, cid, "stream", tsc))
-            else:
-                inserts.append((uid, gid, cid, "stream", bts, diff.stream, False, tsc))
+            changes.append((uid, gid, cid, "stream", bts, diff.stream, False, tsc, diff.stream))
 
         if diff.video is not None:
             bts = before.video.time
             tsc = TimeTravel.sqlts(bts)
-            if self._check_entry(uid, cid, "video", tsc):
-                updates.append((diff.video, uid, cid, "video", tsc))
-            elif diff.video is not None:
-                inserts.append((uid, gid, cid, "video", bts, diff.video, False, tsc))
+            changes.append((uid, gid, cid, "video", bts, diff.video, False, tsc, diff.video))
 
-        if updates:
-            logger.debug("db updates: %s", updates)
-        if inserts:
-            logger.debug("db inserts: %s", inserts)
+        logger.debug("db changes: %s", changes)
 
         with self._database() as db:
             db.executemany(
                 """
-                UPDATE History
-                SET duration = ?
-                WHERE user = ?
-                  AND channel = ?
-                  AND voicestate = ?
-                  AND h_time = ?
+                INSERT INTO History VALUES (?,?,?,?,?,?,?,?)
+                ON CONFLICT DO UPDATE SET duration = ?
                 """,
-                updates,
+                changes,
             )
-        with self._database() as db:
-            db.executemany("INSERT INTO History VALUES (?,?,?,?,?,?,?,?)", inserts)
 
     @staticmethod
     def _new_state(status, before, after):
@@ -243,9 +203,19 @@ class StatsCog(Cog):
         return Voice(voice=voice, mute=mute, deaf=deaf, stream=stream, video=video)
 
     def _get_new_state(self, id_, state, now):
+        logger.info("%s: %s", id_, self.current)
         prev_state = self.current[id_]
         new_state = self._start_state(state, now)
         return self._save_state_change(id_, prev_state, new_state, now)
+
+    @staticmethod
+    def _set_timestamp(current, new_ts):
+        voice = VoiceState("voice", new_ts) if current.voice else None
+        mute = VoiceState("mute", new_ts) if current.mute else None
+        deaf = VoiceState("deaf", new_ts) if current.deaf else None
+        stream = VoiceState("stream", new_ts) if current.stream else None
+        video = VoiceState("video", new_ts) if current.video else None
+        return Voice(voice=voice, mute=mute, deaf=deaf, stream=stream, video=video)
 
     @Cog.listener("on_voice_state_update")
     async def voice_change(self, member, before, after):
@@ -256,19 +226,20 @@ class StatsCog(Cog):
 
         join = before.channel is None
         leave = after.channel is None
+        move = not join and not leave and before.channel.id != after.channel.id
 
-        if join is None and leave is None:
+        if join and leave:
             return
 
         guild = before.channel.guild.id if not join else after.channel.guild.id
-        if before.channel and after.channel and before.channel.id != after.channel.id:
+        if move:
             b_id = VoiceCon(member.id, guild, before.channel.id)
             a_id = VoiceCon(member.id, guild, after.channel.id)
             # "leave" previous channel
             updated = self._get_new_state(b_id, after, now)
             del self.current[b_id]
             # "join" new channel
-            self.current[a_id] = updated
+            self.current[a_id] = self._set_timestamp(updated, now)
             return
 
         channel = before.channel.id if not join else after.channel.id
