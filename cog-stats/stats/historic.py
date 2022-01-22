@@ -11,9 +11,9 @@ logger = logging.getLogger(__name__)
 MAX_TIME = 10 * 3600
 
 PATS = [
-    (re.compile(r"(?P<user>.*?) joined (?P<channel>.*?)"), "join"),
-    (re.compile(r"(?P<user>.*?) left (?P<channel>.*?)"), "left"),
-    (re.compile(r"(?P<user>.*?) moved from (?P<ch1>.*?) to (?P<ch2>.*?)"), "move"),
+    (re.compile(r"(?P<user>.*?) joined (?P<channel>.*)"), "join"),
+    (re.compile(r"(?P<user>.*?) left (?P<channel>.*)"), "left"),
+    (re.compile(r"(?P<user>.*?) moved from (?P<ch1>.*?) to (?P<ch2>.*)"), "move"),
     (re.compile(r"(?P<user>.*?) (deafen|defeat)ed"), "deaf_on"),
     (re.compile(r"(?P<user>.*?) un(deafen|defeat)ed"), "deaf_off"),
     (re.compile(r"(?P<user>.*?) turned on video"), "video_on"),
