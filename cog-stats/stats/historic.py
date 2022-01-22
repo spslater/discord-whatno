@@ -101,6 +101,7 @@ def get_data(guild):
     full = _full(_spec(), _combos())
     tsdata = {}
 
+    cid = None
     join = None
     deaf = None
     video = None
@@ -130,10 +131,10 @@ def get_data(guild):
                 continue
 
             if act in ("join", "left"):
+                cid = _get_cid(guild, event[3])
                 if act == "join":
                     join = event[1]
                 elif join is not None and act == "left":
-                    cid = _get_cid(guild, event[3])
                     diff = min(ets - join, MAX_TIME)
                     info.append((cid, "voice", join, diff))
                     if deaf:
@@ -155,7 +156,7 @@ def get_data(guild):
                     deaf = ets
                 elif deaf is not None and act == "deaf_off":
                     diff = min(ets - deaf, MAX_TIME)
-                    info.append((join[0], "deaf", deaf, diff))
+                    info.append((cid, "deaf", deaf, diff))
                     deaf = None
                 continue
 
@@ -165,9 +166,8 @@ def get_data(guild):
                 elif act == "video_on":
                     video = ets
                 elif video is not None and act == "video_off":
-                    cid = join[0]
                     diff = min(ets - video, MAX_TIME)
-                    info.append((join[0], "video", video, diff))
+                    info.append((cid, "video", video, diff))
                     video = None
                 continue
 
@@ -178,7 +178,7 @@ def get_data(guild):
                     stream = ets
                 elif stream is not None and act == "stream_off":
                     diff = min(ets - stream, MAX_TIME)
-                    info.append((join[0], "stream", stream, diff))
+                    info.append((cid, "stream", stream, diff))
                     stream = None
                 continue
         tsdata[user] = info

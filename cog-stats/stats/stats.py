@@ -513,7 +513,7 @@ class StatsCog(Cog):
 
         logger.info("adding %s to db", len(entries))
         with self._database() as db:
-            db.executemany("INSERT INTO History VALUES (?,?,?,?,?,?,?)", entries)
+            db.executemany("INSERT INTO History VALUES (?,?,?,?,?,?,?,?)", entries)
 
         await ctx.message.add_reaction("👍")
 
