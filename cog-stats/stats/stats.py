@@ -8,10 +8,11 @@ from os import getenv
 from discord import NotFound
 from discord.ext.commands import Cog, command, group, is_owner
 from discord.ext.tasks import loop
+from discord.utils import escape_markdown
 from dotenv import load_dotenv
 
 from .helpers import calc_path, sec_to_human, TimeTravel
-from .database import VoiceDB
+from .database import StatDB
 from .historic import get_acts, get_data
 
 logger = logging.getLogger(__name__)
@@ -22,6 +23,8 @@ VoiceCon = namedtuple("VoiceCon", ["user", "guild", "channel"])
 VoiceState = namedtuple("VoiceState", ["state", "time"])
 VoiceDiff = namedtuple("VoiceDiff", ["voice", "mute", "deaf", "stream", "video"])
 Voice = namedtuple("Voice", ["voice", "mute", "deaf", "stream", "video"])
+
+MSG_INSERT = "INSERT INTO Message VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
 
 
 class StatsCog(Cog):
@@ -44,7 +47,7 @@ class StatsCog(Cog):
         self.periodic_compress.start()
 
     def _database(self, readonly=False):
-        return VoiceDB(self.database_file, readonly)
+        return StatDB(self.database_file, readonly)
 
     def cog_unload(self):
         self._save_current()
@@ -147,27 +150,37 @@ class StatsCog(Cog):
         if diff.voice is not None:
             bts = before.voice.time
             tsc = TimeTravel.sqlts(bts)
-            changes.append((uid, gid, cid, "voice", bts, diff.voice, False, tsc, diff.voice))
+            changes.append(
+                (uid, gid, cid, "voice", bts, diff.voice, False, tsc, diff.voice)
+            )
 
         if diff.mute is not None:
             bts = before.mute.time
             tsc = TimeTravel.sqlts(bts)
-            changes.append((uid, gid, cid, "mute", bts, diff.mute, False, tsc, diff.mute))
+            changes.append(
+                (uid, gid, cid, "mute", bts, diff.mute, False, tsc, diff.mute)
+            )
 
         if diff.deaf is not None:
             bts = before.deaf.time
             tsc = TimeTravel.sqlts(bts)
-            changes.append((uid, gid, cid, "deaf", bts, diff.deaf, False, tsc, diff.deaf))
+            changes.append(
+                (uid, gid, cid, "deaf", bts, diff.deaf, False, tsc, diff.deaf)
+            )
 
         if diff.stream is not None:
             bts = before.stream.time
             tsc = TimeTravel.sqlts(bts)
-            changes.append((uid, gid, cid, "stream", bts, diff.stream, False, tsc, diff.stream))
+            changes.append(
+                (uid, gid, cid, "stream", bts, diff.stream, False, tsc, diff.stream)
+            )
 
         if diff.video is not None:
             bts = before.video.time
             tsc = TimeTravel.sqlts(bts)
-            changes.append((uid, gid, cid, "video", bts, diff.video, False, tsc, diff.video))
+            changes.append(
+                (uid, gid, cid, "video", bts, diff.video, False, tsc, diff.video)
+            )
 
         logger.debug("db changes: %s", changes)
 
@@ -541,3 +554,155 @@ class StatsCog(Cog):
         logger.info("removing duplicate duration entries")
         self._compress_database()
         await ctx.message.add_reaction("👍")
+
+    #########################
+    ### MessageProcessing ###
+    #########################
+
+    def _get_message_author(self, mid):
+        with self._database() as db:
+            rows = db.execute(
+                """SELECT user FROM Message WHERE message = ? LIMIT 1;""", (mid,)
+            )
+            res = rows.fetchone()
+            if res is None:
+                return None
+            return int(res["user"])
+
+    @Cog.listener("on_message")
+    async def process_on_message(self, message):
+        """Process message details"""
+        ts = TimeTravel.timestamp()
+        tsc = TimeTravel.sqlts(ts)
+
+        mid = message.id
+        aid = message.author.id
+
+        logger.debug(
+            "message %s created by %s: %s, %s, %s",
+            mid,
+            aid,
+            len(message.content),
+            len(message.attachments),
+            len(message.embeds),
+        )
+
+        gid = message.guild.id
+        cid = message.channel.id
+        event = "create"
+        text = escape_markdown(message.content)
+        attach = (
+            str([a.url for a in message.attachments]) if message.attachments else None
+        )
+        embed = (
+            str([str(e.to_dict()) for e in message.embeds]) if message.embeds else None
+        )
+        rt = message.reference.message_id if message.reference else None
+        hist = False
+
+        data = (mid, aid, gid, cid, ts, event, text, attach, embed, rt, hist, tsc)
+        with self._database() as db:
+            db.execute(MSG_INSERT, data)
+
+    @Cog.listener("on_raw_message_edit")
+    async def process_on_message_edit(self, payload):
+        """process message on edit"""
+        ts = TimeTravel.timestamp()
+        tsc = TimeTravel.sqlts(ts)
+
+        mid = payload.message_id
+
+        logger.debug(
+            "message %s edited to: %s", payload.message_id, payload.data.get("content")
+        )
+
+        gid = payload.guild_id
+        cid = payload.channel_id
+
+        message = payload.data
+        aid = (
+            payload.cached_message.author.id
+            if payload.cached_message
+            else self._get_message_author(mid)
+        )
+        event = "edit"
+        text = escape_markdown(message["content"])
+        attach = (
+            str([a["url"] for a in message["attachments"]])
+            if message.get("attachments")
+            else None
+        )
+        embed = (
+            str([str(e) for e in message["embeds"]]) if message.get("embeds") else None
+        )
+        rt = (
+            message["referenced_message"]["id"]
+            if message.get("referenced_message")
+            else None
+        )
+        hist = False
+
+        data = (mid, aid, gid, cid, ts, event, text, attach, embed, rt, hist, tsc)
+        with self._database() as db:
+            db.execute(MSG_INSERT, data)
+
+    @Cog.listener("on_raw_message_delete")
+    async def process_on_message_delete(self, payload):
+        """process message on delete"""
+        ts = TimeTravel.timestamp()
+        tsc = TimeTravel.sqlts(ts)
+
+        logger.debug("message %s deleted", payload.message_id)
+
+        mid = payload.message_id
+        gid = payload.guild_id
+        cid = payload.channel_id
+
+        aid = (
+            payload.cached_message.author.id
+            if payload.cached_message
+            else self._get_message_author(mid)
+        )
+
+        event = "delete"
+        text = None
+        attach = None
+        embed = None
+        rt = None
+        hist = False
+
+        data = (mid, aid, gid, cid, ts, event, text, attach, embed, rt, hist, tsc)
+        with self._database() as db:
+            db.execute(MSG_INSERT, data)
+
+    @Cog.listener("on_raw_bulk_message_delete")
+    async def process_on_message_bulk_delete(self, payload):
+        """process message on bulk delete"""
+        ts = TimeTravel.timestamp()
+        tsc = TimeTravel.sqlts(ts)
+
+        logger.debug("bulk message delete: %s", payload.message_ids)
+
+        gid = payload.guild_id
+        cid = payload.channel_id
+
+        event = "delete"
+        text = None
+        attach = None
+        embed = None
+        rt = None
+        hist = False
+
+        entries = []
+        for mid in payload.message_ids:
+            aid = (
+                payload.cached_message.author.id
+                if payload.cached_message
+                else self._get_message_author(mid)
+            )
+            entries.append(
+                (mid, aid, gid, cid, ts, event, text, attach, embed, rt, hist, tsc)
+            )
+
+        with self._database() as db:
+            db.executemany(MSG_INSERT, entries)

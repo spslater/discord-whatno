@@ -1,4 +1,4 @@
-"""Interface for the Voice Stats DB"""
+"""Interface for the Stats DB"""
 import logging
 from pathlib import Path
 from sqlite3 import Connection, Row, connect
@@ -7,7 +7,7 @@ from .helpers import calc_path
 
 logger = logging.getLogger(__name__)
 
-class VoiceDB:
+class StatDB:
     """Voice DB Interface"""
 
     def __init__(self, dbfile, readonly=False):
