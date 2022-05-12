@@ -271,24 +271,26 @@ class StatsCog(Cog):
 
     def _save_current(self):
         now = TimeTravel.timestamp()
-        for id_, data in self.current_voice():
+        current = self.current_voice()
+        for id_, data in current:
             if id_ in self.current:
                 prev = self.current[id_]
                 self._update_state(id_, prev, data, now)
             else:
                 self.current[id_] = data
+        return bool(current)
 
     @loop(seconds=5)
     async def periodic_save(self):
         """periodically save the voice stats"""
         await self.bot.wait_until_ready()
-        self._save_current()
-        logger.debug(
-            "periodically save the voice stats, next at %s",
-            # function transformed by the @loop annotation
-            # pylint: disable=no-member
-            self.periodic_save.next_iteration,
-        )
+        if self._save_current():
+            logger.debug(
+                "periodically save the voice stats, next at %s",
+                # function transformed by the @loop annotation
+                # pylint: disable=no-member
+                self.periodic_save.next_iteration,
+            )
 
     @is_owner()
     @command()
