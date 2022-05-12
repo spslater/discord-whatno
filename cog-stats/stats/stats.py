@@ -706,3 +706,17 @@ class StatsCog(Cog):
 
         with self._database() as db:
             db.executemany(MSG_INSERT, entries)
+
+
+
+    @group(name="msg")
+    async def message_stat(self, ctx):
+        """get info about the user message"""
+        if ctx.invoked_subcommand:
+            return
+
+
+    @message_stat.command("hist")
+    async def get_past_messages(self, ctx):
+        """gather previous messages"""
+        return None
