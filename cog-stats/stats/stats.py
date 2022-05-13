@@ -571,11 +571,59 @@ class StatsCog(Cog):
                 return None
             return int(res["user"])
 
+    def _proc_message(self, tstp, event, message=None, payload=None, hist=False):
+        mid = None
+        aid = None
+        gid = None
+        cid = None
+        # tstp
+        # event
+        text = None
+        attach = None
+        embed = None
+        ref = None
+        # hist
+        tsc = None
+
+
+        if message:
+            mid = message.id
+            gid = message.guild.id
+            cid = message.channel.id
+        else:
+            mid = payload.message_id
+            gid = payload.guild_id
+            cid = payload.channel_id
+
+
+        if event == "create":
+            aid = message.author.id
+            tstp = message.created_at
+
+            if message.content:
+                text = escape_markdown(message.content)
+            if message.attachments:
+                attach = str([a.url for a in message.attachments])
+            if message.embeds:
+                embed = str([str(e.to_dict()) for e in message.embeds])
+            if message.reference:
+                ref = message.reference.message_id
+
+        if event == "edit":
+            tstp = message.edited_at
+
+        if event == "delete":
+            pass
+
+
+        tsc = TimeTravel.sqlts(tstp)
+
+        return (mid, aid, gid, cid, tstp, event, text, attach, embed, ref, hist, tsc)
+
+
     @Cog.listener("on_message")
     async def process_on_message(self, message):
         """Process message details"""
-        ts = TimeTravel.timestamp()
-        tsc = TimeTravel.sqlts(ts)
 
         mid = message.id
         aid = message.author.id
@@ -591,6 +639,7 @@ class StatsCog(Cog):
 
         gid = message.guild.id
         cid = message.channel.id
+        ts = message.created_at
         event = "create"
         text = escape_markdown(message.content)
         attach = (
@@ -601,6 +650,7 @@ class StatsCog(Cog):
         )
         rt = message.reference.message_id if message.reference else None
         hist = False
+        tsc = TimeTravel.sqlts(ts)
 
         data = (mid, aid, gid, cid, ts, event, text, attach, embed, rt, hist, tsc)
         with self._database() as db:
@@ -698,8 +748,8 @@ class StatsCog(Cog):
         entries = []
         for mid in payload.message_ids:
             aid = (
-                payload.cached_message.author.id
-                if payload.cached_message
+                [m.author.id for m in payload.cached_messages if m.id == mid][0]
+                if payload.cached_messages
                 else self._get_message_author(mid)
             )
             entries.append(
@@ -719,6 +769,9 @@ class StatsCog(Cog):
 
 
     @message_stat.command("hist")
-    async def get_past_messages(self, ctx):
+    async def get_past_messages(self, ctx, channel):
         """gather previous messages"""
-        return None
+        ch = self.bot.get_channel(int(channel))
+        async for message in ch.history(limit=50, oldest_first=True):
+            pass
+        await ctx.send("all downloaded")
