@@ -28,6 +28,14 @@ def build_parser():
         help="Discord API Token.",
         metavar="TOKEN",
     )
+    temp.add_argument(
+        "-d",
+        "--dev",
+        action="store_true",
+        default=False,
+        dest="devmode",
+        help="Enable DevMode (alt prefix)",
+    )
 
     return temp
 
@@ -39,5 +47,8 @@ logging_config = getenv("DISCORD_LOGGING_CONFIG")
 if logging_config:
     logging.config.fileConfig(logging_config)
 
-whatno = WhatnoBot(args.token or getenv("DISCORD_TOKEN", None))
+if args.devmode:
+    whatno = WhatnoBot(args.token or getenv("DISCORD_TOKEN", None), prefix="~")
+else:
+    whatno = WhatnoBot(args.token or getenv("DISCORD_TOKEN", None))
 whatno.run()
