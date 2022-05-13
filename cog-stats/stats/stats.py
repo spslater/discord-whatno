@@ -139,6 +139,21 @@ class StatsCog(Cog):
             after_info,
         )
 
+    def _check_entry(self, uid, cid, state, tss):
+        with self._database() as db:
+            states = db.execute(
+                """
+                SELECT *
+                FROM History
+                WHERE user = ?
+                  AND channel = ?
+                  AND voicestate = ?
+                  AND h_time = ?
+                """,
+                (uid, cid, state, tss),
+            ).fetchone()
+        return bool(states)
+
     def _update_state(self, id_, before, after, now):
         diff = self._diff_state(before, after, now)
 
@@ -146,52 +161,68 @@ class StatsCog(Cog):
         gid = id_.guild
         cid = id_.channel
 
-        changes = []
+        updates = []
+        inserts = []
         if diff.voice is not None:
             bts = before.voice.time
             tsc = TimeTravel.sqlts(bts)
-            changes.append(
-                (uid, gid, cid, "voice", bts, diff.voice, False, tsc, diff.voice)
-            )
+            if self._check_entry(uid, cid, "voice", tsc):
+                updates.append((diff.voice, uid, cid, "voice", tsc))
+            else:
+                inserts.append((uid, gid, cid, "voice", bts, diff.voice, False, tsc))
 
         if diff.mute is not None:
             bts = before.mute.time
             tsc = TimeTravel.sqlts(bts)
-            changes.append(
-                (uid, gid, cid, "mute", bts, diff.mute, False, tsc, diff.mute)
-            )
+            if self._check_entry(uid, cid, "mute", tsc):
+                updates.append((diff.mute, uid, cid, "mute", tsc))
+            else:
+                inserts.append((uid, gid, cid, "mute", bts, diff.mute, False, tsc))
 
         if diff.deaf is not None:
             bts = before.deaf.time
             tsc = TimeTravel.sqlts(bts)
-            changes.append(
-                (uid, gid, cid, "deaf", bts, diff.deaf, False, tsc, diff.deaf)
-            )
+            if self._check_entry(uid, cid, "deaf", tsc):
+                updates.append((diff.deaf, uid, cid, "deaf", tsc))
+            else:
+                inserts.append((uid, gid, cid, "deaf", bts, diff.deaf, False, tsc))
+
 
         if diff.stream is not None:
             bts = before.stream.time
             tsc = TimeTravel.sqlts(bts)
-            changes.append(
-                (uid, gid, cid, "stream", bts, diff.stream, False, tsc, diff.stream)
-            )
+            if self._check_entry(uid, cid, "stream", tsc):
+                updates.append((diff.stream, uid, cid, "stream", tsc))
+            else:
+                inserts.append((uid, gid, cid, "stream", bts, diff.stream, False, tsc))
 
         if diff.video is not None:
             bts = before.video.time
             tsc = TimeTravel.sqlts(bts)
-            changes.append(
-                (uid, gid, cid, "video", bts, diff.video, False, tsc, diff.video)
-            )
+            if self._check_entry(uid, cid, "video", tsc):
+                updates.append((diff.video, uid, cid, "video", tsc))
+            elif diff.video is not None:
+                inserts.append((uid, gid, cid, "video", bts, diff.video, False, tsc))
 
-        logger.debug("db changes: %s", changes)
+        if updates:
+            logger.debug("db updates: %s", updates)
+            with self._database() as db:
+                db.executemany(
+                    """
+                    UPDATE History
+                    SET duration = ?
+                    WHERE user = ?
+                    AND channel = ?
+                    AND voicestate = ?
+                    AND h_time = ?
+                    """,
+                    updates,
+                )
 
-        with self._database() as db:
-            db.executemany(
-                """
-                INSERT INTO History VALUES (?,?,?,?,?,?,?,?)
-                ON CONFLICT DO UPDATE SET duration = ?
-                """,
-                changes,
-            )
+        if inserts:
+            logger.debug("db inserts: %s", inserts)
+            with self._database() as db:
+                db.executemany("INSERT INTO History VALUES (?,?,?,?,?,?,?,?)", inserts)
 
     @staticmethod
     def _new_state(status, before, after):
