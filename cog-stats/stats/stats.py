@@ -2,10 +2,11 @@
 import logging
 import re
 from collections import namedtuple
-from json import dump
+from json import dump, dumps
 from os import getenv
+from sqlite3 import IntegrityError
 
-from discord import NotFound
+from discord import NotFound, ChannelType
 from discord.ext.commands import Cog, command, group, is_owner
 from discord.ext.tasks import loop
 from discord.utils import escape_markdown
@@ -25,6 +26,14 @@ VoiceDiff = namedtuple("VoiceDiff", ["voice", "mute", "deaf", "stream", "video"]
 Voice = namedtuple("Voice", ["voice", "mute", "deaf", "stream", "video"])
 
 MSG_INSERT = "INSERT INTO Message VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
+TEXT_CHANNELS = (
+    ChannelType.text,
+    ChannelType.private,
+    ChannelType.group,
+    ChannelType.news,
+    ChannelType.public_thread,
+    ChannelType.private_thread,
+)
 
 
 class StatsCog(Cog):
@@ -55,6 +64,10 @@ class StatsCog(Cog):
         # pylint: disable=no-member
         self.periodic_save.cancel()
         self.periodic_compress.cancel()
+
+    #########################
+    ### Voice Processing  ###
+    #########################
 
     @Cog.listener("on_ready")
     async def load_current(self):
@@ -602,7 +615,8 @@ class StatsCog(Cog):
                     return int(res["user"])
         return None
 
-    def _get_message_data(self, message):
+    @staticmethod
+    def _get_message_data(message):
         text = None
         attach = None
         embed = None
@@ -610,15 +624,16 @@ class StatsCog(Cog):
         if message.content:
             text = escape_markdown(message.content)
         if message.attachments:
-            attach = [a.url for a in message.attachments]
+            attach = dumps([a.url for a in message.attachments])
         if message.embeds:
-            embed = [str(e.to_dict()) for e in message.embeds]
+            embed = dumps([e.to_dict() for e in message.embeds])
         if message.reference:
             ref = message.reference.message_id
 
         return text, attach, embed, ref
 
-    def _get_paylaod_data(self, msgdict):
+    @staticmethod
+    def _get_paylaod_data(msgdict):
         text = None
         attach = None
         embed = None
@@ -626,9 +641,9 @@ class StatsCog(Cog):
         if msgdict.get("content"):
             text = escape_markdown(msgdict["content"])
         if msgdict.get("attachments"):
-            attach = [a["url"] for a in msgdict["attachments"]]
+            attach = dumps([a["url"] for a in msgdict["attachments"]])
         if msgdict.get("embeds"):
-            embed = [str(e) for e in msgdict["embeds"]]
+            embed = dumps(msgdict["embeds"])
         if msgdict.get("referenced_message"):
             ref = msgdict["referenced_message"]["id"]
 
@@ -663,14 +678,14 @@ class StatsCog(Cog):
         if event == "create":
             aid = message.author.id
             text, attach, embed, ref = self._get_message_data(message)
-            tstp = message.created_at
+            tstp = message.created_at.timestamp()
 
         if event == "edit":
-            message = await self.bot.get_channel(cid).fetch_message(mid)
+            message = message or await self.bot.get_channel(cid).fetch_message(mid)
             if message:
                 aid = message.author.id
                 text, attach, embed, ref = self._get_message_data(message)
-                tstp = message.edited_at
+                tstp = message.edited_at.timestamp()
             else:
                 aid = self._get_message_author(mid)
                 text, attach, embed, ref = self._get_payload_data(payload.data)
@@ -779,10 +794,54 @@ class StatsCog(Cog):
         if ctx.invoked_subcommand:
             return
 
-    @message_stat.command("hist")
-    async def get_past_messages(self, ctx, channel):
+    @message_stat.command("ch")
+    async def get_past_messages_channel(self, ctx, channel):
         """gather previous messages"""
-        ckch = self.bot.get_channel(int(channel))
-        async for message in ckch.history(limit=50, oldest_first=True):
-            pass
-        await ctx.send("all downloaded")
+        tstp = TimeTravel.timestamp()
+        ckch = await self.bot.fetch_channel(int(channel))
+        entries = []
+        if ckch is None:
+            await ctx.send(f"unable to find channel with id {channel}")
+            return
+        logger.debug("downloading messages for channel %s", ckch.name)
+        async for message in ckch.history(limit=None, oldest_first=True):
+            if message.created_at:
+                data = await self._proc_message(
+                    tstp,
+                    "create",
+                    message=message,
+                    hist=True,
+                )
+                entries.append(data)
+            if message.edited_at:
+                data = await self._proc_message(
+                    tstp,
+                    "edit",
+                    message=message,
+                    hist=True,
+                )
+                entries.append(data)
+
+        logger.debug("hist for %s: %s", ckch.name, len(entries))
+        for entry in entries:
+            with self._database() as db:
+                try:
+                    db.execute(MSG_INSERT, entry)
+                except IntegrityError:
+                    pass
+
+        await ctx.send(f"downloaded {len(entries)} from channel {ckch.name}")
+
+    @message_stat.command("gd")
+    async def get_past_messages_guild(self, ctx, guild):
+        """gather messages from guild text channels"""
+        ckgd = await self.bot.fetch_guild(int(guild))
+        if ckgd is None:
+            await ctx.send(f"unable to find guild with id {guild}")
+            return
+
+        for ckch in await ckgd.fetch_channels():
+            if ckch.type in TEXT_CHANNELS:
+                await self.get_past_messages_channel(ctx, ckch.id)
+
+        await ctx.send(f"all downloaded for guild {ckgd.name}")
