@@ -616,7 +616,6 @@ class StatsCog(Cog):
         # hist
         tsc = None
 
-
         if message:
             mid = message.id
             gid = message.guild.id
@@ -625,7 +624,6 @@ class StatsCog(Cog):
             mid = payload.message_id
             gid = payload.guild_id
             cid = payload.channel_id
-
 
         if event == "create":
             aid = message.author.id
@@ -646,44 +644,25 @@ class StatsCog(Cog):
         if event == "delete":
             pass
 
-
         tsc = TimeTravel.sqlts(tstp)
 
         return (mid, aid, gid, cid, tstp, event, text, attach, embed, ref, hist, tsc)
 
-
     @Cog.listener("on_message")
     async def process_on_message(self, message):
         """Process message details"""
-
-        mid = message.id
-        aid = message.author.id
+        tstp = TimeTravel.timestamp()
+        data = self._proc_message(tstp, "create", message=message)
 
         logger.debug(
             "message %s created by %s: %s, %s, %s",
-            mid,
-            aid,
+            data[0],
+            data[1],
             len(message.content),
             len(message.attachments),
             len(message.embeds),
         )
 
-        gid = message.guild.id
-        cid = message.channel.id
-        ts = message.created_at
-        event = "create"
-        text = escape_markdown(message.content)
-        attach = (
-            str([a.url for a in message.attachments]) if message.attachments else None
-        )
-        embed = (
-            str([str(e.to_dict()) for e in message.embeds]) if message.embeds else None
-        )
-        rt = message.reference.message_id if message.reference else None
-        hist = False
-        tsc = TimeTravel.sqlts(ts)
-
-        data = (mid, aid, gid, cid, ts, event, text, attach, embed, rt, hist, tsc)
         with self._database() as db:
             db.execute(MSG_INSERT, data)
 
@@ -790,14 +769,11 @@ class StatsCog(Cog):
         with self._database() as db:
             db.executemany(MSG_INSERT, entries)
 
-
-
     @group(name="msg")
     async def message_stat(self, ctx):
         """get info about the user message"""
         if ctx.invoked_subcommand:
             return
-
 
     @message_stat.command("hist")
     async def get_past_messages(self, ctx, channel):

@@ -47,6 +47,8 @@ class TimeTravel:
     @classmethod
     def sqlts(cls, ts):
         """Convert timestamp to sqlite database time string check"""
+        if isinstance(ts, datetime):
+            ts = ts.timestamp()
         return datetime.fromtimestamp(ts, tz=cls.tz).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
 
     @staticmethod
