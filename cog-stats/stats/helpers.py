@@ -51,6 +51,11 @@ class TimeTravel:
             ts = ts.timestamp()
         return datetime.fromtimestamp(ts, tz=cls.tz).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
 
+    @classmethod
+    def tsfromdiscord(cls, ts):
+        """Convert discord's timestamp to unix timestamp: 2022-05-12T08:46:46.505000+00:00"""
+        return datetime.strptime(ts[:-9], "%Y-%m-%dT%H:%M:%S.%f").timestamp()
+
     @staticmethod
     def timestamp():
         """Get current utc timestamp"""

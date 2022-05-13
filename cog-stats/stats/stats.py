@@ -187,7 +187,6 @@ class StatsCog(Cog):
             else:
                 inserts.append((uid, gid, cid, "deaf", bts, diff.deaf, False, tsc))
 
-
         if diff.stream is not None:
             bts = before.stream.time
             tsc = TimeTravel.sqlts(bts)
@@ -593,16 +592,49 @@ class StatsCog(Cog):
     #########################
 
     def _get_message_author(self, mid):
-        with self._database() as db:
-            rows = db.execute(
-                """SELECT user FROM Message WHERE message = ? LIMIT 1;""", (mid,)
-            )
-            res = rows.fetchone()
-            if res is None:
-                return None
-            return int(res["user"])
+        if mid:
+            with self._database() as db:
+                rows = db.execute(
+                    """SELECT user FROM Message WHERE message = ? LIMIT 1;""", (mid,)
+                )
+                res = rows.fetchone()
+                if res:
+                    return int(res["user"])
+        return None
 
-    def _proc_message(self, tstp, event, message=None, payload=None, hist=False):
+    def _get_message_data(self, message):
+        text = None
+        attach = None
+        embed = None
+        ref = None
+        if message.content:
+            text = escape_markdown(message.content)
+        if message.attachments:
+            attach = [a.url for a in message.attachments]
+        if message.embeds:
+            embed = [str(e.to_dict()) for e in message.embeds]
+        if message.reference:
+            ref = message.reference.message_id
+
+        return text, attach, embed, ref
+
+    def _get_paylaod_data(self, msgdict):
+        text = None
+        attach = None
+        embed = None
+        ref = None
+        if msgdict.get("content"):
+            text = escape_markdown(msgdict["content"])
+        if msgdict.get("attachments"):
+            attach = [a["url"] for a in msgdict["attachments"]]
+        if msgdict.get("embeds"):
+            embed = [str(e) for e in msgdict["embeds"]]
+        if msgdict.get("referenced_message"):
+            ref = msgdict["referenced_message"]["id"]
+
+        return text, attach, embed, ref
+
+    async def _proc_message(self, tstp, event, message=None, payload=None, hist=False):
         mid = None
         aid = None
         gid = None
@@ -621,30 +653,68 @@ class StatsCog(Cog):
             gid = message.guild.id
             cid = message.channel.id
         else:
-            mid = payload.message_id
+            try:
+                mid = payload.message_id
+            except AttributeError:
+                pass
             gid = payload.guild_id
             cid = payload.channel_id
 
         if event == "create":
             aid = message.author.id
+            text, attach, embed, ref = self._get_message_data(message)
             tstp = message.created_at
 
-            if message.content:
-                text = escape_markdown(message.content)
-            if message.attachments:
-                attach = str([a.url for a in message.attachments])
-            if message.embeds:
-                embed = str([str(e.to_dict()) for e in message.embeds])
-            if message.reference:
-                ref = message.reference.message_id
-
         if event == "edit":
-            tstp = message.edited_at
-
-        if event == "delete":
-            pass
+            message = await self.bot.get_channel(cid).fetch_message(mid)
+            if message:
+                aid = message.author.id
+                text, attach, embed, ref = self._get_message_data(message)
+                tstp = message.edited_at
+            else:
+                aid = self._get_message_author(mid)
+                text, attach, embed, ref = self._get_payload_data(payload.data)
+                if payload.data.get("edited_timestamp"):
+                    tstp = TimeTravel.tsfromdiscord(
+                        payload.data.get("edited_timestamp")
+                    )
 
         tsc = TimeTravel.sqlts(tstp)
+
+        if event == "delete":
+            if mid is None:
+                mids = {}
+                for tmid in payload.message_ids:
+                    cached = [
+                        msg.author.id
+                        for msg in payload.cached_messages
+                        if msg.id == tmid
+                    ]
+                    mids[tmid] = cached[0] if cached else self._get_message_author(tmid)
+                entries = []
+                for tmid, taid in mids.items():
+                    entries.append(
+                        (
+                            tmid,
+                            taid,
+                            gid,
+                            cid,
+                            tstp,
+                            event,
+                            text,
+                            attach,
+                            embed,
+                            ref,
+                            hist,
+                            tsc,
+                        )
+                    )
+                return entries
+            aid = (
+                payload.cached_message.author.id
+                if payload.cached_message
+                else self._get_message_author(mid)
+            )
 
         return (mid, aid, gid, cid, tstp, event, text, attach, embed, ref, hist, tsc)
 
@@ -652,7 +722,7 @@ class StatsCog(Cog):
     async def process_on_message(self, message):
         """Process message details"""
         tstp = TimeTravel.timestamp()
-        data = self._proc_message(tstp, "create", message=message)
+        data = await self._proc_message(tstp, "create", message=message)
 
         logger.debug(
             "message %s created by %s: %s, %s, %s",
@@ -669,102 +739,36 @@ class StatsCog(Cog):
     @Cog.listener("on_raw_message_edit")
     async def process_on_message_edit(self, payload):
         """process message on edit"""
-        ts = TimeTravel.timestamp()
-        tsc = TimeTravel.sqlts(ts)
-
-        mid = payload.message_id
+        tstp = TimeTravel.timestamp()
+        data = await self._proc_message(tstp, "edit", payload=payload)
 
         logger.debug(
-            "message %s edited to: %s", payload.message_id, payload.data.get("content")
+            "message %s edited to: %s",
+            payload.message_id,
+            payload.data.get("content"),
         )
 
-        gid = payload.guild_id
-        cid = payload.channel_id
-
-        message = payload.data
-        aid = (
-            payload.cached_message.author.id
-            if payload.cached_message
-            else self._get_message_author(mid)
-        )
-        event = "edit"
-        text = escape_markdown(message["content"])
-        attach = (
-            str([a["url"] for a in message["attachments"]])
-            if message.get("attachments")
-            else None
-        )
-        embed = (
-            str([str(e) for e in message["embeds"]]) if message.get("embeds") else None
-        )
-        rt = (
-            message["referenced_message"]["id"]
-            if message.get("referenced_message")
-            else None
-        )
-        hist = False
-
-        data = (mid, aid, gid, cid, ts, event, text, attach, embed, rt, hist, tsc)
         with self._database() as db:
             db.execute(MSG_INSERT, data)
 
     @Cog.listener("on_raw_message_delete")
     async def process_on_message_delete(self, payload):
         """process message on delete"""
-        ts = TimeTravel.timestamp()
-        tsc = TimeTravel.sqlts(ts)
+        tstp = TimeTravel.timestamp()
+        data = await self._proc_message(tstp, "delete", payload=payload)
 
         logger.debug("message %s deleted", payload.message_id)
 
-        mid = payload.message_id
-        gid = payload.guild_id
-        cid = payload.channel_id
-
-        aid = (
-            payload.cached_message.author.id
-            if payload.cached_message
-            else self._get_message_author(mid)
-        )
-
-        event = "delete"
-        text = None
-        attach = None
-        embed = None
-        rt = None
-        hist = False
-
-        data = (mid, aid, gid, cid, ts, event, text, attach, embed, rt, hist, tsc)
         with self._database() as db:
             db.execute(MSG_INSERT, data)
 
     @Cog.listener("on_raw_bulk_message_delete")
     async def process_on_message_bulk_delete(self, payload):
         """process message on bulk delete"""
-        ts = TimeTravel.timestamp()
-        tsc = TimeTravel.sqlts(ts)
+        tstp = TimeTravel.timestamp()
+        entries = await self._proc_message(tstp, "delete", payload=payload)
 
         logger.debug("bulk message delete: %s", payload.message_ids)
-
-        gid = payload.guild_id
-        cid = payload.channel_id
-
-        event = "delete"
-        text = None
-        attach = None
-        embed = None
-        rt = None
-        hist = False
-
-        entries = []
-        for mid in payload.message_ids:
-            aid = (
-                [m.author.id for m in payload.cached_messages if m.id == mid][0]
-                if payload.cached_messages
-                else self._get_message_author(mid)
-            )
-            entries.append(
-                (mid, aid, gid, cid, ts, event, text, attach, embed, rt, hist, tsc)
-            )
 
         with self._database() as db:
             db.executemany(MSG_INSERT, entries)
@@ -778,7 +782,7 @@ class StatsCog(Cog):
     @message_stat.command("hist")
     async def get_past_messages(self, ctx, channel):
         """gather previous messages"""
-        ch = self.bot.get_channel(int(channel))
-        async for message in ch.history(limit=50, oldest_first=True):
+        ckch = self.bot.get_channel(int(channel))
+        async for message in ckch.history(limit=50, oldest_first=True):
             pass
         await ctx.send("all downloaded")
