@@ -6,7 +6,7 @@ from json import dump, dumps
 from os import getenv
 from sqlite3 import IntegrityError
 
-from discord import NotFound, ChannelType
+from discord import NotFound, ChannelType, HTTPException
 from discord.ext.commands import Cog, command, group, is_owner
 from discord.ext.tasks import loop
 from discord.utils import escape_markdown
@@ -685,7 +685,7 @@ class StatsCog(Cog):
             if message:
                 aid = message.author.id
                 text, attach, embed, ref = self._get_message_data(message)
-                tstp = message.edited_at.timestamp()
+                tstp = message.edited_at.timestamp() if message.edited_at else (payload.data.get("edited_timestamp", tstp) if payload else tstp)
             else:
                 aid = self._get_message_author(mid)
                 text, attach, embed, ref = self._get_payload_data(payload.data)
@@ -810,7 +810,11 @@ class StatsCog(Cog):
     async def get_past_messages_channel(self, ctx, channel):
         """gather previous messages"""
         tstp = TimeTravel.timestamp()
-        ckch = await self.bot.fetch_channel(int(channel))
+        try:
+            ckch = await self.bot.fetch_channel(int(channel))
+        except HTTPException:
+            await ctx.send(f"unable to access channel with id {channel}")
+            return
         entries = []
         if ckch is None:
             await ctx.send(f"unable to find channel with id {channel}")
@@ -835,24 +839,33 @@ class StatsCog(Cog):
                     hist=True,
                 )
                 entries.append(data)
-                total += 1
-                if not total % 100:
-                    await msg.edit(f"{ckch.name}: downloaded {total}")
+            total += 1
+            if not total % 100:
+                await msg.edit(f"{ckch.name}: downloaded {total}")
 
         logger.debug("hist for %s: %s", ckch.name, len(entries))
+        saved = 0
+        skipped = 0
         for entry in entries:
             try:
                 with self._database() as db:
                     db.execute(MSG_INSERT, entry)
+                saved += 1
             except IntegrityError:
-                pass
+                skipped += 1
+            if not saved % 100:
+                await msg.edit(f"{ckch.name}: downloaded {total} / saved {saved} / skipped {skipped}")
 
         await msg.edit(f"{ckch.name}: updated {len(entries)}")
 
     @message_stat.command("gd")
     async def get_past_messages_guild(self, ctx, guild):
         """gather messages from guild text channels"""
-        ckgd = await self.bot.fetch_guild(int(guild))
+        try:
+            ckgd = await self.bot.fetch_guild(int(guild))
+        except HTTPException:
+            await ctx.send(f"unable to access guild with id {guild}")
+            return
         if ckgd is None:
             await ctx.send(f"unable to find guild with id {guild}")
             return
