@@ -25,7 +25,7 @@ VoiceState = namedtuple("VoiceState", ["state", "time"])
 VoiceDiff = namedtuple("VoiceDiff", ["voice", "mute", "deaf", "stream", "video"])
 Voice = namedtuple("Voice", ["voice", "mute", "deaf", "stream", "video"])
 
-MSG_INSERT = "INSERT INTO Message VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
+MSG_INSERT = "INSERT OR IGNORE INTO Message VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
 TEXT_CHANNELS = (
     ChannelType.text,
     ChannelType.private,
@@ -748,11 +748,8 @@ class StatsCog(Cog):
             len(message.embeds),
         )
 
-        try:
-            with self._database() as db:
-                db.execute(MSG_INSERT, data)
-        except IntegrityError:
-            pass
+        with self._database() as db:
+            db.execute(MSG_INSERT, data)
 
     @Cog.listener("on_raw_message_edit")
     async def process_on_message_edit(self, payload):
@@ -766,11 +763,8 @@ class StatsCog(Cog):
             payload.data.get("content"),
         )
 
-        try:
-            with self._database() as db:
-                db.execute(MSG_INSERT, data)
-        except IntegrityError:
-            pass
+        with self._database() as db:
+            db.execute(MSG_INSERT, data)
 
     @Cog.listener("on_raw_message_delete")
     async def process_on_message_delete(self, payload):
@@ -780,11 +774,8 @@ class StatsCog(Cog):
 
         logger.debug("message %s deleted", payload.message_id)
 
-        try:
-            with self._database() as db:
-                db.execute(MSG_INSERT, data)
-        except IntegrityError:
-            pass
+        with self._database() as db:
+            db.execute(MSG_INSERT, data)
 
     @Cog.listener("on_raw_bulk_message_delete")
     async def process_on_message_bulk_delete(self, payload):
@@ -794,11 +785,8 @@ class StatsCog(Cog):
 
         logger.debug("bulk message delete: %s", payload.message_ids)
 
-        try:
-            with self._database() as db:
-                db.executemany(MSG_INSERT, entries)
-        except IntegrityError:
-            pass
+        with self._database() as db:
+            db.executemany(MSG_INSERT, entries)
 
     @group(name="msg")
     async def message_stat(self, ctx):
@@ -845,16 +833,12 @@ class StatsCog(Cog):
 
         logger.debug("hist for %s: %s", ckch.name, len(entries))
         saved = 0
-        skipped = 0
         for entry in entries:
-            try:
-                with self._database() as db:
-                    db.execute(MSG_INSERT, entry)
-                saved += 1
-            except IntegrityError:
-                skipped += 1
+            with self._database() as db:
+                db.execute(MSG_INSERT, entry)
+            saved += 1
             if not saved % 100:
-                await msg.edit(f"{ckch.name}: downloaded {total} / saved {saved} / skipped {skipped}")
+                await msg.edit(f"{ckch.name}: downloaded {total} / processed {saved}")
 
         await msg.edit(f"{ckch.name}: updated {len(entries)}")
 
