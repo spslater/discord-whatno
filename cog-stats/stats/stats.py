@@ -681,7 +681,7 @@ class StatsCog(Cog):
             tstp = message.created_at.timestamp()
 
         if event == "edit":
-            message = message or await self.bot.get_channel(cid).fetch_message(mid)
+            message = message or await (await self.bot.fetch_channel(cid)).fetch_message(mid)
             if message:
                 aid = message.author.id
                 text, attach, embed, ref = self._get_message_data(message)
@@ -748,8 +748,11 @@ class StatsCog(Cog):
             len(message.embeds),
         )
 
-        with self._database() as db:
-            db.execute(MSG_INSERT, data)
+        try:
+            with self._database() as db:
+                db.execute(MSG_INSERT, data)
+        except IntegrityError:
+            pass
 
     @Cog.listener("on_raw_message_edit")
     async def process_on_message_edit(self, payload):
@@ -763,8 +766,11 @@ class StatsCog(Cog):
             payload.data.get("content"),
         )
 
-        with self._database() as db:
-            db.execute(MSG_INSERT, data)
+        try:
+            with self._database() as db:
+                db.execute(MSG_INSERT, data)
+        except IntegrityError:
+            pass
 
     @Cog.listener("on_raw_message_delete")
     async def process_on_message_delete(self, payload):
@@ -774,8 +780,11 @@ class StatsCog(Cog):
 
         logger.debug("message %s deleted", payload.message_id)
 
-        with self._database() as db:
-            db.execute(MSG_INSERT, data)
+        try:
+            with self._database() as db:
+                db.execute(MSG_INSERT, data)
+        except IntegrityError:
+            pass
 
     @Cog.listener("on_raw_bulk_message_delete")
     async def process_on_message_bulk_delete(self, payload):
@@ -785,8 +794,11 @@ class StatsCog(Cog):
 
         logger.debug("bulk message delete: %s", payload.message_ids)
 
-        with self._database() as db:
-            db.executemany(MSG_INSERT, entries)
+        try:
+            with self._database() as db:
+                db.executemany(MSG_INSERT, entries)
+        except IntegrityError:
+            pass
 
     @group(name="msg")
     async def message_stat(self, ctx):
@@ -804,6 +816,8 @@ class StatsCog(Cog):
             await ctx.send(f"unable to find channel with id {channel}")
             return
         logger.debug("downloading messages for channel %s", ckch.name)
+        total = 0
+        msg = await ctx.send(f"{ckch.name}: downloaded {total}")
         async for message in ckch.history(limit=None, oldest_first=True):
             if message.created_at:
                 data = await self._proc_message(
@@ -821,16 +835,19 @@ class StatsCog(Cog):
                     hist=True,
                 )
                 entries.append(data)
+                total += 1
+                if not total % 100:
+                    await msg.edit(f"{ckch.name}: downloaded {total}")
 
         logger.debug("hist for %s: %s", ckch.name, len(entries))
         for entry in entries:
-            with self._database() as db:
-                try:
+            try:
+                with self._database() as db:
                     db.execute(MSG_INSERT, entry)
-                except IntegrityError:
-                    pass
+            except IntegrityError:
+                pass
 
-        await ctx.send(f"downloaded {len(entries)} from channel {ckch.name}")
+        await msg.edit(f"{ckch.name}: updated {len(entries)}")
 
     @message_stat.command("gd")
     async def get_past_messages_guild(self, ctx, guild):
