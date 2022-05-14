@@ -157,10 +157,13 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
             context.author.id,
             context.message.content,
         )
-        original = exception.original
-        tb_list = "\n".join(format_tb(original.__traceback__))
-        tb_string = " | ".join(tb_list.splitlines())
-        logger.debug("Command error from: %s | %s", original, tb_string)
+        try:
+            original = exception.original
+            tb_list = "\n".join(format_tb(original.__traceback__))
+            tb_string = " | ".join(tb_list.splitlines())
+            logger.debug("Command error from: %s | %s", original, tb_string)
+        except AttributeError:
+            pass
 
     # pylint: disable=arguments-differ
     def run(self):
