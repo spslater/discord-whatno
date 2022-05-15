@@ -1,10 +1,10 @@
 """Generate historical data for the server"""
-import re
 import logging
+import re
 from csv import reader
 from json import load
 
-from .helpers import calc_path, TimeTravel
+from .helpers import TimeTravel, calc_path
 
 logger = logging.getLogger(__name__)
 

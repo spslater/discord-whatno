@@ -4,16 +4,15 @@ import re
 from collections import namedtuple
 from json import dump, dumps
 from os import getenv
-from sqlite3 import IntegrityError
 
-from discord import NotFound, ChannelType, HTTPException
+from discord import ChannelType, HTTPException, NotFound
 from discord.ext.commands import Cog, command, group, is_owner
 from discord.ext.tasks import loop
 from discord.utils import escape_markdown
 from dotenv import load_dotenv
 
-from .helpers import calc_path, sec_to_human, TimeTravel
 from .database import StatDB
+from .helpers import TimeTravel, calc_path, sec_to_human
 from .historic import get_acts, get_data
 
 logger = logging.getLogger(__name__)
@@ -681,11 +680,19 @@ class StatsCog(Cog):
             tstp = message.created_at.timestamp()
 
         if event == "edit":
-            message = message or await (await self.bot.fetch_channel(cid)).fetch_message(mid)
+            message = message or await (
+                await self.bot.fetch_channel(cid)
+            ).fetch_message(mid)
             if message:
                 aid = message.author.id
                 text, attach, embed, ref = self._get_message_data(message)
-                tstp = message.edited_at.timestamp() if message.edited_at else (payload.data.get("edited_timestamp", tstp) if payload else tstp)
+                tstp = (
+                    message.edited_at.timestamp()
+                    if message.edited_at
+                    else (
+                        payload.data.get("edited_timestamp", tstp) if payload else tstp
+                    )
+                )
             else:
                 aid = self._get_message_author(mid)
                 text, attach, embed, ref = self._get_payload_data(payload.data)
@@ -788,7 +795,7 @@ class StatsCog(Cog):
         with self._database() as db:
             db.executemany(MSG_INSERT, entries)
 
-    @group(name="msg")
+    @group(name="txt")
     async def message_stat(self, ctx):
         """get info about the user message"""
         if ctx.invoked_subcommand:
@@ -832,13 +839,8 @@ class StatsCog(Cog):
                 await msg.edit(f"{ckch.name}: downloaded {total}")
 
         logger.debug("hist for %s: %s", ckch.name, len(entries))
-        saved = 0
-        for entry in entries:
-            with self._database() as db:
-                db.execute(MSG_INSERT, entry)
-            saved += 1
-            if not saved % 100:
-                await msg.edit(f"{ckch.name}: downloaded {total} / processed {saved}")
+        with self._database() as db:
+            db.executemany(MSG_INSERT, entries)
 
         await msg.edit(f"{ckch.name}: updated {len(entries)}")
 
