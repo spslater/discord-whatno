@@ -139,9 +139,10 @@ class WNMessageCog(Cog, name="Manage Messages"):
             for attach in ctx.message.attachments
         ]
 
-        await channel.send(
+        msg = await channel.send(
             content=content,
             embeds=ctx.message.embeds,
             files=attachments,
         )
         await ctx.message.add_reaction("\N{OK HAND SIGN}")
+        await ctx.send(f"https://discord.com/channels/{msg.guild.id}/{msg.channel.id}/{msg.id}")
