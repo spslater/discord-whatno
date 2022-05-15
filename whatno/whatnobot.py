@@ -9,7 +9,7 @@ from pathlib import Path
 from sys import exc_info
 from traceback import format_tb
 
-from discord import ExtensionFailed, NoEntryPointError, Intents
+from discord import ExtensionFailed, Intents, NoEntryPointError
 from discord.ext.commands import Bot, when_mentioned_or
 
 logger = logging.getLogger(__name__)
@@ -90,6 +90,7 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
             history = history.filter(lambda msg: msg.author.id == user_id)
         return history
 
+    # pylint: disable=arguments-differ
     async def sync_commands(self):
         pass
 

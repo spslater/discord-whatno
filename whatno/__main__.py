@@ -1,7 +1,6 @@
 """Test the bot from the CLI"""
 import logging
 import logging.config
-import sys
 from argparse import ArgumentParser
 from os import getenv
 

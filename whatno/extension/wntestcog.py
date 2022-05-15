@@ -1,9 +1,8 @@
 """Test and general functions Cog"""
 import logging
 
-from discord.ui import Button, View
 from discord.ext.commands import Cog, command
-
+from discord.ui import Button, View
 
 logger = logging.getLogger(__name__)
 
