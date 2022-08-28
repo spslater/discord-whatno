@@ -248,9 +248,12 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         tag_text = entry.get("tags")
         img_url = entry.get("image")
         release = entry.get("release")
+        reacts = entry.get("reacts")
 
         embed = Embed(title=title, url=url, colour=Colour.random())
         embed.add_field(name=alt, value=tag_text)
+        if reacts:
+            embed.add_field(name="reacts", value=" ".join([f"{r[0]}: {r[1]}" for r in reacts]), inline=False)
         embed.set_image(url=img_url)
         embed.set_footer(text=release)
 

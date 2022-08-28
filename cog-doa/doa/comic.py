@@ -11,6 +11,22 @@ from .helpers import TimeTravel, calc_path
 
 logger = logging.getLogger(__name__)
 
+class DictRow:
+    def __init__(self, cursor, row):
+        self._keys = []
+        for idx, col in enumerate(cursor.description):
+            setattr(self, col[0], row[idx])
+
+    def __repr__(self):
+        vals = [f"{k}: {getattr(self,k)}" for k in self._keys]
+        return "DictRow(" + " | ".join(vals) + ")"
+
+    def __getitem__(self, key):
+        return getattr(self, key, None)
+
+    def __setitem__(self, key, value):
+        self._keys.append(key)
+        setattr(self, key, value)
 
 class ComicDB:
     """Comic DB Interface"""
@@ -38,7 +54,7 @@ class ComicDB:
             if self.readonly
             else connect(self.filename)
         )
-        self.conn.row_factory = Row
+        self.conn.row_factory = DictRow
         return self.conn.cursor()
 
     def close(self):
@@ -181,7 +197,25 @@ class ComicInfo:
                     (*data, message.id),
                 )
 
-    def released_on(self, dates: Union[str, list[str]]) -> list[Row]:
+    def _add_reacts(self, results: list[DictRow]) -> list[DictRow]:
+        """Add the reacts as a list of tuples"""
+        with self._database() as database:
+            for result in results:
+                reacts = database.execute(
+                    f"""SELECT reaction, count(reaction) as num
+                        FROM React
+                        WHERE msg = {result['msg']} AND uid != 639324610772467714
+                        GROUP BY msg, reaction
+                        ORDER BY reaction ASC"""
+                ).fetchall()
+                if reacts:
+                    #setattr(result, "reacts", [(react["reaction"], react["num"]) for react in reacts])
+                    result["reacts"] = [(react["reaction"], react["num"]) for react in reacts]
+                print(result)
+        print(results)
+        return results
+
+    def released_on(self, dates: Union[str, list[str]]) -> list[DictRow]:
         """Get database rows for comics released on given dates"""
         if isinstance(dates, str):
             dates = [dates]
@@ -192,11 +226,14 @@ class ComicInfo:
                     Comic.title as title,
                     Comic.image as image,
                     Comic.url as url,
-                    Alt.alt as alt
+                    Alt.alt as alt,
+                    Latest.msg as msg
                 FROM Comic
                 JOIN Alt ON Comic.release = Alt.comicId
+                JOIN Latest ON Comic.url = Latest.url
                 WHERE release IN {dates}"""
             ).fetchall()
+        results = self._add_reacts(results)
         return results
 
     def todays_reread(self, date=None):
@@ -222,9 +259,10 @@ class ComicInfo:
                     "title": comic["title"],
                     "url": comic["url"],
                     "alt": f"||{comic['alt']}||",
-                    "tags": ", ".join(tags),
+                    "tags": ", ".join(tags) or "no tags today",
                     "image": f"https://www.dumbingofage.com/comics/{image}",
                     "release": release,
+                    "reacts": comic["reacts"],
                 }
             )
         return entries
