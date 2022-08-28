@@ -304,6 +304,27 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         self.comics.update_schedule()
         logger.info("Publish complete! :)")
 
+    @Cog.listener("on_raw_reaction_add")
+    async def react_refresh(self, payload):
+        logger.debug("reaction: %s", payload.emoji )
+        if payload.emoji != "🔁":
+            logger.debug("skipping???" )
+            return
+        msg = await self.fetch_message(payload.channel_id, payload.message_id)
+        reply = msg.reference and msg.content == "%refresh"
+        self_react = msg.author.id == self.user.id
+        if not reply and not self_react:
+            logger.debug("not reply or react?" )
+            return
+        if reply:
+            ref = msg.reference
+        elif self_react:
+            ref = msg
+        embed = ref.embeds[0]
+        if embed:
+            logger.debug("Refreshing Embed: %s", embed.to_dict())
+            await self.refresh_embed(ref, embed)
+
     async def refresh_embed(self, msg, embed) -> bool:
         """Perform embed refresh"""
         if embed:
