@@ -35,6 +35,8 @@ TEXT_CHANNELS = (
 )
 
 
+ROLLING = (90,)
+
 class StatsCog(Cog):
     """Voice Stats Cog"""
 
@@ -347,24 +349,27 @@ class StatsCog(Cog):
         d, h, m, s = sec_to_human(value)
         val = ""
         if d:
-            val += f"{d} day{'s' if d > 1 else ''}"
+            val += f"{d} day{'s' if d != 1 else ''}"
         if d and (h or m or s):
             val += ", "
         if h:
-            val += f"{h} hr{'s' if h > 1 else ''}"
+            val += f"{h} hr{'s' if h != 1 else ''}"
         if h and (m or s):
             val += ", "
         if m:
-            val += f"{m} min{'s' if m > 1 else ''}"
+            val += f"{m} min{'s' if m != 1 else ''}"
         if m and s:
             val += ", "
         if s:
-            val += f"{s} sec{'s' if s > 1 else ''}"
+            val += f"{s} sec{'s' if s != 1 else ''}"
         return val
 
-    async def _generate_voice_output(self, results, stats, in_voice, user, guild):
+    async def _generate_voice_output(self, results, early, stats, in_voice, user, guild):
         member = await guild.fetch_member(user)
-        output = f"```\n{member.nick or member.name}\n"
+        e_time = f" - past {ROLLING[0]} days"
+        if early:
+            e_time = f" - since {TimeTravel.pretty_ts(early)}"
+        output = f"```\n{member.nick or member.name}{e_time}\n"
         for state, value in results.items():
             val = self._display_duration(value)
             green = (
@@ -376,24 +381,42 @@ class StatsCog(Cog):
         output += "```"
         return output
 
-    async def _user_stat(self, user, guild):
+    async def _user_stat(self, user, guild, alltime=False):
         rows = None
+        logger.debug("get all time stats: %s", alltime)
+        since = TimeTravel.tsinpast(*ROLLING)
         with self._database() as db:
-            rows = db.execute(
-                """
-                SELECT voicestate, sum(duration) as total
-                FROM History
-                WHERE user = ? and guild = ?
-                GROUP BY voicestate
-                """,
-                (user, guild.id),
-            ).fetchall()
+            if alltime:
+                rows = db.execute(
+                    """
+                    SELECT voicestate, sum(duration) as total, min(starttime) as early
+                    FROM History
+                    WHERE user = ? and guild = ?
+                    GROUP BY voicestate
+                    """,
+                    (user, guild.id),
+                ).fetchall()
+            else:
+                rows = db.execute(
+                    """
+                    SELECT voicestate, sum(duration) as total
+                    FROM History
+                    WHERE user = ? and guild = ? and starttime > ?
+                    GROUP BY voicestate
+                    """,
+                    (user, guild.id, since),
+                ).fetchall()
         results = {}
+        early = None
         for row in rows:
+            logger.debug("checking row: %s", tuple(row))
+            if alltime and (early is None or row["early"] < early):
+                early = row["early"]
             if row["voicestate"] in results:
                 results[row["voicestate"]] += row["total"]
             else:
                 results[row["voicestate"]] = row["total"]
+        logger.debug("early time: %s", early)
 
         in_voice = user in [vc.user for vc in self.current]
         stats = None
@@ -402,7 +425,7 @@ class StatsCog(Cog):
                 stats = value
                 break
 
-        return await self._generate_voice_output(results, stats, in_voice, user, guild)
+        return await self._generate_voice_output(results, early, stats, in_voice, user, guild)
 
     @group(name="vc")
     async def voice_stat(self, ctx):
@@ -410,7 +433,7 @@ class StatsCog(Cog):
         if ctx.invoked_subcommand:
             return
 
-        output = await self._user_stat(ctx.author.id, ctx.channel.guild)
+        output = await self._user_stat(ctx.author.id, ctx.channel.guild, alltime=False)
         await ctx.send(output)
 
     @staticmethod
@@ -422,6 +445,13 @@ class StatsCog(Cog):
             if member.name and pat.search(member.name):
                 return member.id
         return None
+
+    @voice_stat.command(name="all")
+    async def voice_stat_user_all(self, ctx):
+        """get info about any user by id"""
+        logger.info("geting specific user vc data for all time")
+        output = await self._user_stat(ctx.author.id, ctx.channel.guild, alltime=True)
+        await ctx.send(output)
 
     @voice_stat.command(name="user")
     async def voice_stat_user(self, ctx, user, *extra):
@@ -451,19 +481,17 @@ class StatsCog(Cog):
             guild = ctx.channel.guild
 
             rows = []
+            since = TimeTravel.tsinpast(*ROLLING)
             with self._database() as db:
                 if all_:
-                    rows = db.execute(
+                    early = db.execute(
                         """
-                        SELECT user, sum(duration) as total
+                        SELECT min(starttime) as early
                         FROM History
-                        WHERE voicestate = "voice"
-                        GROUP BY user
-                        ORDER BY total DESC
-                        LIMIT 10
-                        """,
-                    ).fetchall()
-                else:
+                        GROUP BY starttime
+                        LIMIT 1
+                        """
+                    ).fetchone()['early']
                     rows = db.execute(
                         """
                         SELECT user, sum(duration) as total
@@ -473,15 +501,31 @@ class StatsCog(Cog):
                         ORDER BY total DESC
                         LIMIT 10
                         """,
-                        (guild.id,),
+                        (guild.id,)
+                    ).fetchall()
+                else:
+                    rows = db.execute(
+                        """
+                        SELECT user, sum(duration) as total
+                        FROM History
+                        WHERE guild = ? AND voicestate = "voice" AND starttime > ?
+                        GROUP BY user
+                        ORDER BY total DESC
+                        LIMIT 10
+                        """,
+                        (guild.id,since,),
                     ).fetchall()
             users = [(r["user"], r["total"]) for r in rows]
             output = "```\n"
+            if not all_:
+                output += f"Last {ROLLING[0]} days\n"
+            else:
+                output += f"Since {TimeTravel.pretty_ts(early)}\n"
             for idx, (user, value) in enumerate(users):
                 try:
                     member = await guild.fetch_member(user)
                 except NotFound:
-                    name = user
+                    name = f"(user left) {user}"
                 else:
                     name = member.nick or member.name
                 val = self._display_duration(value)
