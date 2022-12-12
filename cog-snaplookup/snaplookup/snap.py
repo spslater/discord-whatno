@@ -45,6 +45,7 @@ class SnapCog(Cog):
     async def periodic_check(self):
         """periodically get the new cards"""
         await self.bot.wait_until_ready()
+        logger.info("gathering a")
         self.info = process_cards(self.database_file, dl=True)
 
     def save_database(self):
@@ -69,33 +70,32 @@ class SnapCog(Cog):
         matches = re.findall("\{\{.*?\}\}", msg, flags=re.IGNORECASE)
         if not matches:
             return
-        logger.info("processing: %s", msg)
-        reqs = []
-        for match in matches:
-            tmp = [(m.strip(), strim(m)) for m in match[2:-2].split("|")]
-            reqs.extend(tmp)
-        errs = []
-        res = []
-        for og, req in reqs:
-            lu = self._lookup(req)
-            if lu is None:
-                errs.append(og)
-                continue
-            res.append(f"combo/{lu['img']}")
 
-        if not res:
-            return
-
+        logger.info("processing: %s|%s,%s,%s,%s|%s", message.created_at, message.guild.id, message.channel.id, message.id, message.author.id, matches)
         chnl = message.channel
+        async with chnl.typing():
+            reqs = []
+            for match in matches:
+                tmp = [(m.strip(), strim(m)) for m in match[2:-2].split("|")]
+                reqs.extend(tmp)
+            errs = []
+            res = []
+            for og, req in reqs:
+                lu = self._lookup(req)
+                if lu is None:
+                    errs.append(og)
+                    continue
+                res.append(f"combo/{lu['img']}")
 
-        if errs:
-            await chnl.send("unable to find following cards / locations:\n"+", ".join(errs))
-        for fnames in chnk(res):
-            logger.debug("cards: %s", fnames)
-            fps = [File(calc_path(f)) for f in fnames]
-            logger.debug("fps: %s", fps)
-            await chnl.send(files=fps)
-            logger.debug("sent!?")
+            if not res:
+                return
+
+            if errs:
+                await chnl.send("unable to find following cards / locations:\n"+", ".join(errs))
+            for fnames in chnk(res):
+                logger.debug("cards: %s", fnames)
+                fps = [File(calc_path(f)) for f in fnames]
+                await chnl.send(files=fps)
 
 
     # @Cog.listener("on_message_edit")
