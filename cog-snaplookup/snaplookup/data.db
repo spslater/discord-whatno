@@ -1,1860 +1,1890 @@
 {
     "cards": {
         "abomination": {
-            "url": "https://snap.fan/cards/Abomination/",
+            "img": "cards/Abomination.webp",
             "name": "Abomination",
             "txt": "Foolish rabble! You are beneath me!",
-            "img": "cards/Abomination.webp"
+            "url": "https://snap.fan/cards/Abomination/"
         },
         "absorbingman": {
-            "url": "https://snap.fan/cards/AbsorbingMan/",
+            "img": "cards/AbsorbingMan.webp",
             "name": "AbsorbingMan",
             "txt": "On Reveal: If the last card you played has an On Reveal ability, this card copies it.",
-            "img": "cards/AbsorbingMan.webp"
+            "url": "https://snap.fan/cards/AbsorbingMan/"
         },
         "adamwarlock": {
-            "url": "https://snap.fan/cards/AdamWarlock/",
+            "img": "cards/AdamWarlock.webp",
             "name": "AdamWarlock",
             "txt": "At the end of each turn, if you are winning this location, draw a card.",
-            "img": "cards/AdamWarlock.webp"
+            "url": "https://snap.fan/cards/AdamWarlock/"
         },
         "aero": {
-            "url": "https://snap.fan/cards/Aero/",
+            "img": "cards/Aero.webp",
             "name": "Aero",
             "txt": "On Reveal: Move all enemy cards played this turn to this location.",
-            "img": "cards/Aero.webp"
+            "url": "https://snap.fan/cards/Aero/"
         },
         "agathaharkness": {
-            "url": "https://snap.fan/cards/AgathaHarkness/",
+            "img": "cards/AgathaHarkness.webp",
             "name": "AgathaHarkness",
             "txt": "Agatha starts in your hand and plays your cards for you.",
-            "img": "cards/AgathaHarkness.webp"
+            "url": "https://snap.fan/cards/AgathaHarkness/"
         },
         "agent13": {
-            "url": "https://snap.fan/cards/Agent13/",
+            "img": "cards/Agent13.webp",
             "name": "Agent13",
             "txt": "On Reveal: Add a random card to your hand.",
-            "img": "cards/Agent13.webp"
+            "url": "https://snap.fan/cards/Agent13/"
         },
         "agentcoulson": {
-            "url": "https://snap.fan/cards/AgentCoulson/",
+            "img": "cards/AgentCoulson.webp",
             "name": "AgentCoulson",
             "txt": "On Reveal: Add a random 4-cost and 5-cost card to your hand.",
-            "img": "cards/AgentCoulson.webp"
+            "url": "https://snap.fan/cards/AgentCoulson/"
         },
         "americachavez": {
-            "url": "https://snap.fan/cards/AmericaChavez/",
+            "img": "cards/AmericaChavez.webp",
             "name": "AmericaChavez",
             "txt": "You always draw this card on turn 6, and not before.",
-            "img": "cards/AmericaChavez.webp"
+            "url": "https://snap.fan/cards/AmericaChavez/"
         },
         "angel": {
-            "url": "https://snap.fan/cards/Angel/",
+            "img": "cards/Angel.webp",
             "name": "Angel",
             "txt": "When one of your cards is destroyed, this flies out of your deck to replace it.",
-            "img": "cards/Angel.webp"
+            "url": "https://snap.fan/cards/Angel/"
         },
         "angela": {
-            "url": "https://snap.fan/cards/Angela/",
+            "img": "cards/Angela.webp",
             "name": "Angela",
             "txt": "When you play a card here,\n+2 Power.",
-            "img": "cards/Angela.webp"
+            "url": "https://snap.fan/cards/Angela/"
         },
         "antman": {
-            "url": "https://snap.fan/cards/AntMan/",
+            "img": "cards/AntMan.webp",
             "name": "AntMan",
             "txt": "Ongoing: If you have 3 other cards here, +3 Power.",
-            "img": "cards/AntMan.webp"
+            "url": "https://snap.fan/cards/AntMan/"
         },
         "apocalypse": {
-            "url": "https://snap.fan/cards/Apocalypse/",
+            "img": "cards/Apocalypse.webp",
             "name": "Apocalypse",
             "txt": "When you discard this from your hand, put it back with +4 Power.",
-            "img": "cards/Apocalypse.webp"
+            "url": "https://snap.fan/cards/Apocalypse/"
         },
         "armor": {
-            "url": "https://snap.fan/cards/Armor/",
+            "img": "cards/Armor.webp",
             "name": "Armor",
             "txt": "Ongoing: Cards at this location can't be destroyed.",
-            "img": "cards/Armor.webp"
+            "url": "https://snap.fan/cards/Armor/"
         },
         "arnimzola": {
-            "url": "https://snap.fan/cards/ArnimZola/",
+            "img": "cards/ArnimZola.webp",
             "name": "ArnimZola",
             "txt": "On Reveal: Destroy a random friendly card here. Add copies of it to the other locations.",
-            "img": "cards/ArnimZola.webp"
+            "url": "https://snap.fan/cards/ArnimZola/"
         },
         "attuma": {
-            "url": "https://snap.fan/cards/Attuma/",
+            "img": "cards/Attuma.webp",
             "name": "Attuma",
             "txt": "If you have another card here at the end of your turn, destroy this.",
-            "img": "cards/Attuma.webp"
+            "url": "https://snap.fan/cards/Attuma/"
         },
         "baronmordo": {
-            "url": "https://snap.fan/cards/BaronMordo/",
+            "img": "cards/BaronMordo.webp",
             "name": "BaronMordo",
             "txt": "On Reveal: Your opponent draws a card. Set its Cost to 6.",
-            "img": "cards/BaronMordo.webp"
+            "url": "https://snap.fan/cards/BaronMordo/"
         },
         "bast": {
-            "url": "https://snap.fan/cards/Bast/",
+            "img": "cards/Bast.webp",
             "name": "Bast",
             "txt": "On Reveal: Set the Power of all cards in your hand to 3.",
-            "img": "cards/Bast.webp"
+            "url": "https://snap.fan/cards/Bast/"
         },
         "beast": {
-            "url": "https://snap.fan/cards/Beast/",
+            "img": "cards/Beast.webp",
             "name": "Beast",
             "txt": "On Reveal: Return your other cards at this location to your hand.\nThey cost 1 less.",
-            "img": "cards/Beast.webp"
+            "url": "https://snap.fan/cards/Beast/"
         },
         "bishop": {
-            "url": "https://snap.fan/cards/Bishop/",
+            "img": "cards/Bishop.webp",
             "name": "Bishop",
             "txt": "When you play a card, this gains +1 Power.",
-            "img": "cards/Bishop.webp"
+            "url": "https://snap.fan/cards/Bishop/"
         },
         "blackbolt": {
-            "url": "https://snap.fan/cards/BlackBolt/",
+            "img": "cards/BlackBolt.webp",
             "name": "BlackBolt",
             "txt": "On Reveal: Your opponent must discard the lowest-Cost card\nin their hand.",
-            "img": "cards/BlackBolt.webp"
+            "url": "https://snap.fan/cards/BlackBolt/"
         },
         "blackcat": {
-            "url": "https://snap.fan/cards/BlackCat/",
+            "img": "cards/BlackCat.webp",
             "name": "BlackCat",
             "txt": "If this is in your hand at the end of your turn, discard it.",
-            "img": "cards/BlackCat.webp"
+            "url": "https://snap.fan/cards/BlackCat/"
         },
         "blackpanther": {
-            "url": "https://snap.fan/cards/BlackPanther/",
+            "img": "cards/BlackPanther.webp",
             "name": "BlackPanther",
             "txt": "On Reveal: Double this\ncard's Power.",
-            "img": "cards/BlackPanther.webp"
+            "url": "https://snap.fan/cards/BlackPanther/"
         },
         "blackwidow": {
-            "url": "https://snap.fan/cards/BlackWidow/",
+            "img": "cards/BlackWidow.webp",
             "name": "BlackWidow",
             "txt": "On Reveal: Add a Widow's Bite to your opponent's hand.",
-            "img": "cards/BlackWidow.webp"
+            "url": "https://snap.fan/cards/BlackWidow/"
         },
         "blade": {
-            "url": "https://snap.fan/cards/Blade/",
+            "img": "cards/Blade.webp",
             "name": "Blade",
             "txt": "On Reveal: Discard a card from your hand.",
-            "img": "cards/Blade.webp"
+            "url": "https://snap.fan/cards/Blade/"
         },
         "bluemarvel": {
-            "url": "https://snap.fan/cards/BlueMarvel/",
+            "img": "cards/BlueMarvel.webp",
             "name": "BlueMarvel",
             "txt": "Ongoing: Your other cards have +1 Power.",
-            "img": "cards/BlueMarvel.webp"
+            "url": "https://snap.fan/cards/BlueMarvel/"
         },
         "brood": {
-            "url": "https://snap.fan/cards/Brood/",
+            "img": "cards/Brood.webp",
             "name": "Brood",
             "txt": "On Reveal: Add 2 Broodlings to this location with the same Power.",
-            "img": "cards/Brood.webp"
+            "url": "https://snap.fan/cards/Brood/"
         },
         "buckybarnes": {
-            "url": "https://snap.fan/cards/BuckyBarnes/",
+            "img": "cards/BuckyBarnes.webp",
             "name": "BuckyBarnes",
             "txt": "When this is destroyed, create the Winter Soldier in its place.",
-            "img": "cards/BuckyBarnes.webp"
+            "url": "https://snap.fan/cards/BuckyBarnes/"
         },
         "cable": {
-            "url": "https://snap.fan/cards/Cable/",
+            "img": "cards/Cable.webp",
             "name": "Cable",
             "txt": "On Reveal: Put the bottom card of your opponent's deck into your hand.",
-            "img": "cards/Cable.webp"
+            "url": "https://snap.fan/cards/Cable/"
         },
         "captainamerica": {
-            "url": "https://snap.fan/cards/CaptainAmerica/",
+            "img": "cards/CaptainAmerica.webp",
             "name": "CaptainAmerica",
             "txt": "Ongoing: Your other cards at this location have +1 Power.",
-            "img": "cards/CaptainAmerica.webp"
+            "url": "https://snap.fan/cards/CaptainAmerica/"
         },
         "captainmarvel": {
-            "url": "https://snap.fan/cards/CaptainMarvel/",
+            "img": "cards/CaptainMarvel.webp",
             "name": "CaptainMarvel",
             "txt": "At the end of the game, move to a location that wins you the\ngame. (If possible)",
-            "img": "cards/CaptainMarvel.webp"
+            "url": "https://snap.fan/cards/CaptainMarvel/"
         },
         "carnage": {
-            "url": "https://snap.fan/cards/Carnage/",
+            "img": "cards/Carnage.webp",
             "name": "Carnage",
             "txt": "On Reveal: Destroy your other cards here. +2 Power for each destroyed.",
-            "img": "cards/Carnage.webp"
+            "url": "https://snap.fan/cards/Carnage/"
         },
         "cerebro": {
-            "url": "https://snap.fan/cards/Cerebro/",
+            "img": "cards/Cerebro.webp",
             "name": "Cerebro",
             "txt": "Ongoing: Your highest Power cards get +2 Power.",
-            "img": "cards/Cerebro.webp"
+            "url": "https://snap.fan/cards/Cerebro/"
         },
         "cloak": {
-            "url": "https://snap.fan/cards/Cloak/",
+            "img": "cards/Cloak.webp",
             "name": "Cloak",
             "txt": "On Reveal: Next turn, both players can move cards to this location.",
-            "img": "cards/Cloak.webp"
+            "url": "https://snap.fan/cards/Cloak/"
         },
         "colleenwing": {
-            "url": "https://snap.fan/cards/ColleenWing/",
+            "img": "cards/ColleenWing.webp",
             "name": "ColleenWing",
             "txt": "On Reveal: Discard the lowest-cost card from your hand.",
-            "img": "cards/ColleenWing.webp"
+            "url": "https://snap.fan/cards/ColleenWing/"
         },
         "colossus": {
-            "url": "https://snap.fan/cards/Colossus/",
+            "img": "cards/Colossus.webp",
             "name": "Colossus",
             "txt": "Ongoing: Can't be destroyed, moved, or have its Power reduced.",
-            "img": "cards/Colossus.webp"
+            "url": "https://snap.fan/cards/Colossus/"
         },
         "cosmo": {
-            "url": "https://snap.fan/cards/Cosmo/",
+            "img": "cards/Cosmo.webp",
             "name": "Cosmo",
             "txt": "Ongoing: On Reveal abilities won't happen at this location.",
-            "img": "cards/Cosmo.webp"
+            "url": "https://snap.fan/cards/Cosmo/"
         },
         "crossbones": {
-            "url": "https://snap.fan/cards/Crossbones/",
+            "img": "cards/Crossbones.webp",
             "name": "Crossbones",
             "txt": "You can only play this at locations where you are winning.",
-            "img": "cards/Crossbones.webp"
+            "url": "https://snap.fan/cards/Crossbones/"
         },
         "crystal": {
-            "url": "https://snap.fan/cards/Crystal/",
+            "img": "cards/Crystal.webp",
             "name": "Crystal",
             "txt": "On Reveal: If this is at the middle location, shuffle your hand into your deck and draw 3 cards.",
-            "img": "cards/Crystal.webp"
+            "url": "https://snap.fan/cards/Crystal/"
         },
         "cyclops": {
-            "url": "https://snap.fan/cards/Cyclops/",
+            "img": "cards/Cyclops.webp",
             "name": "Cyclops",
             "txt": "Let's move, X-Men.",
-            "img": "cards/Cyclops.webp"
+            "url": "https://snap.fan/cards/Cyclops/"
         },
         "dagger": {
-            "url": "https://snap.fan/cards/Dagger/",
+            "img": "cards/Dagger.webp",
             "name": "Dagger",
             "txt": "When this moves to a location,\n+2 Power for each card your\nopponent has there.",
-            "img": "cards/Dagger.webp"
+            "url": "https://snap.fan/cards/Dagger/"
         },
         "daredevil": {
-            "url": "https://snap.fan/cards/Daredevil/",
+            "img": "cards/Daredevil.webp",
             "name": "Daredevil",
             "txt": "On turn 5, you get to see your opponent's plays before you\nmake your own.",
-            "img": "cards/Daredevil.webp"
+            "url": "https://snap.fan/cards/Daredevil/"
         },
         "deadpool": {
-            "url": "https://snap.fan/cards/Deadpool/",
+            "img": "cards/Deadpool.webp",
             "name": "Deadpool",
             "txt": "When this is destroyed, return it to your hand with double the Power.",
-            "img": "cards/Deadpool.webp"
+            "url": "https://snap.fan/cards/Deadpool/"
         },
         "death": {
-            "url": "https://snap.fan/cards/Death/",
+            "img": "cards/Death.webp",
             "name": "Death",
             "txt": "Costs 1 less for each card destroyed this game.",
-            "img": "cards/Death.webp"
+            "url": "https://snap.fan/cards/Death/"
         },
         "deathlok": {
-            "url": "https://snap.fan/cards/Deathlok/",
+            "img": "cards/Deathlok.webp",
             "name": "Deathlok",
             "txt": "On Reveal: Destroy your other cards at this location.",
-            "img": "cards/Deathlok.webp"
+            "url": "https://snap.fan/cards/Deathlok/"
         },
         "debrii": {
-            "url": "https://snap.fan/cards/Debrii/",
+            "img": "cards/Debrii.webp",
             "name": "Debrii",
             "txt": "On Reveal: Add a Rock to each other location, for both players.",
-            "img": "cards/Debrii.webp"
+            "url": "https://snap.fan/cards/Debrii/"
         },
         "destroyer": {
-            "url": "https://snap.fan/cards/Destroyer/",
+            "img": "cards/Destroyer.webp",
             "name": "Destroyer",
             "txt": "On Reveal: Destroy your\nother cards.",
-            "img": "cards/Destroyer.webp"
+            "url": "https://snap.fan/cards/Destroyer/"
         },
         "devildinosaur": {
-            "url": "https://snap.fan/cards/DevilDinosaur/",
+            "img": "cards/DevilDinosaur.webp",
             "name": "DevilDinosaur",
             "txt": "Ongoing: +2 Power for each card in your hand.",
-            "img": "cards/DevilDinosaur.webp"
-        },
-        "drdoom": {
-            "url": "https://snap.fan/cards/DrDoom/",
-            "name": "DrDoom",
-            "txt": "On Reveal: Add a 5-Power DoomBot to each other location.",
-            "img": "cards/DrDoom.webp"
+            "url": "https://snap.fan/cards/DevilDinosaur/"
         },
         "doctoroctopus": {
-            "url": "https://snap.fan/cards/DoctorOctopus/",
+            "img": "cards/DoctorOctopus.webp",
             "name": "DoctorOctopus",
             "txt": "On Reveal: Pull 4 random cards from your opponent's hand to their side\nof this location.",
-            "img": "cards/DoctorOctopus.webp"
+            "url": "https://snap.fan/cards/DoctorOctopus/"
         },
         "doctorstrange": {
-            "url": "https://snap.fan/cards/DoctorStrange/",
+            "img": "cards/DoctorStrange.webp",
             "name": "DoctorStrange",
             "txt": "On Reveal: Move your highest Power cards to this location.",
-            "img": "cards/DoctorStrange.webp"
+            "url": "https://snap.fan/cards/DoctorStrange/"
         },
         "domino": {
-            "url": "https://snap.fan/cards/Domino/",
+            "img": "cards/Domino.webp",
             "name": "Domino",
             "txt": "You always draw this card on turn 2, and not before.",
-            "img": "cards/Domino.webp"
+            "url": "https://snap.fan/cards/Domino/"
         },
         "dracula": {
-            "url": "https://snap.fan/cards/Dracula/",
+            "img": "cards/Dracula.webp",
             "name": "Dracula",
             "txt": "At the end of the game, discard a card from your hand. This has its Power.",
-            "img": "cards/Dracula.webp"
+            "url": "https://snap.fan/cards/Dracula/"
         },
         "drax": {
-            "url": "https://snap.fan/cards/Drax/",
+            "img": "cards/Drax.webp",
             "name": "Drax",
             "txt": "On Reveal: If your opponent played a card here this turn, +4 Power.",
-            "img": "cards/Drax.webp"
+            "url": "https://snap.fan/cards/Drax/"
+        },
+        "drdoom": {
+            "img": "cards/DrDoom.webp",
+            "name": "DrDoom",
+            "txt": "On Reveal: Add a 5-Power DoomBot to each other location.",
+            "url": "https://snap.fan/cards/DrDoom/"
         },
         "ebonymaw": {
-            "url": "https://snap.fan/cards/EbonyMaw/",
+            "img": "cards/EbonyMaw.webp",
             "name": "EbonyMaw",
             "txt": "You can't play this after turn 3.\nOngoing: You can't play cards here.",
-            "img": "cards/EbonyMaw.webp"
+            "url": "https://snap.fan/cards/EbonyMaw/"
         },
         "electro": {
-            "url": "https://snap.fan/cards/Electro/",
+            "img": "cards/Electro.webp",
             "name": "Electro",
             "txt": "On Reveal: +1 Max Energy. Ongoing: You can only play\n1 card a turn.",
-            "img": "cards/Electro.webp"
+            "url": "https://snap.fan/cards/Electro/"
         },
         "elektra": {
-            "url": "https://snap.fan/cards/Elektra/",
+            "img": "cards/Elektra.webp",
             "name": "Elektra",
             "txt": "On Reveal: Destroy a random enemy 1-Cost card at this location.",
-            "img": "cards/Elektra.webp"
+            "url": "https://snap.fan/cards/Elektra/"
         },
         "enchantress": {
-            "url": "https://snap.fan/cards/Enchantress/",
+            "img": "cards/Enchantress.webp",
             "name": "Enchantress",
             "txt": "On Reveal: Remove the abilities from all Ongoing cards at this location.",
-            "img": "cards/Enchantress.webp"
+            "url": "https://snap.fan/cards/Enchantress/"
         },
         "falcon": {
-            "url": "https://snap.fan/cards/Falcon/",
+            "img": "cards/Falcon.webp",
             "name": "Falcon",
             "txt": "On Reveal: Return your 1-Cost cards to your hand.",
-            "img": "cards/Falcon.webp"
+            "url": "https://snap.fan/cards/Falcon/"
         },
         "forge": {
-            "url": "https://snap.fan/cards/Forge/",
+            "img": "cards/Forge.webp",
             "name": "Forge",
             "txt": "On Reveal: Give the next card you play +2 Power.",
-            "img": "cards/Forge.webp"
+            "url": "https://snap.fan/cards/Forge/"
         },
         "galactus": {
-            "url": "https://snap.fan/cards/Galactus/",
+            "img": "cards/Galactus.webp",
             "name": "Galactus",
             "txt": "On Reveal: If this is your only card here, destroy all other locations.",
-            "img": "cards/Galactus.webp"
+            "url": "https://snap.fan/cards/Galactus/"
         },
         "gambit": {
-            "url": "https://snap.fan/cards/Gambit/",
+            "img": "cards/Gambit.webp",
             "name": "Gambit",
             "txt": "On Reveal: Discard a card from your hand. Destroy a random enemy card.",
-            "img": "cards/Gambit.webp"
+            "url": "https://snap.fan/cards/Gambit/"
         },
         "gamora": {
-            "url": "https://snap.fan/cards/Gamora/",
+            "img": "cards/Gamora.webp",
             "name": "Gamora",
             "txt": "On Reveal: If your opponent played a card here this turn, +5 Power.",
-            "img": "cards/Gamora.webp"
+            "url": "https://snap.fan/cards/Gamora/"
         },
         "ghostrider": {
-            "url": "https://snap.fan/cards/GhostRider/",
+            "img": "cards/GhostRider.webp",
             "name": "GhostRider",
             "txt": "On Reveal: Bring back one of your discarded cards to this location.",
-            "img": "cards/GhostRider.webp"
+            "url": "https://snap.fan/cards/GhostRider/"
         },
         "giganto": {
-            "url": "https://snap.fan/cards/Giganto/",
+            "img": "cards/Giganto.webp",
             "name": "Giganto",
             "txt": "You can only play this at the left location.",
-            "img": "cards/Giganto.webp"
+            "url": "https://snap.fan/cards/Giganto/"
         },
         "goose": {
-            "url": "https://snap.fan/cards/Goose/",
+            "img": "cards/Goose.webp",
             "name": "Goose",
             "txt": "Ongoing: Nobody can play cards that cost 4, 5, or 6 at this location.",
-            "img": "cards/Goose.webp"
+            "url": "https://snap.fan/cards/Goose/"
         },
         "greengoblin": {
-            "url": "https://snap.fan/cards/GreenGoblin/",
+            "img": "cards/GreenGoblin.webp",
             "name": "GreenGoblin",
             "txt": "On Reveal: Your opponent gains control of this.",
-            "img": "cards/GreenGoblin.webp"
+            "url": "https://snap.fan/cards/GreenGoblin/"
         },
         "groot": {
-            "url": "https://snap.fan/cards/Groot/",
+            "img": "cards/Groot.webp",
             "name": "Groot",
             "txt": "On Reveal: If your opponent played a card here this turn, +3 Power.",
-            "img": "cards/Groot.webp"
+            "url": "https://snap.fan/cards/Groot/"
         },
         "hawkeye": {
-            "url": "https://snap.fan/cards/Hawkeye/",
+            "img": "cards/Hawkeye.webp",
             "name": "Hawkeye",
             "txt": "On Reveal: If you play a card here next turn, +2 Power.",
-            "img": "cards/Hawkeye.webp"
+            "url": "https://snap.fan/cards/Hawkeye/"
         },
         "hazmat": {
-            "url": "https://snap.fan/cards/Hazmat/",
+            "img": "cards/Hazmat.webp",
             "name": "Hazmat",
             "txt": "On Reveal: Afflict all other cards with -1 Power.",
-            "img": "cards/Hazmat.webp"
+            "url": "https://snap.fan/cards/Hazmat/"
         },
         "heimdall": {
-            "url": "https://snap.fan/cards/Heimdall/",
+            "img": "cards/Heimdall.webp",
             "name": "Heimdall",
             "txt": "On Reveal: Move your other cards one location to the left.",
-            "img": "cards/Heimdall.webp"
+            "url": "https://snap.fan/cards/Heimdall/"
         },
         "hela": {
-            "url": "https://snap.fan/cards/Hela/",
+            "img": "cards/Hela.webp",
             "name": "Hela",
             "txt": "On Reveal: Play all cards you discarded from your hand to\nrandom locations.",
-            "img": "cards/Hela.webp"
+            "url": "https://snap.fan/cards/Hela/"
         },
         "helicarrier": {
-            "url": "https://snap.fan/cards/Helicarrier/",
+            "img": "cards/Helicarrier.webp",
             "name": "Helicarrier",
             "txt": "When you discard this from your hand, add 3 random cards\nto your hand.",
-            "img": "cards/Helicarrier.webp"
+            "url": "https://snap.fan/cards/Helicarrier/"
         },
         "hellcow": {
-            "url": "https://snap.fan/cards/Hellcow/",
+            "img": "cards/Hellcow.webp",
             "name": "Hellcow",
             "txt": "On Reveal: Discard 2 cards from your hand.",
-            "img": "cards/Hellcow.webp"
+            "url": "https://snap.fan/cards/Hellcow/"
         },
         "hobgoblin": {
-            "url": "https://snap.fan/cards/Hobgoblin/",
+            "img": "cards/Hobgoblin.webp",
             "name": "Hobgoblin",
             "txt": "On Reveal: Your opponent gains control of this.",
-            "img": "cards/Hobgoblin.webp"
-        },
-        "hulk": {
-            "url": "https://snap.fan/cards/Hulk/",
-            "name": "Hulk",
-            "txt": "HULK SMASH!",
-            "img": "cards/Hulk.webp"
-        },
-        "hulkbuster": {
-            "url": "https://snap.fan/cards/Hulkbuster/",
-            "name": "Hulkbuster",
-            "txt": "On Reveal: Merge this card with a random friendly card at this location.",
-            "img": "cards/Hulkbuster.webp"
-        },
-        "humantorch": {
-            "url": "https://snap.fan/cards/HumanTorch/",
-            "name": "HumanTorch",
-            "txt": "When this moves, double\nits Power.",
-            "img": "cards/HumanTorch.webp"
-        },
-        "iceman": {
-            "url": "https://snap.fan/cards/Iceman/",
-            "name": "Iceman",
-            "txt": "On Reveal: Give a random card in your opponent's hand +1 Cost. (maximum 6)",
-            "img": "cards/Iceman.webp"
-        },
-        "invisiblewoman": {
-            "url": "https://snap.fan/cards/InvisibleWoman/",
-            "name": "InvisibleWoman",
-            "txt": "Ongoing: Cards you play here are not revealed until the game ends.",
-            "img": "cards/InvisibleWoman.webp"
-        },
-        "ironfist": {
-            "url": "https://snap.fan/cards/IronFist/",
-            "name": "IronFist",
-            "txt": "On Reveal: Move the next card you play one location to the left\nafter it reveals.",
-            "img": "cards/IronFist.webp"
-        },
-        "ironman": {
-            "url": "https://snap.fan/cards/IronMan/",
-            "name": "IronMan",
-            "txt": "Ongoing: Your total Power is doubled at this location.",
-            "img": "cards/IronMan.webp"
-        },
-        "ironheart": {
-            "url": "https://snap.fan/cards/Ironheart/",
-            "name": "Ironheart",
-            "txt": "On Reveal: Give 3 other friendly cards +2 Power.",
-            "img": "cards/Ironheart.webp"
-        },
-        "janefoster": {
-            "url": "https://snap.fan/cards/JaneFoster/",
-            "name": "JaneFoster",
-            "txt": "On Reveal: Draw all cards that Cost 0 from your deck.",
-            "img": "cards/JaneFoster.webp"
-        },
-        "jessicajones": {
-            "url": "https://snap.fan/cards/JessicaJones/",
-            "name": "JessicaJones",
-            "txt": "On Reveal: If you don't play a card here next turn, +4 Power.",
-            "img": "cards/JessicaJones.webp"
-        },
-        "jubilee": {
-            "url": "https://snap.fan/cards/Jubilee/",
-            "name": "Jubilee",
-            "txt": "On Reveal: Play a card from your deck at this location.",
-            "img": "cards/Jubilee.webp"
-        },
-        "juggernaut": {
-            "url": "https://snap.fan/cards/Juggernaut/",
-            "name": "Juggernaut",
-            "txt": "On Reveal: If your opponent played cards here this turn, move\nthem randomly.",
-            "img": "cards/Juggernaut.webp"
-        },
-        "kazar": {
-            "url": "https://snap.fan/cards/KaZar/",
-            "name": "KaZar",
-            "txt": "Ongoing: Your 1-Cost cards have +1 Power.",
-            "img": "cards/KaZar.webp"
-        },
-        "killmonger": {
-            "url": "https://snap.fan/cards/Killmonger/",
-            "name": "Killmonger",
-            "txt": "On Reveal: Destroy ALL\n1-Cost cards.",
-            "img": "cards/Killmonger.webp"
-        },
-        "kingpin": {
-            "url": "https://snap.fan/cards/Kingpin/",
-            "name": "Kingpin",
-            "txt": "When a card moves here on turn 6, destroy it.",
-            "img": "cards/Kingpin.webp"
-        },
-        "klaw": {
-            "url": "https://snap.fan/cards/Klaw/",
-            "name": "Klaw",
-            "txt": "Ongoing: The location to the right has +6 Power.",
-            "img": "cards/Klaw.webp"
-        },
-        "korg": {
-            "url": "https://snap.fan/cards/Korg/",
-            "name": "Korg",
-            "txt": "On Reveal: Shuffle a Rock into your opponent's deck.",
-            "img": "cards/Korg.webp"
-        },
-        "kraven": {
-            "url": "https://snap.fan/cards/Kraven/",
-            "name": "Kraven",
-            "txt": "When a card moves here, this gets +2 Power.",
-            "img": "cards/Kraven.webp"
-        },
-        "ladysif": {
-            "url": "https://snap.fan/cards/LadySif/",
-            "name": "LadySif",
-            "txt": "On Reveal: Discard the highest-cost card from your hand.",
-            "img": "cards/LadySif.webp"
-        },
-        "leader": {
-            "url": "https://snap.fan/cards/Leader/",
-            "name": "Leader",
-            "txt": "On Reveal: Copy all cards your opponent played this turn,\nbut on your side.",
-            "img": "cards/Leader.webp"
-        },
-        "leech": {
-            "url": "https://snap.fan/cards/Leech/",
-            "name": "Leech",
-            "txt": "On Reveal: Remove the abilities from all cards in your opponent's hand.",
-            "img": "cards/Leech.webp"
-        },
-        "lizard": {
-            "url": "https://snap.fan/cards/Lizard/",
-            "name": "Lizard",
-            "txt": "Ongoing: -3 Power if your opponent has 4 cards here.",
-            "img": "cards/Lizard.webp"
-        },
-        "lockjaw": {
-            "url": "https://snap.fan/cards/Lockjaw/",
-            "name": "Lockjaw",
-            "txt": "When you play a card here, swap it with a card in your deck.",
-            "img": "cards/Lockjaw.webp"
-        },
-        "lukecage": {
-            "url": "https://snap.fan/cards/LukeCage/",
-            "name": "LukeCage",
-            "txt": "Ongoing: Your cards can't have their Power reduced.",
-            "img": "cards/LukeCage.webp"
-        },
-        "mbaku": {
-            "url": "https://snap.fan/cards/MBaku/",
-            "name": "MBaku",
-            "txt": "If this is in your deck at the end of the game, it jumps to a random location.",
-            "img": "cards/MBaku.webp"
-        },
-        "magik": {
-            "url": "https://snap.fan/cards/Magik/",
-            "name": "Magik",
-            "txt": "You can't play this on turn 6.\nOn Reveal: Change this\nlocation to 'Limbo'.",
-            "img": "cards/Magik.webp"
-        },
-        "magneto": {
-            "url": "https://snap.fan/cards/Magneto/",
-            "name": "Magneto",
-            "txt": "On Reveal: Move all opposing 3 and 4-Cost cards to this location.",
-            "img": "cards/Magneto.webp"
-        },
-        "mantis": {
-            "url": "https://snap.fan/cards/Mantis/",
-            "name": "Mantis",
-            "txt": "On Reveal: If your opponent played a card here this turn, draw a card\nfrom their deck.",
-            "img": "cards/Mantis.webp"
-        },
-        "mariahill": {
-            "url": "https://snap.fan/cards/MariaHill/",
-            "name": "MariaHill",
-            "txt": "On Reveal: Add a random 1-Cost card to your hand.",
-            "img": "cards/MariaHill.webp"
-        },
-        "maximus": {
-            "url": "https://snap.fan/cards/Maximus/",
-            "name": "Maximus",
-            "txt": "On Reveal: Your opponent\ndraws 2 cards.",
-            "img": "cards/Maximus.webp"
-        },
-        "medusa": {
-            "url": "https://snap.fan/cards/Medusa/",
-            "name": "Medusa",
-            "txt": "On Reveal: If this is at the middle location, +2 Power.",
-            "img": "cards/Medusa.webp"
-        },
-        "milesmorales": {
-            "url": "https://snap.fan/cards/MilesMorales/",
-            "name": "MilesMorales",
-            "txt": "If a card moved last turn, this costs 1.",
-            "img": "cards/MilesMorales.webp"
-        },
-        "mrfantastic": {
-            "url": "https://snap.fan/cards/MrFantastic/",
-            "name": "MrFantastic",
-            "txt": "Ongoing: Adjacent locations have +2 Power.",
-            "img": "cards/MrFantastic.webp"
-        },
-        "mrnegative": {
-            "url": "https://snap.fan/cards/MrNegative/",
-            "name": "MrNegative",
-            "txt": "On Reveal: Swap the Power and Cost of all cards in your deck.",
-            "img": "cards/MrNegative.webp"
-        },
-        "mrsinister": {
-            "url": "https://snap.fan/cards/MrSinister/",
-            "name": "MrSinister",
-            "txt": "On Reveal: Add a Sinister Clone to this location with the same Power.",
-            "img": "cards/MrSinister.webp"
-        },
-        "mistyknight": {
-            "url": "https://snap.fan/cards/MistyKnight/",
-            "name": "MistyKnight",
-            "txt": "We've got to save this city.",
-            "img": "cards/MistyKnight.webp"
-        },
-        "mojo": {
-            "url": "https://snap.fan/cards/Mojo/",
-            "name": "Mojo",
-            "txt": "Ongoing: If both players have 4 cards at this location, +6 Power.",
-            "img": "cards/Mojo.webp"
-        },
-        "moongirl": {
-            "url": "https://snap.fan/cards/MoonGirl/",
-            "name": "MoonGirl",
-            "txt": "On Reveal: Duplicate\nyour hand.",
-            "img": "cards/MoonGirl.webp"
-        },
-        "moonknight": {
-            "url": "https://snap.fan/cards/MoonKnight/",
-            "name": "MoonKnight",
-            "txt": "On Reveal: Discard a card from each player's hand.",
-            "img": "cards/MoonKnight.webp"
-        },
-        "morbius": {
-            "url": "https://snap.fan/cards/Morbius/",
-            "name": "Morbius",
-            "txt": "Ongoing: +2 Power for each time you discarded a card this game.",
-            "img": "cards/Morbius.webp"
-        },
-        "morph": {
-            "url": "https://snap.fan/cards/Morph/",
-            "name": "Morph",
-            "txt": "On Reveal: Become a copy of a random card in your opponent's hand.",
-            "img": "cards/Morph.webp"
-        },
-        "multipleman": {
-            "url": "https://snap.fan/cards/MultipleMan/",
-            "name": "MultipleMan",
-            "txt": "When this moves, add a copy to the old location.",
-            "img": "cards/MultipleMan.webp"
-        },
-        "mysterio": {
-            "url": "https://snap.fan/cards/Mysterio/",
-            "name": "Mysterio",
-            "txt": "As you play this, play Illusions to other locations. Disguise this as an Illusion until the game ends.",
-            "img": "cards/Mysterio.webp"
-        },
-        "mystique": {
-            "url": "https://snap.fan/cards/Mystique/",
-            "name": "Mystique",
-            "txt": "On Reveal: If the last card you played has an Ongoing ability, this card gains it.",
-            "img": "cards/Mystique.webp"
-        },
-        "nakia": {
-            "url": "https://snap.fan/cards/Nakia/",
-            "name": "Nakia",
-            "txt": "On Reveal: Give the 2 leftmost cards in your hand +2 Power.",
-            "img": "cards/Nakia.webp"
-        },
-        "namor": {
-            "url": "https://snap.fan/cards/Namor/",
-            "name": "Namor",
-            "txt": "Ongoing: +5 Power if this is your only card here.",
-            "img": "cards/Namor.webp"
-        },
-        "nickfury": {
-            "url": "https://snap.fan/cards/NickFury/",
-            "name": "NickFury",
-            "txt": "On Reveal: Add 3 random\n6-Cost cards to your hand.",
-            "img": "cards/NickFury.webp"
-        },
-        "nightcrawler": {
-            "url": "https://snap.fan/cards/Nightcrawler/",
-            "name": "Nightcrawler",
-            "txt": "You can move this once.",
-            "img": "cards/Nightcrawler.webp"
-        },
-        "nova": {
-            "url": "https://snap.fan/cards/Nova/",
-            "name": "Nova",
-            "txt": "When this is destroyed, give your cards +1 Power.",
-            "img": "cards/Nova.webp"
-        },
-        "odin": {
-            "url": "https://snap.fan/cards/Odin/",
-            "name": "Odin",
-            "txt": "On Reveal: Activate the On Reveal abilities of your other cards\nat this location.",
-            "img": "cards/Odin.webp"
-        },
-        "okoye": {
-            "url": "https://snap.fan/cards/Okoye/",
-            "name": "Okoye",
-            "txt": "On Reveal: Give every card in your deck +1 Power.",
-            "img": "cards/Okoye.webp"
-        },
-        "omegared": {
-            "url": "https://snap.fan/cards/OmegaRed/",
-            "name": "OmegaRed",
-            "txt": "Ongoing: If you're ahead by\n10 Power here, +4 Power\nto other locations.",
-            "img": "cards/OmegaRed.webp"
-        },
-        "onslaught": {
-            "url": "https://snap.fan/cards/Onslaught/",
-            "name": "Onslaught",
-            "txt": "Ongoing: Double your other Ongoing effects at this location.",
-            "img": "cards/Onslaught.webp"
-        },
-        "orka": {
-            "url": "https://snap.fan/cards/Orka/",
-            "name": "Orka",
-            "txt": "Ongoing: +5 Power if this is your only card here.",
-            "img": "cards/Orka.webp"
-        },
-        "patriot": {
-            "url": "https://snap.fan/cards/Patriot/",
-            "name": "Patriot",
-            "txt": "Ongoing: Your cards with no abilities have +2 Power.",
-            "img": "cards/Patriot.webp"
-        },
-        "polaris": {
-            "url": "https://snap.fan/cards/Polaris/",
-            "name": "Polaris",
-            "txt": "On Reveal: Move an opposing 1 or 2-Cost card to this location.",
-            "img": "cards/Polaris.webp"
-        },
-        "professorx": {
-            "url": "https://snap.fan/cards/ProfessorX/",
-            "name": "ProfessorX",
-            "txt": "Ongoing: Lock down this location. (Cards can't be added, removed, etc.)",
-            "img": "cards/ProfessorX.webp"
-        },
-        "psylocke": {
-            "url": "https://snap.fan/cards/Psylocke/",
-            "name": "Psylocke",
-            "txt": "On Reveal: Next turn, you get +1 Energy.",
-            "img": "cards/Psylocke.webp"
-        },
-        "punisher": {
-            "url": "https://snap.fan/cards/Punisher/",
-            "name": "Punisher",
-            "txt": "Ongoing: +1 Power for each opposing card at this location.",
-            "img": "cards/Punisher.webp"
-        },
-        "quake": {
-            "url": "https://snap.fan/cards/Quake/",
-            "name": "Quake",
-            "txt": "On Reveal: If this is at the middle location, swap the positions of\neach location.",
-            "img": "cards/Quake.webp"
-        },
-        "quicksilver": {
-            "url": "https://snap.fan/cards/Quicksilver/",
-            "name": "Quicksilver",
-            "txt": "Starts in your opening hand.",
-            "img": "cards/Quicksilver.webp"
-        },
-        "quinjet": {
-            "url": "https://snap.fan/cards/Quinjet/",
-            "name": "Quinjet",
-            "txt": "Ongoing: Cards that didn't start in your deck cost 1 less.",
-            "img": "cards/Quinjet.webp"
-        },
-        "redskull": {
-            "url": "https://snap.fan/cards/RedSkull/",
-            "name": "RedSkull",
-            "txt": "Ongoing: Enemy cards at this location have +2 Power.",
-            "img": "cards/RedSkull.webp"
-        },
-        "rescue": {
-            "url": "https://snap.fan/cards/Rescue/",
-            "name": "Rescue",
-            "txt": "On Reveal: If you play a card here next turn, +5 Power.",
-            "img": "cards/Rescue.webp"
-        },
-        "rhino": {
-            "url": "https://snap.fan/cards/Rhino/",
-            "name": "Rhino",
-            "txt": "On Reveal: Ruin this location. (remove its ability)",
-            "img": "cards/Rhino.webp"
-        },
-        "rocketraccoon": {
-            "url": "https://snap.fan/cards/RocketRaccoon/",
-            "name": "RocketRaccoon",
-            "txt": "On Reveal: If your opponent played a card here this turn, +2 Power.",
-            "img": "cards/RocketRaccoon.webp"
-        },
-        "rockslide": {
-            "url": "https://snap.fan/cards/Rockslide/",
-            "name": "Rockslide",
-            "txt": "On Reveal: Shuffle 2 Rocks into your opponent's deck.",
-            "img": "cards/Rockslide.webp"
-        },
-        "rogue": {
-            "url": "https://snap.fan/cards/Rogue/",
-            "name": "Rogue",
-            "txt": "On Reveal: Steal an Ongoing ability from a random enemy card at\nthis location.",
-            "img": "cards/Rogue.webp"
-        },
-        "ronan": {
-            "url": "https://snap.fan/cards/Ronan/",
-            "name": "Ronan",
-            "txt": "Ongoing: +2 Power for each card in your opponent's hand.",
-            "img": "cards/Ronan.webp"
-        },
-        "sabretooth": {
-            "url": "https://snap.fan/cards/Sabretooth/",
-            "name": "Sabretooth",
-            "txt": "When this is destroyed, return it to your hand. It costs 0.",
-            "img": "cards/Sabretooth.webp"
-        },
-        "sandman": {
-            "url": "https://snap.fan/cards/Sandman/",
-            "name": "Sandman",
-            "txt": "Ongoing: Players can only play 1 card a turn.",
-            "img": "cards/Sandman.webp"
-        },
-        "scarletwitch": {
-            "url": "https://snap.fan/cards/ScarletWitch/",
-            "name": "ScarletWitch",
-            "txt": "On Reveal: Replace this location with a random new one.",
-            "img": "cards/ScarletWitch.webp"
-        },
-        "scorpion": {
-            "url": "https://snap.fan/cards/Scorpion/",
-            "name": "Scorpion",
-            "txt": "On Reveal: Afflict cards in your opponent's hand with -1 Power.",
-            "img": "cards/Scorpion.webp"
-        },
-        "sentinel": {
-            "url": "https://snap.fan/cards/Sentinel/",
-            "name": "Sentinel",
-            "txt": "On Reveal: Add another Sentinel to your hand.",
-            "img": "cards/Sentinel.webp"
-        },
-        "sera": {
-            "url": "https://snap.fan/cards/Sera/",
-            "name": "Sera",
-            "txt": "Ongoing: Cards in your hand cost 1 less. (minimum 1)",
-            "img": "cards/Sera.webp"
-        },
-        "shangchi": {
-            "url": "https://snap.fan/cards/ShangChi/",
-            "name": "ShangChi",
-            "txt": "On Reveal: Destroy all enemy cards at this location that have\n9 or more Power.",
-            "img": "cards/ShangChi.webp"
-        },
-        "shehulk": {
-            "url": "https://snap.fan/cards/SheHulk/",
-            "name": "SheHulk",
-            "txt": "Costs 1 less for each unspent Energy last turn.",
-            "img": "cards/SheHulk.webp"
-        },
-        "shocker": {
-            "url": "https://snap.fan/cards/Shocker/",
-            "name": "Shocker",
-            "txt": "I'm gonna blast you!",
-            "img": "cards/Shocker.webp"
-        },
-        "shuri": {
-            "url": "https://snap.fan/cards/Shuri/",
-            "name": "Shuri",
-            "txt": "On Reveal: Double the Power of the next card you play.",
-            "img": "cards/Shuri.webp"
-        },
-        "silversurfer": {
-            "url": "https://snap.fan/cards/SilverSurfer/",
-            "name": "SilverSurfer",
-            "txt": "On Reveal: Give your other\n3-Cost cards +3 Power.",
-            "img": "cards/SilverSurfer.webp"
-        },
-        "spectrum": {
-            "url": "https://snap.fan/cards/Spectrum/",
-            "name": "Spectrum",
-            "txt": "On Reveal: Give your Ongoing cards +2 Power.",
-            "img": "cards/Spectrum.webp"
-        },
-        "spiderman": {
-            "url": "https://snap.fan/cards/SpiderMan/",
-            "name": "SpiderMan",
-            "txt": "On Reveal: Your opponent can\u2019t play cards at this location next turn.",
-            "img": "cards/SpiderMan.webp"
-        },
-        "spiderwoman": {
-            "url": "https://snap.fan/cards/SpiderWoman/",
-            "name": "SpiderWoman",
-            "txt": "On Reveal: Afflict all enemy cards here with -1 Power.",
-            "img": "cards/SpiderWoman.webp"
-        },
-        "squirrelgirl": {
-            "url": "https://snap.fan/cards/SquirrelGirl/",
-            "name": "SquirrelGirl",
-            "txt": "On Reveal: Add a 1-Power Squirrel to each other location.",
-            "img": "cards/SquirrelGirl.webp"
-        },
-        "starlord": {
-            "url": "https://snap.fan/cards/Starlord/",
-            "name": "Starlord",
-            "txt": "On Reveal: If your opponent played a card here this turn, +3 Power.",
-            "img": "cards/Starlord.webp"
-        },
-        "storm": {
-            "url": "https://snap.fan/cards/Storm/",
-            "name": "Storm",
-            "txt": "On Reveal: Flood this location. Next turn is the last turn cards can\nbe played here.",
-            "img": "cards/Storm.webp"
-        },
-        "strongguy": {
-            "url": "https://snap.fan/cards/StrongGuy/",
-            "name": "StrongGuy",
-            "txt": "Ongoing: If your hand is empty, +6 Power.",
-            "img": "cards/StrongGuy.webp"
-        },
-        "sunspot": {
-            "url": "https://snap.fan/cards/Sunspot/",
-            "name": "Sunspot",
-            "txt": "At the end of each turn, gain +1 Power for each unspent Energy.",
-            "img": "cards/Sunspot.webp"
-        },
-        "superskrull": {
-            "url": "https://snap.fan/cards/SuperSkrull/",
-            "name": "SuperSkrull",
-            "txt": "Ongoing: Has the Ongoing effects of all enemy cards.",
-            "img": "cards/SuperSkrull.webp"
-        },
-        "swarm": {
-            "url": "https://snap.fan/cards/Swarm/",
-            "name": "Swarm",
-            "txt": "When this is discarded from your hand, add two copies that Cost 0\nto your hand.",
-            "img": "cards/Swarm.webp"
-        },
-        "swordmaster": {
-            "url": "https://snap.fan/cards/SwordMaster/",
-            "name": "SwordMaster",
-            "txt": "On Reveal: Discard a card from your hand.",
-            "img": "cards/SwordMaster.webp"
-        },
-        "taskmaster": {
-            "url": "https://snap.fan/cards/Taskmaster/",
-            "name": "Taskmaster",
-            "txt": "On Reveal: Set this card's Power equal to the Power of the last\ncard you played.",
-            "img": "cards/Taskmaster.webp"
-        },
-        "thanos": {
-            "url": "https://snap.fan/cards/Thanos/",
-            "name": "Thanos",
-            "txt": "At the start of the game, shuffle the six Infinity Stones into your deck.",
-            "img": "cards/Thanos.webp"
-        },
-        "thecollector": {
-            "url": "https://snap.fan/cards/TheCollector/",
-            "name": "TheCollector",
-            "txt": "When a card enters your hand from anywhere (except your deck),\n+1 Power.",
-            "img": "cards/TheCollector.webp"
+            "url": "https://snap.fan/cards/Hobgoblin/"
         },
         "hood": {
-            "url": "https://snap.fan/cards/Hood/",
+            "img": "cards/Hood.webp",
             "name": "Hood",
             "txt": "On Reveal: Add a Demon to your hand.",
-            "img": "cards/Hood.webp"
+            "url": "https://snap.fan/cards/Hood/"
+        },
+        "hulk": {
+            "img": "cards/Hulk.webp",
+            "name": "Hulk",
+            "txt": "HULK SMASH!",
+            "url": "https://snap.fan/cards/Hulk/"
+        },
+        "hulkbuster": {
+            "img": "cards/Hulkbuster.webp",
+            "name": "Hulkbuster",
+            "txt": "On Reveal: Merge this card with a random friendly card at this location.",
+            "url": "https://snap.fan/cards/Hulkbuster/"
+        },
+        "humantorch": {
+            "img": "cards/HumanTorch.webp",
+            "name": "HumanTorch",
+            "txt": "When this moves, double\nits Power.",
+            "url": "https://snap.fan/cards/HumanTorch/"
+        },
+        "iceman": {
+            "img": "cards/Iceman.webp",
+            "name": "Iceman",
+            "txt": "On Reveal: Give a random card in your opponent's hand +1 Cost. (maximum 6)",
+            "url": "https://snap.fan/cards/Iceman/"
         },
         "infinaut": {
-            "url": "https://snap.fan/cards/Infinaut/",
+            "img": "cards/Infinaut.webp",
             "name": "Infinaut",
             "txt": "If you played a card last turn, you can't play this.",
-            "img": "cards/Infinaut.webp"
+            "url": "https://snap.fan/cards/Infinaut/"
+        },
+        "invisiblewoman": {
+            "img": "cards/InvisibleWoman.webp",
+            "name": "InvisibleWoman",
+            "txt": "Ongoing: Cards you play here are not revealed until the game ends.",
+            "url": "https://snap.fan/cards/InvisibleWoman/"
+        },
+        "ironfist": {
+            "img": "cards/IronFist.webp",
+            "name": "IronFist",
+            "txt": "On Reveal: Move the next card you play one location to the left\nafter it reveals.",
+            "url": "https://snap.fan/cards/IronFist/"
+        },
+        "ironheart": {
+            "img": "cards/Ironheart.webp",
+            "name": "Ironheart",
+            "txt": "On Reveal: Give 3 other friendly cards +2 Power.",
+            "url": "https://snap.fan/cards/Ironheart/"
+        },
+        "ironman": {
+            "img": "cards/IronMan.webp",
+            "name": "IronMan",
+            "txt": "Ongoing: Your total Power is doubled at this location.",
+            "url": "https://snap.fan/cards/IronMan/"
+        },
+        "janefoster": {
+            "img": "cards/JaneFoster.webp",
+            "name": "JaneFoster",
+            "txt": "On Reveal: Draw all cards that Cost 0 from your deck.",
+            "url": "https://snap.fan/cards/JaneFoster/"
+        },
+        "jessicajones": {
+            "img": "cards/JessicaJones.webp",
+            "name": "JessicaJones",
+            "txt": "On Reveal: If you don't play a card here next turn, +4 Power.",
+            "url": "https://snap.fan/cards/JessicaJones/"
+        },
+        "jubilee": {
+            "img": "cards/Jubilee.webp",
+            "name": "Jubilee",
+            "txt": "On Reveal: Play a card from your deck at this location.",
+            "url": "https://snap.fan/cards/Jubilee/"
+        },
+        "juggernaut": {
+            "img": "cards/Juggernaut.webp",
+            "name": "Juggernaut",
+            "txt": "On Reveal: If your opponent played cards here this turn, move\nthem randomly.",
+            "url": "https://snap.fan/cards/Juggernaut/"
+        },
+        "kazar": {
+            "img": "cards/KaZar.webp",
+            "name": "KaZar",
+            "txt": "Ongoing: Your 1-Cost cards have +1 Power.",
+            "url": "https://snap.fan/cards/KaZar/"
+        },
+        "killmonger": {
+            "img": "cards/Killmonger.webp",
+            "name": "Killmonger",
+            "txt": "On Reveal: Destroy ALL\n1-Cost cards.",
+            "url": "https://snap.fan/cards/Killmonger/"
+        },
+        "kingpin": {
+            "img": "cards/Kingpin.webp",
+            "name": "Kingpin",
+            "txt": "When a card moves here on turn 6, destroy it.",
+            "url": "https://snap.fan/cards/Kingpin/"
+        },
+        "klaw": {
+            "img": "cards/Klaw.webp",
+            "name": "Klaw",
+            "txt": "Ongoing: The location to the right has +6 Power.",
+            "url": "https://snap.fan/cards/Klaw/"
+        },
+        "korg": {
+            "img": "cards/Korg.webp",
+            "name": "Korg",
+            "txt": "On Reveal: Shuffle a Rock into your opponent's deck.",
+            "url": "https://snap.fan/cards/Korg/"
+        },
+        "kraven": {
+            "img": "cards/Kraven.webp",
+            "name": "Kraven",
+            "txt": "When a card moves here, this gets +2 Power.",
+            "url": "https://snap.fan/cards/Kraven/"
+        },
+        "ladysif": {
+            "img": "cards/LadySif.webp",
+            "name": "LadySif",
+            "txt": "On Reveal: Discard the highest-cost card from your hand.",
+            "url": "https://snap.fan/cards/LadySif/"
+        },
+        "leader": {
+            "img": "cards/Leader.webp",
+            "name": "Leader",
+            "txt": "On Reveal: Copy all cards your opponent played this turn,\nbut on your side.",
+            "url": "https://snap.fan/cards/Leader/"
+        },
+        "leech": {
+            "img": "cards/Leech.webp",
+            "name": "Leech",
+            "txt": "On Reveal: Remove the abilities from all cards in your opponent's hand.",
+            "url": "https://snap.fan/cards/Leech/"
+        },
+        "lizard": {
+            "img": "cards/Lizard.webp",
+            "name": "Lizard",
+            "txt": "Ongoing: -3 Power if your opponent has 4 cards here.",
+            "url": "https://snap.fan/cards/Lizard/"
+        },
+        "lockjaw": {
+            "img": "cards/Lockjaw.webp",
+            "name": "Lockjaw",
+            "txt": "When you play a card here, swap it with a card in your deck.",
+            "url": "https://snap.fan/cards/Lockjaw/"
+        },
+        "lukecage": {
+            "img": "cards/LukeCage.webp",
+            "name": "LukeCage",
+            "txt": "Ongoing: Your cards can't have their Power reduced.",
+            "url": "https://snap.fan/cards/LukeCage/"
+        },
+        "magik": {
+            "img": "cards/Magik.webp",
+            "name": "Magik",
+            "txt": "You can't play this on turn 6.\nOn Reveal: Change this\nlocation to 'Limbo'.",
+            "url": "https://snap.fan/cards/Magik/"
+        },
+        "magneto": {
+            "img": "cards/Magneto.webp",
+            "name": "Magneto",
+            "txt": "On Reveal: Move all opposing 3 and 4-Cost cards to this location.",
+            "url": "https://snap.fan/cards/Magneto/"
+        },
+        "mantis": {
+            "img": "cards/Mantis.webp",
+            "name": "Mantis",
+            "txt": "On Reveal: If your opponent played a card here this turn, draw a card\nfrom their deck.",
+            "url": "https://snap.fan/cards/Mantis/"
+        },
+        "mariahill": {
+            "img": "cards/MariaHill.webp",
+            "name": "MariaHill",
+            "txt": "On Reveal: Add a random 1-Cost card to your hand.",
+            "url": "https://snap.fan/cards/MariaHill/"
+        },
+        "maximus": {
+            "img": "cards/Maximus.webp",
+            "name": "Maximus",
+            "txt": "On Reveal: Your opponent\ndraws 2 cards.",
+            "url": "https://snap.fan/cards/Maximus/"
+        },
+        "mbaku": {
+            "img": "cards/MBaku.webp",
+            "name": "MBaku",
+            "txt": "If this is in your deck at the end of the game, it jumps to a random location.",
+            "url": "https://snap.fan/cards/MBaku/"
+        },
+        "medusa": {
+            "img": "cards/Medusa.webp",
+            "name": "Medusa",
+            "txt": "On Reveal: If this is at the middle location, +2 Power.",
+            "url": "https://snap.fan/cards/Medusa/"
+        },
+        "milesmorales": {
+            "img": "cards/MilesMorales.webp",
+            "name": "MilesMorales",
+            "txt": "If a card moved last turn, this costs 1.",
+            "url": "https://snap.fan/cards/MilesMorales/"
+        },
+        "mistyknight": {
+            "img": "cards/MistyKnight.webp",
+            "name": "MistyKnight",
+            "txt": "We've got to save this city.",
+            "url": "https://snap.fan/cards/MistyKnight/"
+        },
+        "mojo": {
+            "img": "cards/Mojo.webp",
+            "name": "Mojo",
+            "txt": "Ongoing: If both players have 4 cards at this location, +6 Power.",
+            "url": "https://snap.fan/cards/Mojo/"
+        },
+        "moongirl": {
+            "img": "cards/MoonGirl.webp",
+            "name": "MoonGirl",
+            "txt": "On Reveal: Duplicate\nyour hand.",
+            "url": "https://snap.fan/cards/MoonGirl/"
+        },
+        "moonknight": {
+            "img": "cards/MoonKnight.webp",
+            "name": "MoonKnight",
+            "txt": "On Reveal: Discard a card from each player's hand.",
+            "url": "https://snap.fan/cards/MoonKnight/"
+        },
+        "morbius": {
+            "img": "cards/Morbius.webp",
+            "name": "Morbius",
+            "txt": "Ongoing: +2 Power for each time you discarded a card this game.",
+            "url": "https://snap.fan/cards/Morbius/"
+        },
+        "morph": {
+            "img": "cards/Morph.webp",
+            "name": "Morph",
+            "txt": "On Reveal: Become a copy of a random card in your opponent's hand.",
+            "url": "https://snap.fan/cards/Morph/"
+        },
+        "mrfantastic": {
+            "img": "cards/MrFantastic.webp",
+            "name": "MrFantastic",
+            "txt": "Ongoing: Adjacent locations have +2 Power.",
+            "url": "https://snap.fan/cards/MrFantastic/"
+        },
+        "mrnegative": {
+            "img": "cards/MrNegative.webp",
+            "name": "MrNegative",
+            "txt": "On Reveal: Swap the Power and Cost of all cards in your deck.",
+            "url": "https://snap.fan/cards/MrNegative/"
+        },
+        "mrsinister": {
+            "img": "cards/MrSinister.webp",
+            "name": "MrSinister",
+            "txt": "On Reveal: Add a Sinister Clone to this location with the same Power.",
+            "url": "https://snap.fan/cards/MrSinister/"
+        },
+        "multipleman": {
+            "img": "cards/MultipleMan.webp",
+            "name": "MultipleMan",
+            "txt": "When this moves, add a copy to the old location.",
+            "url": "https://snap.fan/cards/MultipleMan/"
+        },
+        "mysterio": {
+            "img": "cards/Mysterio.webp",
+            "name": "Mysterio",
+            "txt": "As you play this, play Illusions to other locations. Disguise this as an Illusion until the game ends.",
+            "url": "https://snap.fan/cards/Mysterio/"
+        },
+        "mystique": {
+            "img": "cards/Mystique.webp",
+            "name": "Mystique",
+            "txt": "On Reveal: If the last card you played has an Ongoing ability, this card gains it.",
+            "url": "https://snap.fan/cards/Mystique/"
+        },
+        "nakia": {
+            "img": "cards/Nakia.webp",
+            "name": "Nakia",
+            "txt": "On Reveal: Give the 2 leftmost cards in your hand +2 Power.",
+            "url": "https://snap.fan/cards/Nakia/"
+        },
+        "namor": {
+            "img": "cards/Namor.webp",
+            "name": "Namor",
+            "txt": "Ongoing: +5 Power if this is your only card here.",
+            "url": "https://snap.fan/cards/Namor/"
+        },
+        "nickfury": {
+            "img": "cards/NickFury.webp",
+            "name": "NickFury",
+            "txt": "On Reveal: Add 3 random\n6-Cost cards to your hand.",
+            "url": "https://snap.fan/cards/NickFury/"
+        },
+        "nightcrawler": {
+            "img": "cards/Nightcrawler.webp",
+            "name": "Nightcrawler",
+            "txt": "You can move this once.",
+            "url": "https://snap.fan/cards/Nightcrawler/"
+        },
+        "nova": {
+            "img": "cards/Nova.webp",
+            "name": "Nova",
+            "txt": "When this is destroyed, give your cards +1 Power.",
+            "url": "https://snap.fan/cards/Nova/"
+        },
+        "odin": {
+            "img": "cards/Odin.webp",
+            "name": "Odin",
+            "txt": "On Reveal: Activate the On Reveal abilities of your other cards\nat this location.",
+            "url": "https://snap.fan/cards/Odin/"
+        },
+        "okoye": {
+            "img": "cards/Okoye.webp",
+            "name": "Okoye",
+            "txt": "On Reveal: Give every card in your deck +1 Power.",
+            "url": "https://snap.fan/cards/Okoye/"
+        },
+        "omegared": {
+            "img": "cards/OmegaRed.webp",
+            "name": "OmegaRed",
+            "txt": "Ongoing: If you're ahead by\n10 Power here, +4 Power\nto other locations.",
+            "url": "https://snap.fan/cards/OmegaRed/"
+        },
+        "onslaught": {
+            "img": "cards/Onslaught.webp",
+            "name": "Onslaught",
+            "txt": "Ongoing: Double your other Ongoing effects at this location.",
+            "url": "https://snap.fan/cards/Onslaught/"
+        },
+        "orka": {
+            "img": "cards/Orka.webp",
+            "name": "Orka",
+            "txt": "Ongoing: +5 Power if this is your only card here.",
+            "url": "https://snap.fan/cards/Orka/"
+        },
+        "patriot": {
+            "img": "cards/Patriot.webp",
+            "name": "Patriot",
+            "txt": "Ongoing: Your cards with no abilities have +2 Power.",
+            "url": "https://snap.fan/cards/Patriot/"
+        },
+        "polaris": {
+            "img": "cards/Polaris.webp",
+            "name": "Polaris",
+            "txt": "On Reveal: Move an opposing 1 or 2-Cost card to this location.",
+            "url": "https://snap.fan/cards/Polaris/"
+        },
+        "professorx": {
+            "img": "cards/ProfessorX.webp",
+            "name": "ProfessorX",
+            "txt": "Ongoing: Lock down this location. (Cards can't be added, removed, etc.)",
+            "url": "https://snap.fan/cards/ProfessorX/"
+        },
+        "psylocke": {
+            "img": "cards/Psylocke.webp",
+            "name": "Psylocke",
+            "txt": "On Reveal: Next turn, you get +1 Energy.",
+            "url": "https://snap.fan/cards/Psylocke/"
+        },
+        "punisher": {
+            "img": "cards/Punisher.webp",
+            "name": "Punisher",
+            "txt": "Ongoing: +1 Power for each opposing card at this location.",
+            "url": "https://snap.fan/cards/Punisher/"
+        },
+        "quake": {
+            "img": "cards/Quake.webp",
+            "name": "Quake",
+            "txt": "On Reveal: If this is at the middle location, swap the positions of\neach location.",
+            "url": "https://snap.fan/cards/Quake/"
+        },
+        "quicksilver": {
+            "img": "cards/Quicksilver.webp",
+            "name": "Quicksilver",
+            "txt": "Starts in your opening hand.",
+            "url": "https://snap.fan/cards/Quicksilver/"
+        },
+        "quinjet": {
+            "img": "cards/Quinjet.webp",
+            "name": "Quinjet",
+            "txt": "Ongoing: Cards that didn't start in your deck cost 1 less.",
+            "url": "https://snap.fan/cards/Quinjet/"
+        },
+        "redskull": {
+            "img": "cards/RedSkull.webp",
+            "name": "RedSkull",
+            "txt": "Ongoing: Enemy cards at this location have +2 Power.",
+            "url": "https://snap.fan/cards/RedSkull/"
+        },
+        "rescue": {
+            "img": "cards/Rescue.webp",
+            "name": "Rescue",
+            "txt": "On Reveal: If you play a card here next turn, +5 Power.",
+            "url": "https://snap.fan/cards/Rescue/"
+        },
+        "rhino": {
+            "img": "cards/Rhino.webp",
+            "name": "Rhino",
+            "txt": "On Reveal: Ruin this location. (remove its ability)",
+            "url": "https://snap.fan/cards/Rhino/"
+        },
+        "rocketraccoon": {
+            "img": "cards/RocketRaccoon.webp",
+            "name": "RocketRaccoon",
+            "txt": "On Reveal: If your opponent played a card here this turn, +2 Power.",
+            "url": "https://snap.fan/cards/RocketRaccoon/"
+        },
+        "rockslide": {
+            "img": "cards/Rockslide.webp",
+            "name": "Rockslide",
+            "txt": "On Reveal: Shuffle 2 Rocks into your opponent's deck.",
+            "url": "https://snap.fan/cards/Rockslide/"
+        },
+        "rogue": {
+            "img": "cards/Rogue.webp",
+            "name": "Rogue",
+            "txt": "On Reveal: Steal an Ongoing ability from a random enemy card at\nthis location.",
+            "url": "https://snap.fan/cards/Rogue/"
+        },
+        "ronan": {
+            "img": "cards/Ronan.webp",
+            "name": "Ronan",
+            "txt": "Ongoing: +2 Power for each card in your opponent's hand.",
+            "url": "https://snap.fan/cards/Ronan/"
+        },
+        "sabretooth": {
+            "img": "cards/Sabretooth.webp",
+            "name": "Sabretooth",
+            "txt": "When this is destroyed, return it to your hand. It costs 0.",
+            "url": "https://snap.fan/cards/Sabretooth/"
+        },
+        "sandman": {
+            "img": "cards/Sandman.webp",
+            "name": "Sandman",
+            "txt": "Ongoing: Players can only play 1 card a turn.",
+            "url": "https://snap.fan/cards/Sandman/"
+        },
+        "scarletwitch": {
+            "img": "cards/ScarletWitch.webp",
+            "name": "ScarletWitch",
+            "txt": "On Reveal: Replace this location with a random new one.",
+            "url": "https://snap.fan/cards/ScarletWitch/"
+        },
+        "scorpion": {
+            "img": "cards/Scorpion.webp",
+            "name": "Scorpion",
+            "txt": "On Reveal: Afflict cards in your opponent's hand with -1 Power.",
+            "url": "https://snap.fan/cards/Scorpion/"
+        },
+        "sentinel": {
+            "img": "cards/Sentinel.webp",
+            "name": "Sentinel",
+            "txt": "On Reveal: Add another Sentinel to your hand.",
+            "url": "https://snap.fan/cards/Sentinel/"
+        },
+        "sera": {
+            "img": "cards/Sera.webp",
+            "name": "Sera",
+            "txt": "Ongoing: Cards in your hand cost 1 less. (minimum 1)",
+            "url": "https://snap.fan/cards/Sera/"
+        },
+        "shangchi": {
+            "img": "cards/ShangChi.webp",
+            "name": "ShangChi",
+            "txt": "On Reveal: Destroy all enemy cards at this location that have\n9 or more Power.",
+            "url": "https://snap.fan/cards/ShangChi/"
+        },
+        "shehulk": {
+            "img": "cards/SheHulk.webp",
+            "name": "SheHulk",
+            "txt": "Costs 1 less for each unspent Energy last turn.",
+            "url": "https://snap.fan/cards/SheHulk/"
+        },
+        "shocker": {
+            "img": "cards/Shocker.webp",
+            "name": "Shocker",
+            "txt": "I'm gonna blast you!",
+            "url": "https://snap.fan/cards/Shocker/"
+        },
+        "shuri": {
+            "img": "cards/Shuri.webp",
+            "name": "Shuri",
+            "txt": "On Reveal: Double the Power of the next card you play.",
+            "url": "https://snap.fan/cards/Shuri/"
+        },
+        "silversurfer": {
+            "img": "cards/SilverSurfer.webp",
+            "name": "SilverSurfer",
+            "txt": "On Reveal: Give your other\n3-Cost cards +3 Power.",
+            "url": "https://snap.fan/cards/SilverSurfer/"
+        },
+        "spectrum": {
+            "img": "cards/Spectrum.webp",
+            "name": "Spectrum",
+            "txt": "On Reveal: Give your Ongoing cards +2 Power.",
+            "url": "https://snap.fan/cards/Spectrum/"
+        },
+        "spiderman": {
+            "img": "cards/SpiderMan.webp",
+            "name": "SpiderMan",
+            "txt": "On Reveal: Your opponent can\u2019t play cards at this location next turn.",
+            "url": "https://snap.fan/cards/SpiderMan/"
+        },
+        "spiderwoman": {
+            "img": "cards/SpiderWoman.webp",
+            "name": "SpiderWoman",
+            "txt": "On Reveal: Afflict all enemy cards here with -1 Power.",
+            "url": "https://snap.fan/cards/SpiderWoman/"
+        },
+        "squirrelgirl": {
+            "img": "cards/SquirrelGirl.webp",
+            "name": "SquirrelGirl",
+            "txt": "On Reveal: Add a 1-Power Squirrel to each other location.",
+            "url": "https://snap.fan/cards/SquirrelGirl/"
+        },
+        "starlord": {
+            "img": "cards/Starlord.webp",
+            "name": "Starlord",
+            "txt": "On Reveal: If your opponent played a card here this turn, +3 Power.",
+            "url": "https://snap.fan/cards/Starlord/"
+        },
+        "storm": {
+            "img": "cards/Storm.webp",
+            "name": "Storm",
+            "txt": "On Reveal: Flood this location. Next turn is the last turn cards can\nbe played here.",
+            "url": "https://snap.fan/cards/Storm/"
+        },
+        "strongguy": {
+            "img": "cards/StrongGuy.webp",
+            "name": "StrongGuy",
+            "txt": "Ongoing: If your hand is empty, +6 Power.",
+            "url": "https://snap.fan/cards/StrongGuy/"
+        },
+        "sunspot": {
+            "img": "cards/Sunspot.webp",
+            "name": "Sunspot",
+            "txt": "At the end of each turn, gain +1 Power for each unspent Energy.",
+            "url": "https://snap.fan/cards/Sunspot/"
+        },
+        "superskrull": {
+            "img": "cards/SuperSkrull.webp",
+            "name": "SuperSkrull",
+            "txt": "Ongoing: Has the Ongoing effects of all enemy cards.",
+            "url": "https://snap.fan/cards/SuperSkrull/"
+        },
+        "swarm": {
+            "img": "cards/Swarm.webp",
+            "name": "Swarm",
+            "txt": "When this is discarded from your hand, add two copies that Cost 0\nto your hand.",
+            "url": "https://snap.fan/cards/Swarm/"
+        },
+        "swordmaster": {
+            "img": "cards/SwordMaster.webp",
+            "name": "SwordMaster",
+            "txt": "On Reveal: Discard a card from your hand.",
+            "url": "https://snap.fan/cards/SwordMaster/"
+        },
+        "taskmaster": {
+            "img": "cards/Taskmaster.webp",
+            "name": "Taskmaster",
+            "txt": "On Reveal: Set this card's Power equal to the Power of the last\ncard you played.",
+            "url": "https://snap.fan/cards/Taskmaster/"
+        },
+        "thanos": {
+            "img": "cards/Thanos.webp",
+            "name": "Thanos",
+            "txt": "At the start of the game, shuffle the six Infinity Stones into your deck.",
+            "url": "https://snap.fan/cards/Thanos/"
+        },
+        "thecollector": {
+            "img": "cards/TheCollector.webp",
+            "name": "TheCollector",
+            "txt": "When a card enters your hand from anywhere (except your deck),\n+1 Power.",
+            "url": "https://snap.fan/cards/TheCollector/"
         },
         "thething": {
-            "url": "https://snap.fan/cards/TheThing/",
+            "img": "cards/TheThing.webp",
             "name": "TheThing",
             "txt": "It's clobberin' time!",
-            "img": "cards/TheThing.webp"
+            "url": "https://snap.fan/cards/TheThing/"
         },
         "thor": {
-            "url": "https://snap.fan/cards/Thor/",
+            "img": "cards/Thor.webp",
             "name": "Thor",
             "txt": "On Reveal: Shuffle Mjolnir into your deck.",
-            "img": "cards/Thor.webp"
+            "url": "https://snap.fan/cards/Thor/"
         },
         "titania": {
-            "url": "https://snap.fan/cards/Titania/",
+            "img": "cards/Titania.webp",
             "name": "Titania",
             "txt": "When ANY card is played at this location, this card switches sides.",
-            "img": "cards/Titania.webp"
+            "url": "https://snap.fan/cards/Titania/"
         },
         "typhoidmary": {
-            "url": "https://snap.fan/cards/TyphoidMary/",
+            "img": "cards/TyphoidMary.webp",
             "name": "TyphoidMary",
             "txt": "Ongoing: Your other cards\nhave -1 Power.",
-            "img": "cards/TyphoidMary.webp"
+            "url": "https://snap.fan/cards/TyphoidMary/"
         },
         "uatu": {
-            "url": "https://snap.fan/cards/Uatu/",
+            "img": "cards/Uatu.webp",
             "name": "Uatu",
             "txt": "Once this is in your hand, you can see the unrevealed locations.",
-            "img": "cards/Uatu.webp"
+            "url": "https://snap.fan/cards/Uatu/"
         },
         "ultron": {
-            "url": "https://snap.fan/cards/Ultron/",
+            "img": "cards/Ultron.webp",
             "name": "Ultron",
             "txt": "On Reveal: Create four 1-Power Drones at each other location.",
-            "img": "cards/Ultron.webp"
+            "url": "https://snap.fan/cards/Ultron/"
         },
         "valkyrie": {
-            "url": "https://snap.fan/cards/Valkyrie/",
+            "img": "cards/Valkyrie.webp",
             "name": "Valkyrie",
             "txt": "On Reveal: Set ALL cards at this location to 3 Power.",
-            "img": "cards/Valkyrie.webp"
+            "url": "https://snap.fan/cards/Valkyrie/"
         },
         "venom": {
-            "url": "https://snap.fan/cards/Venom/",
+            "img": "cards/Venom.webp",
             "name": "Venom",
             "txt": "On Reveal: Destroy your other cards at this location. Add their Power\nto this card.",
-            "img": "cards/Venom.webp"
+            "url": "https://snap.fan/cards/Venom/"
         },
         "viper": {
-            "url": "https://snap.fan/cards/Viper/",
+            "img": "cards/Viper.webp",
             "name": "Viper",
             "txt": "On Reveal: Your opponent gains control of one of your other cards\nat this location.",
-            "img": "cards/Viper.webp"
+            "url": "https://snap.fan/cards/Viper/"
         },
         "vision": {
-            "url": "https://snap.fan/cards/Vision/",
+            "img": "cards/Vision.webp",
             "name": "Vision",
             "txt": "You can move this each turn.",
-            "img": "cards/Vision.webp"
+            "url": "https://snap.fan/cards/Vision/"
         },
         "vulture": {
-            "url": "https://snap.fan/cards/Vulture/",
+            "img": "cards/Vulture.webp",
             "name": "Vulture",
             "txt": "When this card moves,\n+5 Power.",
-            "img": "cards/Vulture.webp"
+            "url": "https://snap.fan/cards/Vulture/"
         },
         "warpath": {
-            "url": "https://snap.fan/cards/Warpath/",
+            "img": "cards/Warpath.webp",
             "name": "Warpath",
             "txt": "Ongoing: If any of your locations are empty, +4 Power.",
-            "img": "cards/Warpath.webp"
+            "url": "https://snap.fan/cards/Warpath/"
         },
         "wasp": {
-            "url": "https://snap.fan/cards/Wasp/",
+            "img": "cards/Wasp.webp",
             "name": "Wasp",
             "txt": "My secret power is that I get things done.",
-            "img": "cards/Wasp.webp"
+            "url": "https://snap.fan/cards/Wasp/"
         },
         "wave": {
-            "url": "https://snap.fan/cards/Wave/",
+            "img": "cards/Wave.webp",
             "name": "Wave",
             "txt": "On Reveal: Next turn, cards in both players' hands cost 4.",
-            "img": "cards/Wave.webp"
+            "url": "https://snap.fan/cards/Wave/"
         },
         "whitequeen": {
-            "url": "https://snap.fan/cards/WhiteQueen/",
+            "img": "cards/WhiteQueen.webp",
             "name": "WhiteQueen",
             "txt": "On Reveal: Draw a copy of the highest Cost card in your\nopponent's hand.",
-            "img": "cards/WhiteQueen.webp"
+            "url": "https://snap.fan/cards/WhiteQueen/"
         },
         "whitetiger": {
-            "url": "https://snap.fan/cards/WhiteTiger/",
+            "img": "cards/WhiteTiger.webp",
             "name": "WhiteTiger",
             "txt": "On Reveal: Add a 7-Power Tiger to another location.",
-            "img": "cards/WhiteTiger.webp"
+            "url": "https://snap.fan/cards/WhiteTiger/"
         },
         "wolfsbane": {
-            "url": "https://snap.fan/cards/Wolfsbane/",
+            "img": "cards/Wolfsbane.webp",
             "name": "Wolfsbane",
             "txt": "On Reveal: +2 Power for each other card you have here.",
-            "img": "cards/Wolfsbane.webp"
+            "url": "https://snap.fan/cards/Wolfsbane/"
         },
         "wolverine": {
-            "url": "https://snap.fan/cards/Wolverine/",
+            "img": "cards/Wolverine.webp",
             "name": "Wolverine",
             "txt": "When this is discarded or destroyed, play it at a random location.",
-            "img": "cards/Wolverine.webp"
+            "url": "https://snap.fan/cards/Wolverine/"
         },
         "wong": {
-            "url": "https://snap.fan/cards/Wong/",
+            "img": "cards/Wong.webp",
             "name": "Wong",
             "txt": "Ongoing: Your On Reveal abilities at this location happen twice.",
-            "img": "cards/Wong.webp"
+            "url": "https://snap.fan/cards/Wong/"
         },
         "yellowjacket": {
-            "url": "https://snap.fan/cards/Yellowjacket/",
+            "img": "cards/Yellowjacket.webp",
             "name": "Yellowjacket",
             "txt": "On Reveal: Afflict your other cards at this location with -1 Power.",
-            "img": "cards/Yellowjacket.webp"
+            "url": "https://snap.fan/cards/Yellowjacket/"
         },
         "yondu": {
-            "url": "https://snap.fan/cards/Yondu/",
+            "img": "cards/Yondu.webp",
             "name": "Yondu",
             "txt": "On Reveal: Remove the top card of your opponent's deck.",
-            "img": "cards/Yondu.webp"
+            "url": "https://snap.fan/cards/Yondu/"
         },
         "zero": {
-            "url": "https://snap.fan/cards/Zero/",
+            "img": "cards/Zero.webp",
             "name": "Zero",
             "txt": "On Reveal: Remove the abilities on the next card you play.",
-            "img": "cards/Zero.webp"
+            "url": "https://snap.fan/cards/Zero/"
         }
     },
     "locations": {
         "altarofdeath": {
-            "url": "https://snap.fan/locations/AltarOfDeath/",
+            "img": "locations/AltarofDeath.webp",
             "name": "Altar of Death",
             "txt": "When you play a card here, destroy it to get +2 Energy next turn.",
-            "img": "locations/AltarofDeath.webp"
+            "url": "https://snap.fan/locations/AltarOfDeath/"
         },
         "asgard": {
-            "url": "https://snap.fan/locations/Asgard/",
+            "img": "locations/Asgard.webp",
             "name": "Asgard",
             "txt": "After turn 4, whoever is winning here draws 2 cards.",
-            "img": "locations/Asgard.webp"
+            "url": "https://snap.fan/locations/Asgard/"
         },
         "asteroidm": {
-            "url": "https://snap.fan/locations/AsteroidM/",
+            "img": "locations/AsteroidM.webp",
             "name": "Asteroid M",
             "txt": "When you play a 3 or 4-Cost card, move it here.",
-            "img": "locations/AsteroidM.webp"
+            "url": "https://snap.fan/locations/AsteroidM/"
         },
         "atlantis": {
-            "url": "https://snap.fan/locations/Atlantis/",
+            "img": "locations/Atlantis.webp",
             "name": "Atlantis",
             "txt": "If you only have one card here, it has +5 Power.",
-            "img": "locations/Atlantis.webp"
+            "url": "https://snap.fan/locations/Atlantis/"
         },
         "attilan": {
-            "url": "https://snap.fan/locations/Attilan/",
+            "img": "locations/Attilan.webp",
             "name": "Attilan",
             "txt": "After turn 3, shuffle your hand into your deck. Draw 3 cards.",
-            "img": "locations/Attilan.webp"
+            "url": "https://snap.fan/locations/Attilan/"
         },
         "avengerscompound": {
-            "url": "https://snap.fan/locations/AvengersCompound/",
+            "img": "locations/AvengersCompound.webp",
             "name": "Avengers Compound",
             "txt": "On turn 5, all cards must be played here.",
-            "img": "locations/AvengersCompound.webp"
+            "url": "https://snap.fan/locations/AvengersCompound/"
         },
         "barsinister": {
-            "url": "https://snap.fan/locations/BarSinister/",
+            "img": "locations/BarSinister.webp",
             "name": "Bar Sinister",
             "txt": "When you play a card here, fill this location with copies of it.",
-            "img": "locations/BarSinister.webp"
+            "url": "https://snap.fan/locations/BarSinister/"
         },
         "barwithnoname": {
-            "url": "https://snap.fan/locations/BarWithNoName/",
+            "img": "locations/BarWithNoName.webp",
             "name": "Bar With No Name",
             "txt": "Whoever has the least Power here wins.",
-            "img": "locations/BarWithNoName.webp"
+            "url": "https://snap.fan/locations/BarWithNoName/"
         },
         "baxterbuilding": {
-            "url": "https://snap.fan/locations/BaxterBuilding/",
+            "img": "locations/BaxterBuilding.webp",
             "name": "Baxter Building",
             "txt": "Whoever is winning this location gets +3 Power at the others.",
-            "img": "locations/BaxterBuilding.webp"
+            "url": "https://snap.fan/locations/BaxterBuilding/"
         },
         "centralpark": {
-            "url": "https://snap.fan/locations/CentralPark/",
+            "img": "locations/CentralPark.webp",
             "name": "Central Park",
             "txt": "Add a Squirrel to each location.",
-            "img": "locations/CentralPark.webp"
+            "url": "https://snap.fan/locations/CentralPark/"
         },
         "cloningvats": {
-            "url": "https://snap.fan/locations/CloningVats/",
+            "img": "locations/CloningVats.webp",
             "name": "Cloning Vats",
             "txt": "When you play a card here, add a copy to your hand.",
-            "img": "locations/CloningVats.webp"
+            "url": "https://snap.fan/locations/CloningVats/"
         },
         "collapsedmine": {
-            "url": "https://snap.fan/locations/CollapsedMine/",
+            "img": "locations/CollapsedMine.webp",
             "name": "Collapsed Mine",
             "txt": "Fill this location with Rocks. Skip a turn to destroy your Rocks.",
-            "img": "locations/CollapsedMine.webp"
+            "url": "https://snap.fan/locations/CollapsedMine/"
         },
         "counterearth": {
-            "url": "https://snap.fan/locations/CounterEarth/",
+            "img": "locations/CounterEarth.webp",
             "name": "Counter-Earth",
             "txt": "'When you play a card here, create a copy at this location.",
-            "img": "locations/CounterEarth.webp"
+            "url": "https://snap.fan/locations/CounterEarth/"
         },
         "crimsoncosmos": {
-            "url": "https://snap.fan/locations/CrimsonCosmos/",
+            "img": "locations/CrimsonCosmos.webp",
             "name": "Crimson Cosmos",
             "txt": "Cards that cost 1, 2, or 3 can't be played here.",
-            "img": "locations/CrimsonCosmos.webp"
+            "url": "https://snap.fan/locations/CrimsonCosmos/"
         },
         "crystaltowers": {
-            "url": "https://snap.fan/locations/CrystalTowers/",
+            "img": "locations/CrystalTowers.webp",
             "name": "Crystal Towers",
             "txt": "Shuffle your hand into your deck. Draw 3 cards.",
-            "img": "locations/CrystalTowers.webp"
+            "url": "https://snap.fan/locations/CrystalTowers/"
         },
         "dailybugle": {
-            "url": "https://snap.fan/locations/DailyBugle/",
+            "img": "locations/DailyBugle.webp",
             "name": "Daily Bugle",
             "txt": "Get a copy of a card in your opponent's hand.",
-            "img": "locations/DailyBugle.webp"
+            "url": "https://snap.fan/locations/DailyBugle/"
         },
         "dangerroom": {
-            "url": "https://snap.fan/locations/DangerRoom/",
+            "img": "locations/DangerRoom.webp",
             "name": "Danger Room",
             "txt": "Cards played here have a 25% chance to be destroyed.",
-            "img": "locations/DangerRoom.webp"
+            "url": "https://snap.fan/locations/DangerRoom/"
         },
         "darkdimension": {
-            "url": "https://snap.fan/locations/DarkDimension/",
+            "img": "locations/DarkDimension.webp",
             "name": "Dark Dimension",
             "txt": "Cards here are not revealed until the game ends.",
-            "img": "locations/DarkDimension.webp"
+            "url": "https://snap.fan/locations/DarkDimension/"
         },
         "deathsdomain": {
-            "url": "https://snap.fan/locations/DeathsDomain/",
+            "img": "locations/DeathsDomain.webp",
             "name": "Death's Domain",
             "txt": "When you play a card here, destroy it.",
-            "img": "locations/DeathsDomain.webp"
+            "url": "https://snap.fan/locations/DeathsDomain/"
         },
         "deepspace": {
-            "url": "https://snap.fan/locations/DeepSpace/",
+            "img": "locations/DeepSpace.webp",
             "name": "Deep Space",
             "txt": "On Reveal abilities won't happen at this location.",
-            "img": "locations/DeepSpace.webp"
+            "url": "https://snap.fan/locations/DeepSpace/"
         },
         "districtx": {
-            "url": "https://snap.fan/locations/DistrictX/",
+            "img": "locations/DistrictX.webp",
             "name": "District X",
             "txt": "Replace both decks with 10 random cards.",
-            "img": "locations/DistrictX.webp"
+            "url": "https://snap.fan/locations/DistrictX/"
         },
         "dreamdimension": {
-            "url": "https://snap.fan/locations/DreamDimension/",
+            "img": "locations/DreamDimension.webp",
             "name": "Dream Dimension",
             "txt": "On turn 5, cards cost 1 more.",
-            "img": "locations/DreamDimension.webp"
+            "url": "https://snap.fan/locations/DreamDimension/"
         },
         "ego": {
-            "url": "https://snap.fan/locations/Ego/",
+            "img": "locations/Ego.webp",
             "name": "Ego",
             "txt": "Ego takes over and plays your cards for you.",
-            "img": "locations/Ego.webp"
+            "url": "https://snap.fan/locations/Ego/"
         },
         "elysium": {
-            "url": "https://snap.fan/locations/Elysium/",
+            "img": "locations/Elysium.webp",
             "name": "Elysium",
             "txt": "Cards cost 1 less.",
-            "img": "locations/Elysium.webp"
+            "url": "https://snap.fan/locations/Elysium/"
         },
         "eternityrange": {
-            "url": "https://snap.fan/locations/EternityRange/",
+            "img": "locations/EternityRange.webp",
             "name": "Eternity Range",
             "txt": "After turn 3, add a Rock to the losing player's side.",
-            "img": "locations/EternityRange.webp"
+            "url": "https://snap.fan/locations/EternityRange/"
         },
         "fisktower": {
-            "url": "https://snap.fan/locations/FiskTower/",
+            "img": "locations/FiskTower.webp",
             "name": "Fisk Tower",
             "txt": "When a card moves here, destroy it.",
-            "img": "locations/FiskTower.webp"
+            "url": "https://snap.fan/locations/FiskTower/"
         },
         "flooded": {
-            "url": "https://snap.fan/locations/Flooded/",
+            "img": "locations/Flooded.webp",
             "name": "Flooded",
             "txt": "Cards can't be played here.",
-            "img": "locations/Flooded.webp"
+            "url": "https://snap.fan/locations/Flooded/"
         },
         "flooding": {
-            "url": "https://snap.fan/locations/Flooding/",
+            "img": "locations/Flooding.webp",
             "name": "Flooding",
             "txt": "This is the last turn cards can be played here.",
-            "img": "locations/Flooding.webp"
+            "url": "https://snap.fan/locations/Flooding/"
         },
         "fogwellsgym": {
-            "url": "https://snap.fan/locations/FogwellsGym/",
+            "img": "locations/FogwellsGym.webp",
             "name": "Fogwell's Gym",
             "txt": "Both players get double Card XP this game.",
-            "img": "locations/FogwellsGym.webp"
+            "url": "https://snap.fan/locations/FogwellsGym/"
         },
         "gammalab": {
-            "url": "https://snap.fan/locations/GammaLab/",
+            "img": "locations/GammaLab.webp",
             "name": "Gamma Lab",
             "txt": "After turn 3, transform all cards here into the Hulk.",
-            "img": "locations/GammaLab.webp"
+            "url": "https://snap.fan/locations/GammaLab/"
         },
         "genosha": {
-            "url": "https://snap.fan/locations/Genosha/",
+            "img": "locations/Genosha.webp",
             "name": "Genosha",
             "txt": "You can move cards to this location.",
-            "img": "locations/Genosha.webp"
+            "url": "https://snap.fan/locations/Genosha/"
         },
         "grandcentral": {
-            "url": "https://snap.fan/locations/GrandCentral/",
+            "img": "locations/GrandCentral.webp",
             "name": "Grand Central",
             "txt": "After turn 5, put a card from each player's hand here.",
-            "img": "locations/GrandCentral.webp"
+            "url": "https://snap.fan/locations/GrandCentral/"
         },
         "hala": {
-            "url": "https://snap.fan/locations/Hala/",
+            "img": "locations/Hala.webp",
             "name": "Hala",
             "txt": "After turn 4, destroy all cards controlled by the player losing here.",
-            "img": "locations/Hala.webp"
-        },
-        "hellskitchen": {
-            "url": "https://snap.fan/locations/HellsKitchen/",
-            "name": "Hell's Kitchen",
-            "txt": "Draw a 1-Cost card from your deck.",
-            "img": "locations/HellsKitchen.webp"
+            "url": "https://snap.fan/locations/Hala/"
         },
         "hellfireclub": {
-            "url": "https://snap.fan/locations/HellfireClub/",
+            "img": "locations/HellfireClub.webp",
             "name": "Hellfire Club",
             "txt": "Cards that cost 1 can't be played here.",
-            "img": "locations/HellfireClub.webp"
+            "url": "https://snap.fan/locations/HellfireClub/"
+        },
+        "hellskitchen": {
+            "img": "locations/HellsKitchen.webp",
+            "name": "Hell's Kitchen",
+            "txt": "Draw a 1-Cost card from your deck.",
+            "url": "https://snap.fan/locations/HellsKitchen/"
         },
         "isleofsilence": {
-            "url": "https://snap.fan/locations/IsleOfSilence/",
+            "img": "locations/IsleofSilence.webp",
             "name": "Isle of Silence",
             "txt": "Ongoing effects are disabled here.",
-            "img": "locations/IsleofSilence.webp"
+            "url": "https://snap.fan/locations/IsleOfSilence/"
         },
         "jotunheim": {
-            "url": "https://snap.fan/locations/Jotunheim/",
+            "img": "locations/Jotunheim.webp",
             "name": "Jotunheim",
             "txt": "After each turn, cards here lose 1 Power.",
-            "img": "locations/Jotunheim.webp"
-        },
-        "kunlun": {
-            "url": "https://snap.fan/locations/KunLun/",
-            "name": "K'un-Lun",
-            "txt": "When a card moves here, give it +2 Power.",
-            "img": "locations/KunLun.webp"
+            "url": "https://snap.fan/locations/Jotunheim/"
         },
         "kamartaj": {
-            "url": "https://snap.fan/locations/KamarTaj/",
+            "img": "locations/KamarTaj.webp",
             "name": "Kamar-Taj",
             "txt": "On Reveal effects happen twice at this location.",
-            "img": "locations/KamarTaj.webp"
+            "url": "https://snap.fan/locations/KamarTaj/"
         },
         "klyntar": {
-            "url": "https://snap.fan/locations/Klyntar/",
+            "img": "locations/Klyntar.webp",
             "name": "Klyntar",
             "txt": "After turn 4, merge your cards here into a Symbiote.",
-            "img": "locations/Klyntar.webp"
+            "url": "https://snap.fan/locations/Klyntar/"
         },
         "knowhere": {
-            "url": "https://snap.fan/locations/Knowhere/",
+            "img": "locations/Knowhere.webp",
             "name": "Knowhere",
             "txt": "On Reveal effects do not happen at this location.",
-            "img": "locations/Knowhere.webp"
+            "url": "https://snap.fan/locations/Knowhere/"
         },
         "krakoa": {
-            "url": "https://snap.fan/locations/Krakoa/",
+            "img": "locations/Krakoa.webp",
             "name": "Krakoa",
             "txt": "On turn 6, takes over and plays both players' cards for them.",
-            "img": "locations/Krakoa.webp"
+            "url": "https://snap.fan/locations/Krakoa/"
+        },
+        "kunlun": {
+            "img": "locations/KunLun.webp",
+            "name": "K'un-Lun",
+            "txt": "When a card moves here, give it +2 Power.",
+            "url": "https://snap.fan/locations/KunLun/"
         },
         "kyln": {
-            "url": "https://snap.fan/locations/Kyln/",
+            "img": "locations/Kyln.webp",
             "name": "Kyln",
             "txt": "You can't play cards here after turn 4.",
-            "img": "locations/Kyln.webp"
+            "url": "https://snap.fan/locations/Kyln/"
         },
         "lamentis1": {
-            "url": "https://snap.fan/locations/Lamentis1/",
+            "img": "locations/Lamentis1.webp",
             "name": "Lamentis-1",
             "txt": "Draw 3 cards. Destroy both decks.",
-            "img": "locations/Lamentis1.webp"
+            "url": "https://snap.fan/locations/Lamentis1/"
         },
         "lechuguilla": {
-            "url": "https://snap.fan/locations/Lechuguilla/",
+            "img": "locations/Lechuguilla.webp",
             "name": "Lechuguilla",
             "txt": "When you play a card here, shuffle 3 rocks into your deck.",
-            "img": "locations/Lechuguilla.webp"
+            "url": "https://snap.fan/locations/Lechuguilla/"
         },
         "lemuria": {
-            "url": "https://snap.fan/locations/Lemuria/",
+            "img": "locations/Lemuria.webp",
             "name": "Lemuria",
             "txt": "No cards are revealed this turn.",
-            "img": "locations/Lemuria.webp"
+            "url": "https://snap.fan/locations/Lemuria/"
         },
         "limbo": {
-            "url": "https://snap.fan/locations/Limbo/",
+            "img": "locations/Limbo.webp",
             "name": "Limbo",
             "txt": "There is a turn 7 this game.",
-            "img": "locations/Limbo.webp"
+            "url": "https://snap.fan/locations/Limbo/"
         },
         "losdiablosbase": {
-            "url": "https://snap.fan/locations/LosDiablos/",
+            "img": "locations/LosDiablosBase.webp",
             "name": "Los Diablos Base",
             "txt": "After turn 3, ruin a random location.",
-            "img": "locations/LosDiablosBase.webp"
+            "url": "https://snap.fan/locations/LosDiablos/"
         },
         "lukesbar": {
-            "url": "https://snap.fan/locations/LukesBar/",
+            "img": "locations/LukesBar.webp",
             "name": "Luke's Bar",
             "txt": "When you play a card here, return it to your hand.",
-            "img": "locations/LukesBar.webp"
+            "url": "https://snap.fan/locations/LukesBar/"
         },
         "machineworld": {
-            "url": "https://snap.fan/locations/Machineworld/",
+            "img": "locations/Machineworld.webp",
             "name": "Machineworld",
             "txt": "When you play a card here, add a copy to the opponent's hand.",
-            "img": "locations/Machineworld.webp"
+            "url": "https://snap.fan/locations/Machineworld/"
         },
         "madripoor": {
-            "url": "https://snap.fan/locations/Madripoor/",
+            "img": "locations/Madripoor.webp",
             "name": "Madripoor",
             "txt": "You can move cards from this location.",
-            "img": "locations/Madripoor.webp"
+            "url": "https://snap.fan/locations/Madripoor/"
         },
         "mindscape": {
-            "url": "https://snap.fan/locations/Mindscape/",
+            "img": "locations/Mindscape.webp",
             "name": "Mindscape",
             "txt": "At the start of turn 6, swap hands.",
-            "img": "locations/Mindscape.webp"
+            "url": "https://snap.fan/locations/Mindscape/"
         },
         "miniaturizedlab": {
-            "url": "https://snap.fan/locations/MiniaturizedLab/",
+            "img": "locations/MiniaturizedLab.webp",
             "name": "Miniaturized Lab",
             "txt": "On turns 3, 4, and 5, no cards can be added here.",
-            "img": "locations/MiniaturizedLab.webp"
+            "url": "https://snap.fan/locations/MiniaturizedLab/"
         },
         "mirrordimension": {
-            "url": "https://snap.fan/locations/MirrorDimension/",
+            "img": "locations/MirrorDimension.webp",
             "name": "Mirror Dimension",
             "txt": "On turn 4, transform into one of the other locations.",
-            "img": "locations/MirrorDimension.webp"
+            "url": "https://snap.fan/locations/MirrorDimension/"
         },
         "mojoworld": {
-            "url": "https://snap.fan/locations/Mojoworld/",
+            "img": "locations/Mojoworld.webp",
             "name": "Mojoworld",
             "txt": "Whoever has more cards here gets +100 Power.",
-            "img": "locations/Mojoworld.webp"
+            "url": "https://snap.fan/locations/Mojoworld/"
         },
         "monsterisland": {
-            "url": "https://snap.fan/locations/MonsterIsland/",
+            "img": "locations/MonsterIsland.webp",
             "name": "Monster Island",
             "txt": "Add a 9-Power Monster here for each player.",
-            "img": "locations/MonsterIsland.webp"
+            "url": "https://snap.fan/locations/MonsterIsland/"
         },
         "monstermetropolis": {
-            "url": "https://snap.fan/locations/MonsterMetropolis/",
+            "img": "locations/MonsterMetropolis.webp",
             "name": "Monster Metropolis",
             "txt": "The card(s) with the highest Power here get +3 Power.",
-            "img": "locations/MonsterMetropolis.webp"
+            "url": "https://snap.fan/locations/MonsterMetropolis/"
         },
         "morag": {
-            "url": "https://snap.fan/locations/Morag/",
+            "img": "locations/Morag.webp",
             "name": "Morag",
             "txt": "You can't play your first card here each turn.",
-            "img": "locations/Morag.webp"
+            "url": "https://snap.fan/locations/Morag/"
         },
         "mothermold": {
-            "url": "https://snap.fan/locations/MotherMold/",
+            "img": "locations/MotherMold.webp",
             "name": "Mother Mold",
             "txt": "When you play a card here, add a Sentinel to your hand.",
-            "img": "locations/MotherMold.webp"
+            "url": "https://snap.fan/locations/MotherMold/"
         },
         "mtwundagore": {
-            "url": "https://snap.fan/locations/MountWundagore/",
+            "img": "locations/MtWundagore.webp",
             "name": "Mt. Wundagore",
             "txt": "When you play a card here, discard a card.",
-            "img": "locations/MtWundagore.webp"
+            "url": "https://snap.fan/locations/MountWundagore/"
         },
         "muirisland": {
-            "url": "https://snap.fan/locations/MuirIsland/",
+            "img": "locations/MuirIsland.webp",
             "name": "Muir Island",
             "txt": "After each turn, give cards here +1 Power.",
-            "img": "locations/MuirIsland.webp"
+            "url": "https://snap.fan/locations/MuirIsland/"
         },
         "murderworld": {
-            "url": "https://snap.fan/locations/Murderworld/",
+            "img": "locations/Murderworld.webp",
             "name": "Murderworld",
             "txt": "After turn 3, destroy all cards here.",
-            "img": "locations/Murderworld.webp"
+            "url": "https://snap.fan/locations/Murderworld/"
         },
         "necrosha": {
-            "url": "https://snap.fan/locations/Necrosha/",
+            "img": "locations/Necrosha.webp",
             "name": "Necrosha",
             "txt": "Cards here have\n-2 Power.",
-            "img": "locations/Necrosha.webp"
+            "url": "https://snap.fan/locations/Necrosha/"
         },
         "negativezone": {
-            "url": "https://snap.fan/locations/NegativeZone/",
+            "img": "locations/NegativeZone.webp",
             "name": "Negative Zone",
             "txt": "Cards here have\n-3 Power.",
-            "img": "locations/NegativeZone.webp"
+            "url": "https://snap.fan/locations/NegativeZone/"
         },
         "newyork": {
-            "url": "https://snap.fan/locations/NewYork/",
+            "img": "locations/NewYork.webp",
             "name": "New York",
             "txt": "On turn 6, you can move cards to this location.",
-            "img": "locations/NewYork.webp"
+            "url": "https://snap.fan/locations/NewYork/"
         },
         "nidavellir": {
-            "url": "https://snap.fan/locations/Nidavellir/",
+            "img": "locations/Nidavellir.webp",
             "name": "Nidavellir",
             "txt": "Cards here have\n+5 Power.",
-            "img": "locations/Nidavellir.webp"
+            "url": "https://snap.fan/locations/Nidavellir/"
         },
         "novaroma": {
-            "url": "https://snap.fan/locations/NovaRoma/",
+            "img": "locations/NovaRoma.webp",
             "name": "Nova Roma",
             "txt": "Draw a card.",
-            "img": "locations/NovaRoma.webp"
+            "url": "https://snap.fan/locations/NovaRoma/"
         },
         "olympia": {
-            "url": "https://snap.fan/locations/Olympia/",
+            "img": "locations/Olympia.webp",
             "name": "Olympia",
             "txt": "Draw 2 cards.",
-            "img": "locations/Olympia.webp"
+            "url": "https://snap.fan/locations/Olympia/"
         },
         "onslaughtscitadel": {
-            "url": "https://snap.fan/locations/OnslaughtsCitadel/",
+            "img": "locations/OnslaughtsCitadel.webp",
             "name": "Onslaught's Citadel",
             "txt": "Ongoing effects here are doubled.",
-            "img": "locations/OnslaughtsCitadel.webp"
+            "url": "https://snap.fan/locations/OnslaughtsCitadel/"
         },
         "oscorptower": {
-            "url": "https://snap.fan/locations/OscorpTower/",
+            "img": "locations/OscorpTower.webp",
             "name": "Oscorp Tower",
             "txt": "After turn 3, all cards here swap sides.",
-            "img": "locations/OscorpTower.webp"
+            "url": "https://snap.fan/locations/OscorpTower/"
         },
         "pleasanthill": {
-            "url": "https://snap.fan/locations/PleasantHill/",
+            "img": "locations/PleasantHill.webp",
             "name": "Pleasant Hill",
             "txt": "When you play a card here, draw a card.",
-            "img": "locations/PleasantHill.webp"
+            "url": "https://snap.fan/locations/PleasantHill/"
         },
         "plundercastle": {
-            "url": "https://snap.fan/locations/PlunderCastle/",
+            "img": "locations/PlunderCastle.webp",
             "name": "Plunder Castle",
             "txt": "Only cards that cost 6 can be played here.",
-            "img": "locations/PlunderCastle.webp"
+            "url": "https://snap.fan/locations/PlunderCastle/"
         },
         "projectpegasus": {
-            "url": "https://snap.fan/locations/ProjectPegasus/",
+            "img": "locations/ProjectPegasus.webp",
             "name": "Project Pegasus",
             "txt": "+5 Energy this turn.",
-            "img": "locations/ProjectPegasus.webp"
+            "url": "https://snap.fan/locations/ProjectPegasus/"
         },
         "quantumrealm": {
-            "url": "https://snap.fan/locations/QuantumRealm/",
+            "img": "locations/QuantumRealm.webp",
             "name": "Quantum Realm",
             "txt": "When you play a card here, set its Power to 2.",
-            "img": "locations/QuantumRealm.webp"
+            "url": "https://snap.fan/locations/QuantumRealm/"
         },
         "ricketybridge": {
-            "url": "https://snap.fan/locations/RicketyBridge/",
+            "img": "locations/RicketyBridge.webp",
             "name": "Rickety Bridge",
             "txt": "After each turn, if there is more than one card here, destroy them.",
-            "img": "locations/RicketyBridge.webp"
+            "url": "https://snap.fan/locations/RicketyBridge/"
         },
         "ruins": {
-            "url": "https://snap.fan/locations/Ruins/",
+            "img": "locations/Ruins.webp",
             "name": "Ruins",
             "txt": " ",
-            "img": "locations/Ruins.webp"
+            "url": "https://snap.fan/locations/Ruins/"
         },
         "sakaar": {
-            "url": "https://snap.fan/locations/Sakaar/",
+            "img": "locations/Sakaar.webp",
             "name": "Sakaar",
             "txt": "Put a card from each player's hand here.",
-            "img": "locations/Sakaar.webp"
+            "url": "https://snap.fan/locations/Sakaar/"
         },
         "sanctumsanctorum": {
-            "url": "https://snap.fan/locations/SanctumSanctorum/",
+            "img": "locations/SanctumSanctorum.webp",
             "name": "Sanctum Sanctorum",
             "txt": "Cards can't be played here.",
-            "img": "locations/SanctumSanctorum.webp"
+            "url": "https://snap.fan/locations/SanctumSanctorum/"
         },
         "savageland": {
-            "url": "https://snap.fan/locations/SavageLand/",
+            "img": "locations/SavageLand.webp",
             "name": "Savage Land",
             "txt": "Add two Raptors on each side of this location.",
-            "img": "locations/SavageLand.webp"
+            "url": "https://snap.fan/locations/SavageLand/"
         },
         "sewersystem": {
-            "url": "https://snap.fan/locations/SewerSystem/",
+            "img": "locations/SewerSystem.webp",
             "name": "Sewer System",
             "txt": "Cards here have\n-1 Power.",
-            "img": "locations/SewerSystem.webp"
+            "url": "https://snap.fan/locations/SewerSystem/"
         },
         "shadowland": {
-            "url": "https://snap.fan/locations/Shadowland/",
+            "img": "locations/Shadowland.webp",
             "name": "Shadowland",
             "txt": "Add a Ninja to each side with -2 Power.",
-            "img": "locations/Shadowland.webp"
+            "url": "https://snap.fan/locations/Shadowland/"
         },
         "shurislab": {
-            "url": "https://snap.fan/locations/ShurisLab/",
+            "img": "locations/ShurisLab.webp",
             "name": "Shuri's Lab",
             "txt": "When you play a card here, double its Power.",
-            "img": "locations/ShurisLab.webp"
+            "url": "https://snap.fan/locations/ShurisLab/"
         },
         "sinisterlondon": {
-            "url": "https://snap.fan/locations/SinisterLondon/",
+            "img": "locations/SinisterLondon.webp",
             "name": "Sinister London",
             "txt": "When you play a card here, add a copy to another location.",
-            "img": "locations/SinisterLondon.webp"
+            "url": "https://snap.fan/locations/SinisterLondon/"
         },
         "sokovia": {
-            "url": "https://snap.fan/locations/Sokovia/",
+            "img": "locations/Sokovia.webp",
             "name": "Sokovia",
             "txt": "Discard a card from each player's hand.",
-            "img": "locations/Sokovia.webp"
+            "url": "https://snap.fan/locations/Sokovia/"
         },
         "starktower": {
-            "url": "https://snap.fan/locations/StarkTower/",
+            "img": "locations/StarkTower.webp",
             "name": "Stark Tower",
             "txt": "After turn 5, give all cards here +2 Power.",
-            "img": "locations/StarkTower.webp"
+            "url": "https://snap.fan/locations/StarkTower/"
         },
         "starlightcitadel": {
-            "url": "https://snap.fan/locations/StarlightCitadel/",
+            "img": "locations/StarlightCitadel.webp",
             "name": "Starlight Citadel",
             "txt": "After turn 4, swap the position of each location.",
-            "img": "locations/StarlightCitadel.webp"
+            "url": "https://snap.fan/locations/StarlightCitadel/"
         },
         "strangeacademy": {
-            "url": "https://snap.fan/locations/StrangeAcademy/",
+            "img": "locations/StrangeAcademy.webp",
             "name": "Strange Academy",
             "txt": "After turn 5, move all cards here to other random locations.",
-            "img": "locations/StrangeAcademy.webp"
+            "url": "https://snap.fan/locations/StrangeAcademy/"
         },
         "subterranea": {
-            "url": "https://snap.fan/locations/Subterranea/",
+            "img": "locations/Subterranea.webp",
             "name": "Subterranea",
             "txt": "Shuffle 5 rocks into each deck.",
-            "img": "locations/Subterranea.webp"
+            "url": "https://snap.fan/locations/Subterranea/"
         },
         "tahiti": {
-            "url": "https://snap.fan/locations/Tahiti/",
+            "img": "locations/TAHITI.webp",
             "name": "T.A.H.I.T.I.",
             "txt": "When a card is discarded or destroyed, add a copy here.",
-            "img": "locations/TAHITI.webp"
+            "url": "https://snap.fan/locations/Tahiti/"
         },
         "thebifrost": {
-            "url": "https://snap.fan/locations/Bifrost/",
+            "img": "locations/TheBifrost.webp",
             "name": "The Bifrost",
             "txt": "After turn 4, move all cards one location to the right.",
-            "img": "locations/TheBifrost.webp"
+            "url": "https://snap.fan/locations/Bifrost/"
         },
         "thebighouse": {
-            "url": "https://snap.fan/locations/TheBigHouse/",
+            "img": "locations/TheBigHouse.webp",
             "name": "The Big House",
             "txt": "Cards that cost 4, 5, or 6 can't be played here.",
-            "img": "locations/TheBigHouse.webp"
+            "url": "https://snap.fan/locations/TheBigHouse/"
         },
         "thehub": {
-            "url": "https://snap.fan/locations/TheHub/",
+            "img": "locations/TheHub.webp",
             "name": "The Hub",
             "txt": "Add a random card to each player's hand.",
-            "img": "locations/TheHub.webp"
+            "url": "https://snap.fan/locations/TheHub/"
         },
         "theicebox": {
-            "url": "https://snap.fan/locations/TheIceBox/",
+            "img": "locations/TheIceBox.webp",
             "name": "The Ice Box",
             "txt": "Give a card in each player\u2019s hand +1 Cost.",
-            "img": "locations/TheIceBox.webp"
+            "url": "https://snap.fan/locations/TheIceBox/"
         },
         "thenexus": {
-            "url": "https://snap.fan/locations/TheNexus/",
+            "img": "locations/TheNexus.webp",
             "name": "The Nexus",
             "txt": "Your Power here is granted to other locations as well.",
-            "img": "locations/TheNexus.webp"
+            "url": "https://snap.fan/locations/TheNexus/"
         },
         "thepeak": {
-            "url": "https://snap.fan/locations/ThePeak/",
+            "img": "locations/ThePeak.webp",
             "name": "The Peak",
             "txt": "Each card in your hand swaps its Power and Cost.",
-            "img": "locations/ThePeak.webp"
+            "url": "https://snap.fan/locations/ThePeak/"
         },
         "theraft": {
-            "url": "https://snap.fan/locations/Raft/",
+            "img": "locations/TheRaft.webp",
             "name": "The Raft",
             "txt": "First to fill this draws a 6-Cost card. It costs 0.",
-            "img": "locations/TheRaft.webp"
+            "url": "https://snap.fan/locations/Raft/"
         },
         "thespacethrone": {
-            "url": "https://snap.fan/locations/SpaceThrone/",
+            "img": "locations/TheSpaceThrone.webp",
             "name": "The Space Throne",
             "txt": "Only one card can be here for each player.",
-            "img": "locations/TheSpaceThrone.webp"
+            "url": "https://snap.fan/locations/SpaceThrone/"
         },
         "thesuperflow": {
-            "url": "https://snap.fan/locations/Superflow/",
+            "img": "locations/TheSuperflow.webp",
             "name": "The Superflow",
             "txt": "If you have no cards here, +1 energy each turn.",
-            "img": "locations/TheSuperflow.webp"
+            "url": "https://snap.fan/locations/Superflow/"
         },
         "thetriskelion": {
-            "url": "https://snap.fan/locations/Triskelion/",
+            "img": "locations/TheTriskelion.webp",
             "name": "The Triskelion",
             "txt": "Fill each player's hand with random cards.",
-            "img": "locations/TheTriskelion.webp"
+            "url": "https://snap.fan/locations/Triskelion/"
         },
         "thevault": {
-            "url": "https://snap.fan/locations/Vault/",
+            "img": "locations/TheVault.webp",
             "name": "The Vault",
             "txt": "On turn 6, cards can't be played here.",
-            "img": "locations/TheVault.webp"
+            "url": "https://snap.fan/locations/Vault/"
         },
         "throneroom": {
-            "url": "https://snap.fan/locations/WakandanThroneRoom/",
+            "img": "locations/ThroneRoom.webp",
             "name": "Throne Room",
             "txt": "Card(s) here with the highest Power have their Power doubled.",
-            "img": "locations/ThroneRoom.webp"
+            "url": "https://snap.fan/locations/WakandanThroneRoom/"
         },
         "tinkerersworkshop": {
-            "url": "https://snap.fan/locations/TinkerersWorkshop/",
+            "img": "locations/TinkerersWorkshop.webp",
             "name": "Tinkerer's Workshop",
             "txt": "+1 Energy this turn.",
-            "img": "locations/TinkerersWorkshop.webp"
+            "url": "https://snap.fan/locations/TinkerersWorkshop/"
         },
         "titan": {
-            "url": "https://snap.fan/locations/Titan/",
+            "img": "locations/Titan.webp",
             "name": "Titan",
             "txt": "6-Cost cards cost 1 less.",
-            "img": "locations/Titan.webp"
+            "url": "https://snap.fan/locations/Titan/"
         },
         "transia": {
-            "url": "https://snap.fan/locations/Transia/",
+            "img": "locations/Transia.webp",
             "name": "Transia",
             "txt": "Swap the positions of each location.",
-            "img": "locations/Transia.webp"
+            "url": "https://snap.fan/locations/Transia/"
         },
         "tva": {
-            "url": "https://snap.fan/locations/Tva/",
+            "img": "locations/TVA.webp",
             "name": "TVA",
             "txt": "After turn 4, end the game.",
-            "img": "locations/TVA.webp"
+            "url": "https://snap.fan/locations/Tva/"
         },
         "utopia": {
-            "url": "https://snap.fan/locations/Utopia/",
+            "img": "locations/Utopia.webp",
             "name": "Utopia",
             "txt": "On turn 4, cards here can move.",
-            "img": "locations/Utopia.webp"
+            "url": "https://snap.fan/locations/Utopia/"
         },
         "vibraniummines": {
-            "url": "https://snap.fan/locations/VibraniumMines/",
+            "img": "locations/VibraniumMines.webp",
             "name": "Vibranium Mines",
             "txt": "When you play a card here, shuffle 3 Vibranium into your deck.",
-            "img": "locations/VibraniumMines.webp"
+            "url": "https://snap.fan/locations/VibraniumMines/"
         },
         "vormir": {
-            "url": "https://snap.fan/locations/Vormir/",
+            "img": "locations/Vormir.webp",
             "name": "Vormir",
             "txt": "The first card you play here is destroyed.",
-            "img": "locations/Vormir.webp"
+            "url": "https://snap.fan/locations/Vormir/"
         },
         "wakanda": {
-            "url": "https://snap.fan/locations/Wakanda/",
+            "img": "locations/Wakanda.webp",
             "name": "Wakanda",
             "txt": "Cards here can't be destroyed.",
-            "img": "locations/Wakanda.webp"
+            "url": "https://snap.fan/locations/Wakanda/"
         },
         "wakandanembassy": {
-            "url": "https://snap.fan/locations/WakandanEmbassy/",
+            "img": "locations/WakandanEmbassy.webp",
             "name": "Wakandan Embassy",
             "txt": "Give +2 Power to cards in players' hands.",
-            "img": "locations/WakandanEmbassy.webp"
+            "url": "https://snap.fan/locations/WakandanEmbassy/"
         },
         "warriorfalls": {
-            "url": "https://snap.fan/locations/WarriorFalls/",
+            "img": "locations/WarriorFalls.webp",
             "name": "Warrior Falls",
             "txt": "After each turn, cards here FIGHT! Destroy the weakest one(s).",
-            "img": "locations/WarriorFalls.webp"
+            "url": "https://snap.fan/locations/WarriorFalls/"
         },
         "washingtondc": {
-            "url": "https://snap.fan/locations/WashingtonDC/",
+            "img": "locations/WashingtonDC.webp",
             "name": "Washington D.C.",
             "txt": "Cards here with no abilities have +3 Power.",
-            "img": "locations/WashingtonDC.webp"
+            "url": "https://snap.fan/locations/WashingtonDC/"
         },
         "weirdworld": {
-            "url": "https://snap.fan/locations/Weirdworld/",
+            "img": "locations/Weirdworld.webp",
             "name": "Weirdworld",
             "txt": "Both players draw from their opponent's decks.",
-            "img": "locations/Weirdworld.webp"
+            "url": "https://snap.fan/locations/Weirdworld/"
         },
         "westview": {
-            "url": "https://snap.fan/locations/Westview/",
+            "img": "locations/Westview.webp",
             "name": "Westview",
             "txt": "Turns into a new location on turn 4.",
-            "img": "locations/Westview.webp"
+            "url": "https://snap.fan/locations/Westview/"
         },
         "worldship": {
-            "url": "https://snap.fan/locations/Worldship/",
+            "img": "locations/Worldship.webp",
             "name": "Worldship",
             "txt": "Destroy the other locations.",
-            "img": "locations/Worldship.webp"
-        },
-        "xmansion": {
-            "url": "https://snap.fan/locations/XMansion/",
-            "name": "X-Mansion",
-            "txt": "After turn 3, add a random card here for each player.",
-            "img": "locations/XMansion.webp"
+            "url": "https://snap.fan/locations/Worldship/"
         },
         "xandar": {
-            "url": "https://snap.fan/locations/Xandar/",
+            "img": "locations/Xandar.webp",
             "name": "Xandar",
             "txt": "Cards here have\n+1 Power.",
-            "img": "locations/Xandar.webp"
+            "url": "https://snap.fan/locations/Xandar/"
+        },
+        "xmansion": {
+            "img": "locations/XMansion.webp",
+            "name": "X-Mansion",
+            "txt": "After turn 3, add a random card here for each player.",
+            "url": "https://snap.fan/locations/XMansion/"
+        }
+    },
+    "requests": {
+        "1670906995.814": {
+            "author": 365667186208931841,
+            "card": "StrongGuy",
+            "channel": 722988880273342485,
+            "guild": 365677277821796354,
+            "message": 1052084937169317918
+        },
+        "1670907089.893": {
+            "author": 240174717573660673,
+            "card": "TheCollector",
+            "channel": 620013384049623080,
+            "guild": 248732519204126720,
+            "message": 1052085331765239858
+        },
+        "1670907181.253": {
+            "author": 365667186208931841,
+            "card": "Bar With No Name",
+            "channel": 722988880273342485,
+            "guild": 365677277821796354,
+            "message": 1052085714956861470
+        },
+        "1670907291.548": {
+            "author": 240174717573660673,
+            "card": "TheCollector",
+            "channel": 620013384049623080,
+            "guild": 248732519204126720,
+            "message": 1052086177567608832
         }
     }
 }
