@@ -1,9 +1,10 @@
 """Helper methods for the Whatno Cogs"""
 import logging
 import re
-from io import UnsupportedOperation
-from os import fsync
+from html.parser import HTMLParser
+from io import UnsupportedOperation, StringIO
 from json import dumps
+from os import fsync
 from pathlib import Path
 
 from tinydb import JSONStorage, TinyDB
@@ -59,3 +60,19 @@ class StrTable(Table):
 class PrettyStringDB(TinyDB):
     table_class = StrTable
     default_storage_class = PrettyJSONStorage
+
+
+class CleanHTML(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.reset()
+        self.strict = False
+        self.convert_charrefs= True
+        self.text = StringIO()
+
+    def handle_data(self, d):
+        self.text.write(d)
+
+    def process(self, data):
+        self.feed(data)
+        return self.text.getvalue()
