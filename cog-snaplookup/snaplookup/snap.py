@@ -76,7 +76,7 @@ class SnapCog(Cog):
             for req in reqs:
                 doc = self.cards.get(doc_id=req) or self.locs.get(doc_id=req)
                 if doc:
-                    res.append(f"combo/{doc['img']}")
+                    res.append(f"combo/{doc['localImage']}")
                     self.requests.upsert(
                         Document(
                             {
