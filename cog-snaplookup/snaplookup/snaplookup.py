@@ -1,20 +1,23 @@
 import subprocess
 import re
-from bs4 import BeautifulSoup
-from requests import get
 from json import load, dump
 from os.path import exists
-from PIL import Image, ImageDraw, ImageFont
 from math import floor, ceil
 from textwrap import fill
+
+from bs4 import BeautifulSoup
+from PIL import Image, ImageDraw, ImageFont
+from requests import get
 from tinydb.table import Document
 
 BASE = "https://snap.fan"
 
 
 def getsoup(url):
-    cmd = f'curl "{url}" -A "foobar"'
+    cmd = f'curl "{url}" -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/111.0" -H "Cookie: csrftoken=7BZuoxRp4GHtGQjRgwLcEoMY6uL5Ec7CHbS1pIgdA23eXJx7cLG0WchZYy5jiqwu; dnsDisplayed=undefined; ccpaApplies=false; signedLspa=undefined; permutive-id=6c6e39d4-37ce-46a5-8ed1-2aa3bc00ffee; ccpaUUID=aed8919b-eca9-4a8d-9a1e-0bd069922ec9; consentUUID=40d3cd6e-d154-4481-a8f2-9ef35db89927; messages=.eJyLjlaKj88qzs-Lz00tLk5MT1XSMdAxMtVRCi5NTgaKpJXm5FQqFGem56WmKGTmKSQWKxSnJubpKcXqDCmdsQB0kU-V:1pT5RW:dQ3prHvXu98REezg9GheRijrZqTFQw8IqcwC7r7XyRM"'
     res = subprocess.run(cmd, shell=True, text=True, capture_output=True)
+    print(res.returncode)
+    print(res.stdout)
     soup = BeautifulSoup(res.stdout, "html.parser")
     return soup
 
@@ -124,7 +127,7 @@ def combo(card, cw, ch, tt, mult):
     img1.rectangle([(0, 0), (cnw, cnh)], fill=(0, 0, 0))
     img.paste(crd, (0, 0))
 
-    mf = ImageFont.truetype("monofur.ttf", 42)
+    mf = ImageFont.truetype("monofur.ttf", 36)
     txt = fill(card["txt"], width=tt)
     _, _, tw, _ = img1.textbbox((0, 0), txt, font=mf)
     img1.text((((cw - tw) / 2), ch + 10), txt, font=mf, fill=(255, 255, 255))
@@ -150,8 +153,3 @@ def process_cards(db, dl=False):
 
     return db
 
-
-if __name__ == "__main__":
-    from .helpers import PrettyStringDB
-
-    process_cards(PrettyStringDB("./data.db"))

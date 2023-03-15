@@ -1,10 +1,11 @@
-"""Helper methods for the DoA Cogs"""
+"""Helper methods for the Whatno Cogs"""
 import logging
 import re
 from io import UnsupportedOperation
 from os import fsync
 from json import dumps
 from pathlib import Path
+
 from tinydb import JSONStorage, TinyDB
 from tinydb.table import Document, Table
 
