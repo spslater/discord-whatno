@@ -50,7 +50,7 @@ def download(req, res, errs):
     try:
         name, url = req.rsplit(" ", 1)
     except ValueError as e:
-        if req.startswith("http")
+        if req.startswith("http"):
             name = str(uuid4())
             url = req
         else:
