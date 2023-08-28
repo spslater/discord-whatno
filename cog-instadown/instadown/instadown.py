@@ -3,6 +3,7 @@ import logging
 import re
 from os import stat, rename, remove
 from subprocess import run
+from uuid import uuid4
 
 from discord import File
 from discord.ext.commands import Cog
@@ -49,9 +50,13 @@ def download(req, res, errs):
     try:
         name, url = req.rsplit(" ", 1)
     except ValueError as e:
-        logger.debug("only link, no name, prob do a random name in future?")
-        errs.append(str(e))
-        return res, errs
+        if req.startswith("http")
+            name = str(uuid4())
+            url = req
+        else:
+            logger.debug("only link, no name, prob do a random name in future?")
+            errs.append(str(e))
+            return res, errs
     name = name.replace(" ", "_") + ".mp4"
     tmp = calc_path("./tmp/" + name)
     logger.debug("downloading %s as %s", url, tmp)
@@ -113,4 +118,10 @@ class InstaDownCog(Cog):
             if errs:
                 err_msg = "\n".join(errs)
                 await chnl.send(err_msg)
+
+            for fname in res:
+                try:
+                    remove(calc_path(fname))
+                except FileNotFoundError:
+                    pass
 
