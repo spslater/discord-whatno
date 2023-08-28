@@ -1,5 +1,9 @@
 """Test and general functions Cog"""
 import logging
+from pathlib import Path
+from shutil import rmtree
+from subprocess import run, CalledProcessError
+from sys import executable
 
 from discord import ExtensionError
 from discord.ext.commands import Cog, group, is_owner
@@ -48,7 +52,7 @@ class WNManageCog(Cog, name="Manage Extensions"):
     @exts.command()
     async def load(self, ctx, *, module):
         """Loads a module."""
-        await ctx.message.add_reaction("<:wave_Joyce:780682895907618907>")
+        await ctx.message.add_reaction("\N{OK HAND SIGN}")
         module = self._module_name(module)
         try:
             self.bot.load_extension(module)
@@ -71,7 +75,7 @@ class WNManageCog(Cog, name="Manage Extensions"):
                 )
             )
             return
-        await ctx.message.add_reaction("<:wave_Joyce:780682895907618907>")
+        await ctx.message.add_reaction("\N{OK HAND SIGN}")
         try:
             self.bot.unload_extension(module)
         except (ExtensionError, KeyError) as e:
@@ -120,7 +124,7 @@ class WNManageCog(Cog, name="Manage Extensions"):
     @exts.command(name="reload")
     async def reload(self, ctx, *, module="all"):
         """Reloads a module."""
-        await ctx.message.add_reaction("<:wave_Joyce:780682895907618907>")
+        await ctx.message.add_reaction("\N{OK HAND SIGN}")
         if module == "all":
             logger.info("Reloading: %s", ', '.join(self.bot.loaded_extensions))
             good = 0
@@ -141,3 +145,105 @@ class WNManageCog(Cog, name="Manage Extensions"):
         if success:
             await ctx.send("\N{OK HAND SIGN} Reload successful! \N{GRINNING FACE}")
 
+    @is_owner()
+    @exts.command(name="add")
+    async def add(self, ctx, saveas, url):
+        """Download a new extension and link it, don't enable it"""
+        if not url.startswith("http"):
+            await ctx.send("\N{THUMBS DOWN SIGN} repo link needs to be http not ssh")
+            return
+        if Path(saveas).parent != Path("."):
+            await ctx.send("\N{THUMBS DOWN SIGN} name cannot contain multiple directories")
+            return
+        dlpath = Path(f"extension/{saveas}")
+        if dlpath.exists():
+            await ctx.send("\N{THUMBS DOWN SIGN} download location already exists")
+            return
+
+        dlcmd = ["git", "clone", url, dlpath]
+        logger.info("Cloning git repo")
+        res = run(dlcmd)
+        try:
+            res.check_returncode()
+        except CalledProcessError as e:
+            await ctx.send(f"\N{THUMBS DOWN SIGN} error when downloading repo: {e}")
+            rmtree(dlpath, ignore_errors=True)
+            return
+        logger.info("Repo cloned successfully!")
+
+        extfile = dlpath / "external.txt"
+        logger.info("Downloading external dependecies")
+        if extfile.exists():
+            extcmd = ["xargs", "-a", extfile, "apt", "-y", "install"]
+            res = run(extcmd)
+            try:
+                res.check_returncode()
+                logger.info("Done!")
+            except CalledProcessError as e:
+                await ctx.send(f"\N{THUMBS DOWN SIGN} error installing external packages")
+                rmtree(dlpath, ignore_errors=True)
+                return
+        else:
+            logger.info("No external dependecies??")
+
+        reqfile = dlpath / "requirements.txt"
+        if reqfile.exists():
+            pipcmd = [executable, "-m", "pip", "install", "-r", str(reqfile)]
+            res = run(pipcmd)
+            try:
+                res.check_returncode()
+            except CalledProcessError as e:
+                await ctx.send(f"\N{THUMBS DOWN SIGN} error installing requirements")
+                rmtree(dlpath, ignore_errors=True)
+                return
+
+        lncmd = ["ln", "-s", f"../../{dlpath}/{saveas}"]
+        res = run(lncmd, cwd="whatno/extension")
+        try:
+            res.check_returncode()
+        except CalledProcessError as e:
+            await ctx.send(f"\N{THUMBS DOWN SIGN} error linking the repo: {e}")
+            rmtree(dlpath, ignore_errors=True)
+            return
+        await ctx.send(f"\N{OK HAND SIGN} new extension downloaded!")
+
+
+    @is_owner()
+    @exts.command(name="update")
+    async def update(self, ctx, saveas):
+        extloc = Path(f"extension/{saveas}")
+
+        upcmd = ["git", "pull", "origin", "master"]
+        res = run(upcmd, cwd=extloc)
+        try:
+            res.check_returncode()
+        except CalledProcessError as e:
+            await ctx.send(f"\N{THUMBS DOWN SIGN} error updating extension")
+            return
+
+
+        reqfile = extloc / "requirements.txt"
+        if reqfile.exists():
+            pipcmd = [executable, "-m", "pip", "install", "-r", str(reqfile)]
+            res = run(pipcmd)
+            try:
+                res.check_returncode()
+            except CalledProcessError as e:
+                await ctx.send(f"\N{THUMBS DOWN SIGN} error updating requirements")
+                return
+        extfile = extloc / "external.txt"
+        if extfile.exists():
+            extcmd = ["xargs", "-a", f"'{extfile}'", "apt", "-y", "install"]
+            res = run(extcmd, shell=True)
+            try:
+                res.check_returncode()
+            except CalledProcessError as e:
+                await ctx.send(f"\N{THUMBS DOWN SIGN} error updating external packages")
+                return
+
+        module = self._module_name(saveas)
+        success = await self._reload_module(ctx, module)
+        if not success:
+            await ctx.send(f"\N{THUMBS DOWN SIGN} error reloading extension after update")
+            return
+        await ctx.send("\N{OK HAND SIGN} Update successful! \N{GRINNING FACE}")
