@@ -4,6 +4,7 @@ import re
 from os import stat, rename, remove
 from subprocess import run
 from uuid import uuid4
+from pathlib import Path
 
 from discord import File
 from discord.ext.commands import Cog
@@ -85,6 +86,10 @@ class InstaDownCog(Cog):
     def __init__(self, bot):
         super().__init__()
         self.bot = bot
+
+        Path(calc_path("./tmp")).mkdir(parents=True, exist_ok=True)
+        Path(calc_path("./sm")).mkdir(parents=True, exist_ok=True)
+        Path(calc_path("./re")).mkdir(parents=True, exist_ok=True)
 
     def _bad_msg(self, msg):
         if "instagram.com/reel" in msg:
