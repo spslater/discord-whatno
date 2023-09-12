@@ -1,10 +1,8 @@
 """Stats Bot for Voice and Messages"""
 import logging
 import re
-from asyncio import create_subprocess_shell
-from io import StringIO
 from os import stat, rename, remove
-# from subprocess import run
+from subprocess import run
 from uuid import uuid4
 from pathlib import Path
 
@@ -19,14 +17,11 @@ chnk = generate_chunker(10)
 
 MAX_FILE = 25000000
 
-async def resize(tmp, sm_name, scale, res, errs):
+def resize(tmp, sm_name, scale, res, errs):
     # ffmpeg -i gamerrage.mp4 -filter:v scale=270:-1 -c:a copy gamerrage-sm.mp4
     logger.debug("running ffmpg")
-    stderr = StringIO()
-    stdout = StringIO()
-    ff_ret = await create_subprocess_shell(f"ffmpeg -i {tmp} -filter:v scale=iw*{scale}:-1 -c:a copy {sm_name}", stdout=stdout, stderr=stderr)
+    ff_ret = run(f"ffmpeg -i {tmp} -filter:v scale=iw*{scale}:-1 -c:a copy {sm_name}", shell=True, capture_output=True)
     cont = False
-    await ff_ret.wait()
     if ff_ret.returncode != 0:
         logger.debug("ret: %s | %s\n%s", ff_ret.returncode, ff_ret.stdout, ff_ret.stderr)
         errs.append(f"{sm_name} | ffmpg @ {scale}: {ff_ret.returncode}")
@@ -43,11 +38,8 @@ async def resize(tmp, sm_name, scale, res, errs):
         pass
     return res, errs, cont
 
-async def ytdlp(url, name):
-    stderr = StringIO()
-    stdout = StringIO()
-    ret = await create_subprocess_shell(f"/usr/local/bin/yt-dlp '{url}' -o {name}", stdout=stdout, stderr=stderr)
-    await ret.wait()
+def ytdlp(url, name):
+    ret = run(f"/usr/local/bin/yt-dlp '{url}' -o {name}", shell=True, capture_output=True)
     if ret.returncode != 0:
         logger.debug("ret: %s | %s\n%s", ret.returncode, ret.stdout, ret.stderr)
         return False
@@ -55,7 +47,7 @@ async def ytdlp(url, name):
 
 
 scales = ["4/5", "3/4", "3/5", "1/2", "2/5", "1/4", "1/5"]
-async def download(req, res, errs):
+def download(req, res, errs):
     try:
         name, url = req.rsplit(" ", 1)
     except ValueError as e:
@@ -69,7 +61,7 @@ async def download(req, res, errs):
     name = name.replace(" ", "_") + ".mp4"
     tmp = calc_path("./tmp/" + name)
     logger.debug("downloading %s as %s", url, tmp)
-    got = await ytdlp(url, tmp)
+    got = ytdlp(url, tmp)
     logger.debug("downloaded: %s", stat(tmp))
     if (stat(tmp).st_size / MAX_FILE) < 1:
         sm_name = calc_path("./re/" + name)
@@ -80,7 +72,7 @@ async def download(req, res, errs):
     for scale in scales:
         logger.debug("too big :( trying %s", scale)
         sm_name = calc_path("./sm/" + name)
-        res, errs, cont = await resize(tmp, sm_name, scale, res, errs)
+        res, errs, cont = resize(tmp, sm_name, scale, res, errs)
         if cont:
             return res, errs
     logger.debug("too big :( still too big, giving up, very sad")
@@ -112,7 +104,7 @@ class InstaDownCog(Cog):
         msg = message.content
         chnl = message.channel
         gld = message.guild
-        if not (chnl.id in (1034220450793934960, 722988880273342485, 1120438914986024981, 1151022713377394698) or gld.id in (0,)) or self._bad_msg(msg):
+        if not (chnl.id in (1034220450793934960, 722988880273342485, 1120438914986024981) or gld.id in (1090020461682901113,)) or self._bad_msg(msg):
             return
 
         logger.debug("downloading msg: %s", msg)
@@ -121,7 +113,7 @@ class InstaDownCog(Cog):
             res = []
             errs = []
             for req in reqs:
-                res, errs = await download(req, res, errs)
+                res, errs = download(req, res, errs)
 
             for fnames in chnk(res):
                 logger.debug("videos: %s", fnames)
