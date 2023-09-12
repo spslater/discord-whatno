@@ -22,13 +22,11 @@ MAX_FILE = 25000000
 async def resize(tmp, sm_name, scale, res, errs):
     # ffmpeg -i gamerrage.mp4 -filter:v scale=270:-1 -c:a copy gamerrage-sm.mp4
     logger.debug("running ffmpg")
-    stderr = StringIO()
-    stdout = StringIO()
-    ff_ret = await create_subprocess_shell(f"ffmpeg -i {tmp} -filter:v scale=iw*{scale}:-1 -c:a copy {sm_name}", stdout=stdout, stderr=stderr)
+    ff_ret = await create_subprocess_shell(f"ffmpeg -i {tmp} -filter:v scale=iw*{scale}:-1 -c:a copy {sm_name}")
     cont = False
     await ff_ret.wait()
     if ff_ret.returncode != 0:
-        logger.debug("ret: %s | %s\n%s", ff_ret.returncode, ff_ret.stdout, ff_ret.stderr)
+        logger.debug("ret: %s | %s\n%s", ff_ret.returncode)
         errs.append(f"{sm_name} | ffmpg @ {scale}: {ff_ret.returncode}")
         cont = True
     elif (stat(sm_name).st_size / MAX_FILE) < 1:
@@ -46,10 +44,10 @@ async def resize(tmp, sm_name, scale, res, errs):
 async def ytdlp(url, name):
     stderr = StringIO()
     stdout = StringIO()
-    ret = await create_subprocess_shell(f"/usr/local/bin/yt-dlp '{url}' -o {name}", stdout=stdout, stderr=stderr)
+    ret = await create_subprocess_shell(f"/usr/local/bin/yt-dlp '{url}' -o {name}")
     await ret.wait()
     if ret.returncode != 0:
-        logger.debug("ret: %s | %s\n%s", ret.returncode, ret.stdout, ret.stderr)
+        logger.debug("ret: %s | %s\n%s", ret.returncode)
         return False
     return True
 
