@@ -12,7 +12,6 @@ RUN mkdir logs
 ADD whatno whatno
 ADD requirements.txt .
 ADD logging.conf .
-ADD devbot.env .
 
 RUN python -m ensurepip --upgrade
 RUN python -m pip install --upgrade pip
