@@ -242,8 +242,9 @@ class WNManageCog(Cog, name="Manage Extensions"):
                 return
 
         module = self._module_name(saveas)
-        success = await self._reload_module(ctx, module)
-        if not success:
-            await ctx.send(f"\N{THUMBS DOWN SIGN} error reloading extension after update")
-            return
+        if module in self.bot.loaded_extensions:
+            success = await self._reload_module(ctx, module)
+            if not success:
+                await ctx.send(f"\N{THUMBS DOWN SIGN} error reloading extension after update")
+                return
         await ctx.send("\N{OK HAND SIGN} Update successful! \N{GRINNING FACE}")
