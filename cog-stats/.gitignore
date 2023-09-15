@@ -1,0 +1,5 @@
+*.log
+*.env
+*.db
+*.json
+*.bak
