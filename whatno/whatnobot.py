@@ -9,6 +9,8 @@ from pathlib import Path
 from sys import exc_info
 from traceback import format_tb
 
+from environs import Env
+
 from discord import ExtensionFailed, Intents, NoEntryPointError
 from discord.ext.commands import Bot, when_mentioned_or
 
@@ -18,11 +20,13 @@ logger = logging.getLogger(__name__)
 class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
     """Bot to talk to discord"""
 
-    def __init__(self, token, prefix="%"):
+    def __init__(self, token, env=None, prefix="%"):
         if not token:
             raise RuntimeError("No api token provided")
+        self.env = env or Env()
         self.token = token
         self.prefix = prefix
+        self.storage = env.path("DISCORD_STORAGE", "storage").resolve()
 
         super().__init__(
             command_prefix=when_mentioned_or(prefix),
@@ -30,7 +34,6 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
             case_insensitive=True,
             intents=Intents.all(),
         )
-        self.loaded_extensions = set()
         self.load_extensions()
 
     @staticmethod
@@ -45,15 +48,12 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
                 continue
 
             src = Path(filename)
-            rec = src.parent.resolve() / src.name if src.is_symlink() else src.resolve()
+            rec = src.parent.resolve() / src.resolve()
             available.add(".".join([module, rec.relative_to(root).stem]))
         return available
 
     def load_extensions(self):
         """Load the extensions found in the extension folder"""
-        root = "whatno/extension"
-        module = root.replace("/", ".")
-        root = Path(root).resolve()
         for module in self.get_available_extensions():
             logger.info("loading: %s", module)
             try:
@@ -66,8 +66,6 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
                 tb_list = "\n".join(format_tb(err_traceback))
                 tb_str = " | ".join(tb_list.splitlines())
                 logger.error("load %s: %s | %s", module, e, tb_str)
-            else:
-                self.loaded_extensions.add(module)
 
     # pylint: disable=too-many-arguments
     async def get_history(

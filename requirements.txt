@@ -1,2 +1,12 @@
+# whatno
 py-cord==2.4.1
-python-dotenv==0.19.2
+environs==9.5.0
+
+# instadown
+yt-dlp==2023.1.6
+more-itertools=10.1.0
+
+# snaplookup
+aiohttp==3.8.5
+Pillow==9.4.0
+tinydb==4.7.1

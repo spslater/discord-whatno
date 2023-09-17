@@ -4,7 +4,7 @@ import logging.config
 from argparse import ArgumentParser
 from os import getenv
 
-from dotenv import load_dotenv
+from environs import Env
 
 from . import WhatnoBot
 
@@ -35,19 +35,32 @@ def build_parser():
         dest="devmode",
         help="Enable DevMode (alt prefix)",
     )
+    temp.add_argument(
+        "-s",
+        "--storage",
+        nargs=1,
+        dest="storage",
+        help="directory where persistant files are being stored",
+    )
 
     return temp
 
 
 args = build_parser().parse_args()
-load_dotenv(args.envfile)
+env = Env()
+env.read_env(args.envfile, False) # do not recurse up directories to find a .env file
 
-logging_config = getenv("DISCORD_LOGGING_CONFIG")
+with env.prefixed("DISCORD_"):
+    logging_config = env("LOGGING_CONFIG")
+    token = args.token or env("TOKEN")
+
+
 if logging_config:
     logging.config.fileConfig(logging_config)
 
 if args.devmode:
-    whatno = WhatnoBot(args.token or getenv("DISCORD_TOKEN", None), prefix="~")
+    whatno = WhatnoBot(token, env=env, prefix="~")
 else:
-    whatno = WhatnoBot(args.token or getenv("DISCORD_TOKEN", None))
+    whatno = WhatnoBot(token, env=env)
+
 whatno.run()
