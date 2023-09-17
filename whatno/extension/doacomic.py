@@ -10,17 +10,16 @@ import logging
 import re
 from datetime import time, timedelta, datetime
 from json import dump, load
-from os import getenv
 from pathlib import Path
 from time import sleep
 
 from discord import Colour, Embed, Forbidden, HTTPException, NotFound
-
 from discord.ext.commands import Cog, command, is_owner
 from discord.ext.tasks import loop
-from dotenv import load_dotenv
+from discord.ext import bridge
+from sqlite3 import Connection, IntegrityError, Row, connect
+from typing import Union
 
-from .comic import ComicInfo
 from .helpers import TimeTravel, calc_path
 
 
@@ -32,11 +31,118 @@ CP_MINS = 0 + off_mins
 PUBLISH_TIME = time(CP_HOUR, CP_MINS)
 
 
+
+def setup(bot):
+    """Setup the DoA Cogs"""
+    cog_reread = DoaComicCog(bot)
+    bot.add_cog(cog_reread)
+
+
+
+class DictRow:
+    def __init__(self, cursor, row):
+        self._keys = []
+        for idx, col in enumerate(cursor.description):
+            setattr(self, col[0], row[idx])
+
+    def __repr__(self):
+        vals = [f"{k}: {getattr(self,k)}" for k in self._keys]
+        return "DictRow(" + " | ".join(vals) + ")"
+
+    def __getitem__(self, key):
+        return getattr(self, key, None)
+
+    def __setitem__(self, key, value):
+        self._keys.append(key)
+        setattr(self, key, value)
+
+class ComicDB:
+    """Comic DB Interface"""
+
+    def __init__(self, dbfile, readonly=True):
+        self.readonly = readonly
+        self.filename: Path = dbfile
+        if not self.filename:
+            raise ValueError("No database to pull comic info from provided")
+        self.conn = None
+
+    def setup(self):
+        logger.debug("running setup on the comic database")
+        script = calc_path("./doabase.sql")
+        with open(script, "r", encoding="utf-8") as fp:
+            sql_script = fp.read()
+
+        with self as db:
+            db.executescript(sql_script)
+
+    def open(self):
+        """Open a connection to the database and return a cursor"""
+        self.conn: Connection = (
+            connect(f"file:{self.filename}?mode=ro", uri=True)
+            if self.readonly
+            else connect(self.filename)
+        )
+        self.conn.row_factory = DictRow
+        return self.conn.cursor()
+
+    def close(self):
+        """Close connection to the database"""
+        if not self.readonly:
+            self.conn.commit()
+        return self.conn.close()
+
+    def __enter__(self):
+        return self.open()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+        return exc_type is None
+
+
+class Schedule:
+    """Manage schedule database"""
+
+    def __init__(self, schedule):
+        self.schedule_filename: Path = schedule
+        if not self.schedule_filename:
+            raise ValueError("No schedule for when to publish comics provided")
+        self.schedule = None
+
+    def __getitem__(self, key):
+        if self.schedule is None:
+            self.load()
+        return self.schedule[key]
+
+    def __setitem__(self, key, value):
+        if self.schedule is None:
+            self.load()
+        self.schedule[key] = value
+
+    def load(self):
+        """Load schedule from file"""
+        with open(self.schedule_filename, "r") as fp:
+            self.schedule = load(fp)
+
+    def save(self):
+        """Save schedule to file"""
+        if self.schedule:
+            with open(self.schedule_filename, "w+") as fp:
+                dump(self.schedule, fp, sort_keys=True, indent="\t")
+
+    def __enter__(self):
+        self.load()
+        return self.schedule
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.save()
+        return exc_type is None
+
+
 class ComicEmbeds:
     """Embed information for when refreshing comics"""
 
     def __init__(self, embeds):
-        self.filename: Path = calc_path(embeds)
+        self.filename: Path = embeds
         if not self.filename:
             raise ValueError("No embeds file for previously publish comics provided")
         self.data = None
@@ -77,24 +183,205 @@ class ComicEmbeds:
                 dump(self.data, fp, sort_keys=True, indent="\t")
 
 
-class DoaRereadCog(Cog, name="DoA Reread"):
-    """Actual DoA Reread Cog"""
 
-    def __init__(self, bot, envfile):
+class ComicInfo:
+    """Manage and get Comic information"""
+
+    def __init__(self, database, schedule):
+        self.database_file = database
+        self.schedule_file = schedule
+        ComicDB(self.database_file, False).setup()
+
+    def _database(self, readonly=True):
+        return ComicDB(self.database_file, readonly)
+
+    def _schedule(self):
+        return Schedule(self.schedule_file)
+
+    def _get_tags(self, date_string: str) -> list[str]:
+        """Comma seperated tags from a comic"""
+        with self._database() as database:
+            rows = database.execute(
+                "SELECT tag FROM Tag WHERE comicId = ?",
+                (date_string,),
+            ).fetchall()
+        return [r["tag"] for r in rows]
+
+    def new_latest(self, mid, url):
+        """Save latest comic published to latest channel"""
+        with self._database(readonly=False) as database:
+            if url.endswith(".png"):
+                og = url
+                img = f"%{url.split('/')[-1]}"
+                res = database.execute(
+                    "SELECT url FROM Comic WHERE image LIKE ?",
+                    (img,),
+                )
+                url = res.fetchone()["url"]
+            try:
+                database.execute("INSERT INTO Latest VALUES (?,?)", (mid, url))
+            except IntegrityError:
+                pass
+
+    def save_reacts(self, reacts):
+        """Save live reacts from recent comic"""
+        with self._database(readonly=False) as database:
+            for react in reacts:
+                try:
+                    database.execute("INSERT INTO React VALUES (?,?,?)", react)
+                except IntegrityError:
+                    pass
+
+    def save_discussion(self, comic, message):
+        """Save the message that was part of a comics discussion"""
+        content = message.content if message.content.strip() else None
+        if message.attachments:
+            logger.debug("%s attaches: %s", message.id, message.attachments)
+        attach = message.attachments[0].url if message.attachments else None
+        embed = str(message.embeds[0].to_dict()) if message.embeds else None
+        with self._database(readonly=False) as database:
+            data = (
+                message.id,
+                message.created_at.timestamp(),
+                message.author.id,
+                comic,
+                content,
+                attach,
+                embed,
+            )
+            try:
+                database.execute(
+                    "INSERT INTO Discussion VALUES (?,?,?,?,?,?,?)",
+                    data,
+                )
+            except IntegrityError:
+                database.execute(
+                    """
+                    UPDATE Discussion
+                    SET
+                        msg = ?,
+                        time = ?,
+                        user = ?,
+                        comic = ?,
+                        content = ?,
+                        attach = ?,
+                        embed = ?
+                    WHERE msg = ?
+                    """,
+                    (*data, message.id),
+                )
+
+    def _add_reacts(self, results: list[DictRow]) -> list[DictRow]:
+        """Add the reacts as a list of tuples"""
+        with self._database() as database:
+            for result in results:
+                reacts = database.execute(
+                    f"""SELECT reaction, count(reaction) as num
+                        FROM React
+                        WHERE msg = {result['msg']} AND uid != 639324610772467714
+                        GROUP BY msg, reaction
+                        ORDER BY reaction ASC"""
+                ).fetchall()
+                if reacts:
+                    #setattr(result, "reacts", [(react["reaction"], react["num"]) for react in reacts])
+                    result["reacts"] = [(react["reaction"], react["num"]) for react in reacts]
+                print(result)
+        print(results)
+        return results
+
+    def released_on(self, dates: Union[str, list[str]]) -> list[DictRow]:
+        """Get database rows for comics released on given dates"""
+        if isinstance(dates, str):
+            dates = [dates]
+        with self._database() as database:
+            results = database.execute(
+                f"""SELECT
+                    Comic.release as release,
+                    Comic.title as title,
+                    Comic.image as image,
+                    Comic.url as url,
+                    Alt.alt as alt,
+                    Latest.msg as msg
+                FROM Comic
+                JOIN Alt ON Comic.release = Alt.comicId
+                JOIN Latest ON Comic.url = Latest.url
+                WHERE release IN {dates}"""
+            ).fetchall()
+        results = self._add_reacts(results)
+        return results
+
+    def todays_reread(self, date=None):
+        """Get information for comic reread"""
+        with self._schedule() as schedule:
+            date_string = date or TimeTravel.datestr()
+            days = tuple(schedule["days"][date_string])
+            logger.debug("Getting comics on following days: %s", days)
+
+        entries = []
+        comics = self.released_on(days)
+        logger.debug("%s comics from current week", len(comics))
+        for comic in comics:
+            release = comic["release"]
+            image = comic["image"].split("_", maxsplit=3)[3]
+            tags = [
+                f"[{tag}](https://www.dumbingofage.com/tag/{re.sub(' ', '-', tag)}/)"
+                for tag in self._get_tags(release)
+            ]
+
+            entries.append(
+                {
+                    "title": comic["title"],
+                    "url": comic["url"],
+                    "alt": f"||{comic['alt']}||",
+                    "tags": ", ".join(tags) or "no tags today",
+                    "image": f"https://www.dumbingofage.com/comics/{image}",
+                    "release": release,
+                    "reacts": comic["reacts"],
+                }
+            )
+        return entries
+
+    def update_schedule(self):
+        """Update the schedule every week"""
+        logger.info("Checking schedule to see if it needs updating")
+        with self._schedule() as schedule:
+            old_week = schedule["next_week"]
+            now = TimeTravel.datestr()
+            while old_week <= now:
+                new_week = datetime.strptime(old_week, "%Y-%m-%d") + timedelta(days=7)
+                new_week_str = datetime.strftime(new_week, "%Y-%m-%d")
+                schedule["next_week"] = new_week_str
+
+                last_day = sorted(schedule["days"].keys())[-1]
+                next_day = datetime.strptime(last_day, "%Y-%m-%d") + timedelta(days=1)
+                next_day_str = datetime.strftime(next_day, "%Y-%m-%d")
+
+                schedule["days"][next_day_str] = TimeTravel.week_dates(new_week_str)
+
+                old_week = schedule["next_week"]
+
+
+
+class DoaComicCog(Cog, name="DoA Comic"):
+    """Actual DoA Comic Cog"""
+
+    def __init__(self, bot):
         super().__init__()
         self.bot = bot
 
-        envpath = calc_path(envfile)
-        load_dotenv(envpath)
+        self.f_doa = self.bot.storage / "doa"
 
-        self.guild = None
-        self.channel = None
+        with self.bot.env.prefixed("DOA_"):
+            self.latest_channel = self.bot.env.int("LATEST_CHANNEL")
+            self.latest_bot = self.bot.env.int("LATEST_BOT")
+            self.channels = self.bot.env.list("COMIC_CHANNELS", subcast=int)
 
-        self.latest_channel = int(getenv("DOA_LATEST_CHANNEL"))
-        self.latest_bot = int(getenv("DOA_LATEST_BOT"))
+            database = self.f_doa / self.bot.env.path("DATABASE")
+            schedule = self.f_doa / self.bot.env.path("SCHEDULE")
+            embeds = self.f_doa / self.bot.env.path("EMBEDS")
 
-        self.comics = ComicInfo(getenv("DOA_DATABASE"), getenv("DOA_SCHEDULE"))
-        self.embeds = ComicEmbeds(getenv("DOA_EMBEDS"))
+        self.comics = ComicInfo(database, schedule)
+        self.embeds = ComicEmbeds(embeds)
         # function transformed by the @loop annotation
         # pylint: disable=no-member
         self.schedule_comics.start()
@@ -185,8 +472,8 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         await self._process_comic(after)
 
     @is_owner()
-    @command(name="latest")
-    async def save_latest_comic(self, ctx, after_str, before_str=None):
+    @bridge.bridge_command()
+    async def latest(self, ctx, after_str, before_str=None):
         """Save info about the comic from date provided"""
         logger.info(
             "Manually saving reacts after %s and before %s",
@@ -203,13 +490,9 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         await self._process_comic(after, before)
         await ctx.send(f"Saved comics after {after} and before {before} \N{OK HAND SIGN}")
 
-    @staticmethod
-    def _parse_list(original, cast=str):
-        return [cast(g.strip()) for g in original.split(",") if g.strip()]
-
     async def _setup_connection(self):
         given_channels = []
-        for given_channel in self._parse_list(getenv("COMIC_CHANNELS")):
+        for given_channel in self.comic_channels:
             channel_id = channel_name = None
             try:
                 channel_id = int(given_channel)
@@ -217,18 +500,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
                 channel_name = given_channel
 
             if channel_id is None:
-                channels = []
-                try:
-                    logger.debug("Trying to get channel from specific guild.")
-                    channels = self.guild.fetch_channels()
-                except RuntimeError:
-                    logger.debug(
-                        (
-                            "Error getting channels from guild, "
-                            "trying to get from all availible channels."
-                        )
-                    )
-                    channels = self.get_all_channels()
+                channels = self.get_all_channels()
 
                 for channel in channels:
                     if channel.name == channel_name:
@@ -237,7 +509,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
                 if channel_id is None:
                     raise RuntimeError("Provided channel is not an available channels")
             given_channels.append(channel_id)
-        self.channel = given_channels
+        self.channels = given_channels
 
     @staticmethod
     def build_comic_embed(entry: dict[str, str]) -> Embed:
@@ -277,14 +549,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
             "Sending comics for today. (%s)",
             (date or TimeTravel.datestr()),
         )
-        if channel_id is None:
-            if self.channel is None:
-                await self._setup_connection()
-            channels = self.channel
-        elif not isinstance(channel_id, list):
-            channels = [int(channel_id)]
-        else:
-            channels = channel_id
+        channels = self.channels if channel_id else channel_id
         comics = [
             (e["release"], self.build_comic_embed(e))
             for e in self.comics.todays_reread(date)
@@ -343,7 +608,7 @@ class DoaRereadCog(Cog, name="DoA Reread"):
                 )
         return False
 
-    @command()
+    @bridge.bridge_command()
     async def refresh(self, ctx, *date):
         """Refresh the comic to get the embed working"""
         logger.info("refreshing dates: %s", date)
@@ -378,13 +643,12 @@ class DoaRereadCog(Cog, name="DoA Reread"):
         except:
             await ctx.message.add_reaction("\N{OK HAND SIGN}")
 
-    @command(name="publish")
-    async def force_publish(self, ctx, date=None):
+    @bridge.bridge_command()
+    async def publish(self, ctx, date=None):
         """Publish the days comics, date (YYYY-MM-DD)
         is provided will publish comics for those days"""
         if not date:
             date = TimeTravel.datestr()
         logger.info("manually publishing comics for date %s", date)
         msg = await ctx.send("\N{OK HAND SIGN} Sendings Comics")
-        await self.send_comic(date, ctx.message.channel.id)
-
+        await self.send_comic(date, [ctx.message.channel.id])

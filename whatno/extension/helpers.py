@@ -1,12 +1,15 @@
-"""Helper methods for the DoA Cogs"""
-import logging
+"""Helper methods for the Whatno Cogs"""
+import re
 from datetime import datetime, timedelta
-from math import floor
+from html.parser import HTMLParser
+from io import UnsupportedOperation, StringIO
+from json import dumps
+from os import fsync
 from pathlib import Path
 
+from tinydb import JSONStorage, TinyDB
+from tinydb.table import Document, Table
 from pytz import timezone
-
-logger = logging.getLogger(__name__)
 
 
 def calc_path(filename):
@@ -17,6 +20,56 @@ def calc_path(filename):
     if not filepath.is_absolute():
         filepath = Path(__file__, "..", filepath)
     return filepath.resolve()
+
+def strim(s):
+    return re.sub(r'[^a-zA-Z0-9]', '', s.lower())
+
+
+class PrettyJSONStorage(JSONStorage):
+    """Story TinyDB data in a pretty format"""
+
+    def write(self, data):
+        self._handle.seek(0)
+        serialized = dumps(data, indent=4, sort_keys=True, **self.kwargs)
+        try:
+            self._handle.write(serialized)
+        except UnsupportedOperation as e:
+            raise IOError(
+                f'Cannot write to the database. Access mode is "{self._mode}"'
+            ) from e
+
+        self._handle.flush()
+        fsync(self._handle.fileno())
+
+        self._handle.truncate()
+
+class StrTable(Table):
+    document_id_class = str
+
+class PrettyStringDB(TinyDB):
+    table_class = StrTable
+    default_storage_class = PrettyJSONStorage
+
+
+class CleanHTML(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.reset()
+        self.strict = False
+        self.convert_charrefs= True
+        self.text = StringIO()
+
+    def handle_data(self, d):
+        self.text.write(d)
+
+    def process(self, data):
+        self.feed(data)
+        return self.text.getvalue()
+
+
+async def aget_json(session, url):
+    async with session.get(url) as r:
+        return await r.json()
 
 
 TZNAME = "US/Eastern"
@@ -43,31 +96,6 @@ class TimeTravel:
 
     # pylint: disable=invalid-name
     tz = TIMEZONE
-
-    @classmethod
-    def sqlts(cls, ts):
-        """Convert timestamp to sqlite database time string check"""
-        if isinstance(ts, datetime):
-            ts = ts.timestamp()
-        return datetime.fromtimestamp(ts, tz=cls.tz).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
-
-    @staticmethod
-    def tsfromdiscord(ts):
-        """Convert discord's timestamp to unix timestamp: 2022-05-12T08:46:46.505000+00:00"""
-        return datetime.strptime(ts[:-9], "%Y-%m-%dT%H:%M:%S.%f").timestamp()
-
-    @staticmethod
-    def tsinpast(days=0, hrs=0, mins=0, secs=0):
-        now = datetime.now()
-        td = timedelta(days=days, hours=hrs, minutes=mins, seconds=secs)
-        return (now - td).timestamp()
-
-    @classmethod
-    def pretty_ts(cls, ts):
-        val = cls.sqlts(ts)
-        date, time = val.split("T")
-        time = time.split(".")[0]
-        return f"{date} at {time}"
 
     @staticmethod
     def timestamp():

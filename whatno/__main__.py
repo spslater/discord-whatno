@@ -55,12 +55,12 @@ with env.prefixed("DISCORD_"):
     token = args.token or env("TOKEN")
 
 
-if logging_config:
-    logging.config.fileConfig(logging_config)
+    if logging_config:
+        logging.config.fileConfig(logging_config)
 
-if args.devmode:
-    whatno = WhatnoBot(token, env=env, prefix="~")
-else:
-    whatno = WhatnoBot(token, env=env)
+    if args.devmode:
+        whatno = WhatnoBot(token, env=env, prefix="~")
+    else:
+        whatno = WhatnoBot(token, env=env)
 
-whatno.run()
+    whatno.run()

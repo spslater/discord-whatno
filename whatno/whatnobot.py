@@ -26,7 +26,7 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
         self.env = env or Env()
         self.token = token
         self.prefix = prefix
-        self.storage = env.path("DISCORD_STORAGE", "storage").resolve()
+        self.storage = self.env.path("STORAGE", "storage").resolve()
 
         super().__init__(
             command_prefix=when_mentioned_or(prefix),
@@ -43,13 +43,9 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
         module = root.replace("/", ".")
         root = Path(root).resolve()
         available = set()
-        for filename in root.glob("*"):
-            if filename.match("__pycache__"):
-                continue
-
-            src = Path(filename)
-            rec = src.parent.resolve() / src.resolve()
-            available.add(".".join([module, rec.relative_to(root).stem]))
+        for filename in root.glob("cog_*.py"):
+            src = Path(filename).resolve()
+            available.add(".".join([module, src.relative_to(root).stem]))
         return available
 
     def load_extensions(self):
