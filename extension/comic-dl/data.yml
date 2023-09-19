@@ -1,0 +1,75 @@
+workdir: '/srv/projects/comics'
+savedir: '/srv/media/reading/webcomics/'
+comics:
+  DumbingOfAge:
+    loc: "DumbingOfAge/"
+    name: "Dumbing of Age"
+    #url: "https://www.dumbingofage.com/2010/comic/book-1/01-move-in-day/home/"
+    url: "https://www.dumbingofage.com/2021/comic/book-12/01-sister-christian/endgame-3/"
+    home: "https://www.dumbingofage.com/"
+    cur: false
+    alt: true
+    alt_size: 16
+    alt_color: [224, 238, 239]
+    db: "DumbingOfAge.db"
+    log: "output.log"
+    level: "INFO"
+    book:
+      - tag: 'li'
+        class: 'storyline-root'
+      - tag: 'a'
+    img:
+      - id: 'comic'
+      - tag: 'img'
+    nxt:
+      - id: 'comic-foot'
+      - tag: 'a'
+        class: 'navi navi-next'
+    prev:
+      - id: 'comic-foot'
+      - tag: 'a'
+        class: 'navi navi-prev'
+  OrderOfTheStick:
+    loc: "OrderOfTheStick/"
+    name: "Order of the Stick"
+    url: "https://www.giantitp.com/comics/oots.html"
+    base: "https://www.giantitp.com/"
+    cur: true
+    img:
+      - tag: 'table'
+      - tag: 'tr'
+        index: 1
+      - tag: 'tr'
+      - tag: 'td'
+        index: 1
+        recursive: false
+      - tag: 'table'
+      - tag: 'table'
+      - tag: 'tr'
+        index: 1
+        recursive: false
+      - tag: 'img'
+    nxt: null
+  CloverAndCutlass:
+    loc: "CloverAndCutlass/"
+    name: "Clover and Cutlass"
+    url: "https://cloverandcutlass.com/comic/cover/"
+    home: "https://cloverandcutlass.com/"
+    cur: true
+    alt: true
+    alt_size: 64
+    alt_color: [43, 110, 135]
+    db: 'CloverAndCutlass.db'
+    img:
+      - id: 'spliced-comic'
+      - tag: 'img'
+    nxt:
+      - tag: 'div'
+        class: 'single-comic-navigation'
+      - tag: 'a'
+        class: 'next-comic'
+    prev:
+      - tag: 'div'
+        class: 'single-comic-navigation'
+      - tag: 'a'
+        class: 'previous-comic'
