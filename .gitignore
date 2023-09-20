@@ -7,3 +7,9 @@ storage/
 *.db
 *.json
 *.bak
+*DS_Store
+*.png
+*.jpg
+*.svg
+*.cbz
+*.gif

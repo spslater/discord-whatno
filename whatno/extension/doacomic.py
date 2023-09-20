@@ -8,17 +8,25 @@ comics every day as part of a community reread.
 """
 import logging
 import re
+from asyncio import run, sleep, create_subprocess_shell, subprocess
 from datetime import time, timedelta, datetime
 from json import dump, load
 from pathlib import Path
+from textwrap import fill
 from time import sleep
+from typing import NamedTuple
 
+from aiohttp import ClientSession
+from bs4 import BeautifulSoup
+from bs4.element import Tag
 from discord import Colour, Embed, Forbidden, HTTPException, NotFound
 from discord.ext.commands import Cog, command, is_owner
 from discord.ext.tasks import loop
 from discord.ext import bridge
-from sqlite3 import Connection, IntegrityError, Row, connect
-from typing import Union
+from PIL import Image, ImageDraw, ImageFont
+from requests import get, RequestException
+from sqlite3 import Connection, IntegrityError, Row, connect, OperationalError
+from yaml import load, Loader
 
 from .helpers import TimeTravel, calc_path
 
@@ -30,7 +38,9 @@ CP_HOUR = 12 + off_hour
 CP_MINS = 0 + off_mins
 PUBLISH_TIME = time(CP_HOUR, CP_MINS)
 
-
+DL_HOUR = 3 + off_hour
+DL_MINS = 0 + off_mins
+DOWNLOAD_TIME = time(DL_HOUR, DL_MINS)
 
 def setup(bot):
     """Setup the DoA Cogs"""
@@ -61,14 +71,14 @@ class ComicDB:
 
     def __init__(self, dbfile, readonly=True):
         self.readonly = readonly
-        self.filename: Path = dbfile
+        self.filename = dbfile
         if not self.filename:
             raise ValueError("No database to pull comic info from provided")
         self.conn = None
 
-    def setup(self):
+    def setup(self, sql_path):
         logger.debug("running setup on the comic database")
-        script = calc_path("./doabase.sql")
+        script = calc_path(sql_path)
         with open(script, "r", encoding="utf-8") as fp:
             sql_script = fp.read()
 
@@ -77,7 +87,7 @@ class ComicDB:
 
     def open(self):
         """Open a connection to the database and return a cursor"""
-        self.conn: Connection = (
+        self.conn = (
             connect(f"file:{self.filename}?mode=ro", uri=True)
             if self.readonly
             else connect(self.filename)
@@ -103,7 +113,7 @@ class Schedule:
     """Manage schedule database"""
 
     def __init__(self, schedule):
-        self.schedule_filename: Path = schedule
+        self.schedule_filename = schedule
         if not self.schedule_filename:
             raise ValueError("No schedule for when to publish comics provided")
         self.schedule = None
@@ -142,7 +152,7 @@ class ComicEmbeds:
     """Embed information for when refreshing comics"""
 
     def __init__(self, embeds):
-        self.filename: Path = embeds
+        self.filename = embeds
         if not self.filename:
             raise ValueError("No embeds file for previously publish comics provided")
         self.data = None
@@ -190,7 +200,7 @@ class ComicInfo:
     def __init__(self, database, schedule):
         self.database_file = database
         self.schedule_file = schedule
-        ComicDB(self.database_file, False).setup()
+        ComicDB(self.database_file, False).setup("./doabase.sql")
 
     def _database(self, readonly=True):
         return ComicDB(self.database_file, readonly)
@@ -198,7 +208,7 @@ class ComicInfo:
     def _schedule(self):
         return Schedule(self.schedule_file)
 
-    def _get_tags(self, date_string: str) -> list[str]:
+    def _get_tags(self, date_string):
         """Comma seperated tags from a comic"""
         with self._database() as database:
             rows = database.execute(
@@ -271,7 +281,7 @@ class ComicInfo:
                     (*data, message.id),
                 )
 
-    def _add_reacts(self, results: list[DictRow]) -> list[DictRow]:
+    def _add_reacts(self, results):
         """Add the reacts as a list of tuples"""
         with self._database() as database:
             for result in results:
@@ -289,7 +299,7 @@ class ComicInfo:
         print(results)
         return results
 
-    def released_on(self, dates: Union[str, list[str]]) -> list[DictRow]:
+    def released_on(self, dates):
         """Get database rows for comics released on given dates"""
         if isinstance(dates, str):
             dates = [dates]
@@ -380,8 +390,11 @@ class DoaComicCog(Cog, name="DoA Comic"):
             schedule = self.f_doa / self.bot.env.path("SCHEDULE")
             embeds = self.f_doa / self.bot.env.path("EMBEDS")
 
+            dlconfig = self.f_doa / self.bot.env.path("DOWNLOAD")
+
         self.comics = ComicInfo(database, schedule)
         self.embeds = ComicEmbeds(embeds)
+        self.download = DumbingOfAge(dlconfig, self.f_doa, database)
         # function transformed by the @loop annotation
         # pylint: disable=no-member
         self.schedule_comics.start()
@@ -480,7 +493,7 @@ class DoaComicCog(Cog, name="DoA Comic"):
             after_str,
             before_str,
         )
-        await ctx.message.add_reaction("<:wave_Joyce:780682895907618907>")
+        await ctx.message.add_reaction("\N{OK HAND SIGN}")
         after_str = f"{after_str.strip()} 00:00:00"
         after = TimeTravel.fromstr(after_str) - timedelta(hours=6)
         before = None
@@ -512,7 +525,7 @@ class DoaComicCog(Cog, name="DoA Comic"):
         self.channels = given_channels
 
     @staticmethod
-    def build_comic_embed(entry: dict[str, str]) -> Embed:
+    def build_comic_embed(entry):
         """Basic way to generate the embeds"""
         title = entry.get("title")
         url = entry.get("url")
@@ -541,6 +554,22 @@ class DoaComicCog(Cog, name="DoA Comic"):
             # function transformed by the @loop annotation
             # pylint: disable=no-member
             self.schedule_comics.next_iteration,
+        )
+
+    @loop(time=DOWNLOAD_TIME)
+    async def process_comic(self):
+        """Auto download the comis info"""
+        await self.bot.wait_until_ready()
+
+        prev_cur = self.download.cur
+        self.download.cur = True
+        await self.download.process(self.download.home)
+        self.download.cur = prev_cur
+        logger.info(
+            "Downloading todays comic info, checking tomorrow at %s",
+            # function transformed by the @loop annotation
+            # pylint: disable=no-member
+            self.process_comic.next_iteration
         )
 
     async def send_comic(self, date=None, channel_id=None):
@@ -638,10 +667,7 @@ class DoaComicCog(Cog, name="DoA Comic"):
                 if embed:
                     logger.debug("Refreshing Embed: %s", embed.to_dict())
                     await self.refresh_embed(msg, embed)
-        try:
-            await ctx.message.add_reaction("<:wave_Joyce:780682895907618907>")
-        except:
-            await ctx.message.add_reaction("\N{OK HAND SIGN}")
+        await ctx.message.add_reaction("\N{OK HAND SIGN}")
 
     @bridge.bridge_command()
     async def publish(self, ctx, date=None):
@@ -652,3 +678,422 @@ class DoaComicCog(Cog, name="DoA Comic"):
         logger.info("manually publishing comics for date %s", date)
         msg = await ctx.send("\N{OK HAND SIGN} Sendings Comics")
         await self.send_comic(date, [ctx.message.channel.id])
+
+
+    @bridge.bridge_command()
+    async def process(self, ctx, start):
+        """Save info for comic starting from given url"""
+        logger.info("downloading comic info from %s", start)
+        prev_cur = self.download.cur
+        self.download.cur = False
+        await self.download.process(start)
+        self.download.cur = prev_cur
+
+
+
+
+# pylint: disable=invalid-name
+class RGBA(NamedTuple):
+    r: int
+    g: int
+    b: int
+    a: int
+
+class NameInfo(NamedTuple):
+    book: str
+    image: Path
+    final: Path
+    raw: Path
+    imgdir: Path
+
+class DumbingOfAge:
+    AGENT={"User-agent": "WhatnoComicReader/1.0 Whatno Discord Bot (Sean Slater)"}
+
+    def __init__(self, yml_file, savedir, database):
+        with open(yml_file, "r") as yml:
+            self.comic = load(yml.read(), Loader=Loader)
+
+        self.storage = savedir
+        self.database_file = database
+
+        self.cur = comic["cur"]
+        self.home = comic["home"]
+        self.url = comic["url"]
+        self.name = comic["name"]
+        self.archive = self.storage / "archive"
+        self.archive.mkdir(parents=True, exist_ok=True)
+
+        self.last_comic = False
+        self.cur_count = 0
+        self.max_count = 25
+        self.sleep_time = 5
+        self.exception_wait = 2
+
+    def _database(self, readonly=True):
+        return ComicDB(self.database_file, readonly)
+
+    async def exception_sleep(self, current, retries):
+        logger.warning(
+            "Waiting for %d seconds to try again. Remaining atempts: %d",
+            self.exception_wait,
+            retries - current,
+            exc_info=True,
+        )
+        await sleep(self.exception_wait)
+        self.exception_wait *= self.exception_wait
+        if current == retries:
+            e = Exception("Requests timing out too many times")
+            logger.exception(e)
+            raise e
+
+    async def _download(self, image_url, save_as, retries=5):
+        logger.info('Downloading "%s" from %s', save_as, image_url)
+        async with ClientSession(headers=self.AGENT) as session:
+            with open(save_as, "wb") as fp:
+                for x in range(1, retries + 1):
+                    async with session.get(image_url) as res:
+                        if res.status != 200:
+                            await self.exception_sleep(x, retries)
+                            continue
+                        async for chunk in res.content.iter_chunked(1024):
+                            fp.write(chunk)
+                            break
+
+
+    @staticmethod
+    def _search_soup(soup, path, value=None):
+        for nxt in path:
+            dic = {}
+            if "class" in nxt:
+                dic["class"] = nxt["class"]
+            if "id" in nxt:
+                dic["id"] = nxt["id"]
+            if "index" in nxt:
+                soup = soup.find_all(
+                    name=nxt.get("tag"), attrs=dic, recursive=nxt.get("recursive", True)
+                )[nxt["index"]]
+            else:
+                soup = soup.find(name=nxt.get("tag"), attrs=dic)
+        return soup[value] if soup and value else soup
+
+    def search(self, soup, path):
+        soup = self._search_soup(soup, path[:-1])
+        last = path[-1]
+        dic = {}
+        if "class" in last:
+            dic["class"] = last["class"]
+        if "id" in last:
+            dic["id"] = last["id"]
+        return soup.find_all(last["tag"], dic)
+
+    async def get_soup(self, url, retries=10):
+        logger.info("Getting soup for %s", url)
+        async with ClientSession(headers=self.AGENT) as session:
+            for x in range(1, retries + 1):
+                async with session.get(url) as r:
+                    if r.status != 200:
+                        await self.exception_sleep(e, x, retries)
+                        continue
+                    text = await r.text()
+                return BeautifulSoup(text, "html.parser")
+        return None
+
+    def get_next(self, soup):
+        logger.debug("Getting next url")
+        val = self._search_soup(soup, self.comic["nxt"], "href")
+        if val is None:
+            self.last_comic = True
+        return val
+
+    def get_prev(self, soup):
+        logger.debug("Getting previous url")
+        return self._search_soup(soup, self.comic["prev"], "href")
+
+    def get_image(self, soup):
+        logger.debug("Getting image soup")
+        return self._search_soup(soup, self.comic["img"])
+
+    def _get_alt(self, img):
+        if img.has_attr("alt"):
+            return img["alt"]
+        if img.has_attr("title"):
+            return img["title"]
+        return None
+
+    def _save_image_with_alt(self, input_filename, output_filename, alt_raw):
+        logger.info('Adding alt text to image "%s"', output_filename)
+        comic = Image.open(input_filename).convert("RGBA")
+        c_width, c_height = comic.size
+
+        font = ImageFont.truetype(calc_path("ubuntu.ttf"), 16)
+        draw_font = ImageDraw.Draw(
+            Image.new("RGB", (c_width, c_height * 2), (255, 255, 255))
+        )
+        alt = fill(alt_raw, width=(int((c_width - 20) / 11)))
+        _, alt_height = draw_font.textsize(alt, font=font)
+
+        height = c_height + 10 + alt_height + 10
+        output = Image.new("RGBA", (c_width, height), RGBA(224, 238, 239, 255))
+
+        draw = ImageDraw.Draw(output)
+
+        output.paste(comic, (0, 0), mask=comic)
+        draw.text((10, c_height + 10), alt, font=font, fill="black")
+
+        output.save(output_filename, "PNG")
+        logger.info("Removing raw image")
+        input_filename.unlink()
+
+    @staticmethod
+    def _convert_to_png(input_filename, output_filename):
+        ext = input_filename.suffix
+        if ext != ".png":
+            logger.info('Converting image to png "%s"', output_filename)
+            comic = Image.open(input_filename).convert("RGB")
+            comic.save(output_filename, "PNG")
+            input_filename.unlink()
+        else:
+            logger.info('No need to convert image "%s"', output_filename)
+            input_filename.rename(output_filename)
+
+    def download_and_save(self, img_soup, final_filename, raw_filename):
+        logger.info('Downloading and saving "%s"', final_filename)
+        image_url = img_soup["src"]
+
+        alt_text = self._get_alt(img_soup)
+        if alt_text:
+            logger.debug("Saving with alt text")
+            self._download(image_url, raw_filename)
+            self._save_image_with_alt(raw_filename, final_filename, alt_text)
+        else:
+            logger.debug("Saving with no alt")
+            self._download(image_url, raw_filename)
+            self._convert_to_png(raw_filename, final_filename)
+
+    def save_to_archive(self, archive, filename, cur_img_dir):
+        logger.info('Adding to archive: "%s"', archive)
+
+        save_location = self.archive
+        save_as = filename.name
+
+        cmd = f'cd {cur_img_dir} && zip -ur \
+            "{self.archive}/{archive}.cbz" "{save_as}" > /dev/null'
+        logger.debug("Running shell command: `%s`", cmd)
+        await create_subprocess_shell(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+
+    def get_name_info(self, img_name, dir_name):
+        logger.debug(
+            'Getting name info for image "%s" and directory "%s"', img_name, dir_name
+        )
+        current_image_directory = self.archive / dir_name
+        current_image_directory.mkdir(parents=True, exist_ok=True)
+
+        img = img_name.stem
+        final_filename = current_image_directory / f"{img}.png"
+        raw_filename = current_image_directory / f"raw_{img_name}"
+
+
+        return current_image_directory, final_filename, raw_filename
+
+    async def wait_if_need(self):
+        logger.debug(
+            "Checking to see if a wait is needed before parsing next comic. %d / %d",
+            self.cur_count,
+            self.max_count,
+        )
+        if self.cur_count == self.max_count:
+            self.cur_count = 0
+            logger.debug("Sleeping for %d secs.", self.sleep_time)
+            await sleep(self.sleep_time)
+        else:
+            self.cur_count += 1
+
+    @staticmethod
+    def _get_tags(soup):
+        tag_list = []
+        tags = soup.find("div", {"class": "post-tags"}).find_all("a")
+        for tag in tags:
+            tag_list.append(tag.text)
+        return tag_list
+
+    async def get_archive_url(self, soup):
+        logger.debug("Getting archive url from landing page")
+        prev = self.get_prev(soup)
+        prev_soup = await self.get_soup(prev)
+        return self.get_next(prev_soup)
+
+    def get_title(self, soup):
+        logger.debug("Getting title of current comic")
+        title_tag = self._search_soup(
+            soup, [{"tag": "h2", "class": "post-title"}, {"tag": "a"}]
+        )
+        if title_tag:
+            return title_tag.text
+        return None
+
+    def get_arc_name(self, soup):
+        logger.debug("Getting current arc name")
+        arc_tag = self._search_soup(
+            soup, [{"tag": "li", "class": "storyline-root"}, {"tag": "a"}]
+        )
+        if arc_tag:
+            return arc_tag.text[5:]
+        return None
+
+    def add_arc(self, image_filename, arc_name):
+        logger.debug("Checking if arc needs to be added to database")
+        data = image_filename.split("_")
+        num = data[1]
+        name = data[2]
+        book = int(num[0:2])
+        arc = int(num[2:4])
+        url = f"https://www.dumbingofage.com/category/comic/book-{book}/{arc}-{name}/"
+
+        with self._database() as database:
+            database.execute("SELECT * FROM Arc WHERE number = ?", (num,))
+            row = database.fetchone()
+
+            if not row:
+                logger.info('Inserting new arc: "%s"', arc_name)
+                database.execute(
+                    "INSERT INTO Arc VALUES (?,?,?)", (num, arc_name, url)
+                )
+                database.execute("SELECT * FROM Arc WHERE number = ?", (num,))
+                row = database.fetchone()
+
+        return row
+
+    def add_comic(self, image_filename, arc_row, comic_title, url):
+        logger.debug("Checking if comic needs to be added to database")
+        title_release = image_filename.split("_")[3]
+        release = "-".join(title_release.split("-")[0:3])
+
+        with self._database() as database:
+            database.execute("SELECT * FROM Comic WHERE release = ?", (release,))
+            row = database.fetchone()
+
+            if not row:
+                logger.info('Inserting new comic: "%s"', comic_title)
+                database.execute(
+                    "INSERT INTO Comic VALUES (?,?,?,?,?)",
+                    (release, comic_title, image_filename, url, arc_row[0]),
+                )
+                database.execute("SELECT * FROM Comic WHERE release = ?", (release,))
+                row = database.fetchone()
+
+        return row
+
+    def add_alt(self, comic, alt):
+        logger.debug("Checking if alt text needs to be added to database")
+
+        with self._database() as database:
+            database.execute("SELECT * FROM Alt WHERE comicId = ?", (comic[0],))
+            row = database.fetchone()
+
+            if not row:
+                logger.debug('Inserting new alt: "%s"', comic[0])
+                database.execute("INSERT INTO Alt VALUES (?,?)", (comic[0], alt))
+                database.execute("SELECT * FROM Alt WHERE comicId = ?", (comic[0],))
+                row = database.fetchone()
+
+        return row
+
+    def add_tags(self, comic, tags):
+        logger.debug("Checking if tags needs to be added to database")
+        added_tags = []
+        with self._database() as database:
+            for tag in tags:
+                database.execute(
+                    "SELECT * FROM Tag WHERE comicId = ? AND tag = ?", (comic[0], tag)
+                )
+                row = database.fetchone()
+
+                if not row:
+                    database.execute("INSERT INTO Tag VALUES (?,?)", (comic[0], tag))
+                    database.execute(
+                        "SELECT * FROM Tag WHERE comicId = ? AND tag = ?", (comic[0], tag)
+                    )
+                    row = database.fetchone()
+                    added_tags.append(row)
+        logger.debug("Inserted new tags: %s", [tag[1] for tag in added_tags])
+        return added_tags
+
+    async def _naming_info(self, soup, image_url):
+        raw_name = image_url.split("/")[-1]
+        strip_name, ext = raw_name.stem, raw_name.suffix
+
+        if ext.lower() != ".png":
+            self.url = self.get_next(soup)
+            return True, None, None, None, None
+
+        if self.cur:
+            parts = self._search_soup(soup, self.comic["book"], "href").split("/")
+            book_number = parts[-3].split("-")[1].zfill(2)
+            arcs = parts[-2].split("-")
+            self.url = await self.get_archive_url(soup)
+        else:
+            parts = self.url.split("/")
+            book_number = parts[-4].split("-")[1].zfill(2)
+            arcs = parts[-3].split("-")
+        arc_number = arcs[0].zfill(2)
+        arc_name = "-".join(arcs[1:])
+        book_arc = f"{book_number}{arc_number}"
+        book_arc_dir = self.archive / book_arc
+        image_filename = Path(
+            f"DumbingOfAge_{book_arc}_{arc_name}_{strip_name}{ext.lower()}"
+        )
+
+        book_arc_dir.mkdir(parents=True, exist_ok=True)
+
+        cur_img_dir, final_filename, raw_filename = self.get_name_info(image_filename, book_arc_dir)
+
+        return False, NameInfo(book_arc, image_filename, final_filename, raw_filename, cur_img_dir)
+
+    async def process(self, url=None, cur=True):
+        url = url or self.url
+        while True:
+            logger.info("Getting soup for %s", self.url)
+            soup = await self.get_soup(url)
+
+            img_soup = self.get_image(soup)
+            skip_comic, ni = await self._naming_info(soup, img_soup["src"])
+            if skip_comic:
+                continue
+
+            logger.info("Saving Arc to Database")
+            full_arc_name = self.get_arc_name(soup)
+            arc_row = self.add_arc(ni.image, full_arc_name)
+
+            logger.info("Saving Comic to Database")
+            comic_title = self.get_title(soup)
+            comic_row = self.add_comic(ni.image, arc_row, comic_title, self.url)
+
+            alt_text = self._get_alt(img_soup)
+            if alt_text:
+                logger.info("Saving Alt Text to Database")
+                self.add_alt(comic_row, alt_text)
+
+            logger.info("Saving Tags to Database")
+            tags = self._get_tags(soup)
+            self.add_tags(comic_row, tags)
+
+            self.download_and_save(img_soup, ni.final, ni.raw)
+            self.save_to_archive(self.name, ni.final, ni.imgdir)
+            self.save_to_archive(f"{self.name} - {ni.book}", ni.final, ni.imgdir)
+
+            logger.info('Done processing comic "%s"', ni.final)
+
+            self.url = self.get_next(soup)
+            await self.wait_if_need()
+
+            if self.last_comic:
+                break
+
+        logger.info('Completed processing "Dumbing of Age"')
+
+
+
