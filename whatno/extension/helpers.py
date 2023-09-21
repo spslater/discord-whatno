@@ -2,14 +2,16 @@
 import re
 from datetime import datetime, timedelta
 from html.parser import HTMLParser
-from io import UnsupportedOperation, StringIO
+from io import StringIO, UnsupportedOperation
 from json import dumps
+from math import floor
 from os import fsync
 from pathlib import Path
+from sqlite3 import connect
 
-from tinydb import JSONStorage, TinyDB
-from tinydb.table import Document, Table
 from pytz import timezone
+from tinydb import JSONStorage, TinyDB
+from tinydb.table import Table
 
 
 def calc_path(filename):
@@ -21,8 +23,10 @@ def calc_path(filename):
         filepath = Path(__file__, "..", filepath)
     return filepath.resolve()
 
+
 def strim(s):
-    return re.sub(r'[^a-zA-Z0-9]', '', s.lower())
+    """Remove any non-alphanum characters and make the string lowercase"""
+    return re.sub(r"[^a-zA-Z0-9]", "", s.lower())
 
 
 class PrettyJSONStorage(JSONStorage):
@@ -43,33 +47,51 @@ class PrettyJSONStorage(JSONStorage):
 
         self._handle.truncate()
 
+
 class StrTable(Table):
+    """Allow using strings instead of ints for table keys"""
+
     document_id_class = str
 
+
 class PrettyStringDB(TinyDB):
+    """TinyDB that allows using strings at keys
+    and saves as pretty JSON
+    """
+
     table_class = StrTable
     default_storage_class = PrettyJSONStorage
 
 
+# complains about "error" method, but don't know which it's referring too
+# pylint: disable=abstract-method
 class CleanHTML(HTMLParser):
+    """Parse given html and clean the input
+    up so that it displays nicely
+    """
+
     def __init__(self):
         super().__init__()
         self.reset()
         self.strict = False
-        self.convert_charrefs= True
+        self.convert_charrefs = True
         self.text = StringIO()
 
-    def handle_data(self, d):
-        self.text.write(d)
+    # pylint: disable=arguments-differ
+    def handle_data(self, data):
+        """write arbitrary data to the text output"""
+        self.text.write(data)
 
     def process(self, data):
+        """clean up given html and return it"""
         self.feed(data)
         return self.text.getvalue()
 
 
 async def aget_json(session, url):
-    async with session.get(url) as r:
-        return await r.json()
+    """Get json from an async aiohttp GET request"""
+    async with session.get(url) as res:
+        return await res.json()
 
 
 TZNAME = "US/Eastern"
@@ -164,3 +186,96 @@ class TimeTravel:
             cls.week_day(year, week, 6),
             cls.week_day(year, week, 7),
         ]
+
+    @classmethod
+    def sqlts(cls, ts):
+        """Convert timestamp to sqlite database time string check"""
+        if isinstance(ts, datetime):
+            ts = ts.timestamp()
+        return datetime.fromtimestamp(ts, tz=cls.tz).strftime("%Y-%m-%dT%H:%M:%S.%f")[
+            :-3
+        ]
+
+    @staticmethod
+    def tsfromdiscord(ts):
+        """Convert discord's timestamp to unix timestamp: 2022-05-12T08:46:46.505000+00:00"""
+        return datetime.strptime(ts[:-9], "%Y-%m-%dT%H:%M:%S.%f").timestamp()
+
+    @staticmethod
+    def tsinpast(days=0, hrs=0, mins=0, secs=0):
+        """Get a timestamp in the past"""
+        now = datetime.now()
+        td = timedelta(days=days, hours=hrs, minutes=mins, seconds=secs)
+        return (now - td).timestamp()
+
+    @classmethod
+    def pretty_ts(cls, ts):
+        """Return a pretty output for the timestamp"""
+        val = cls.sqlts(ts)
+        date, time = val.split("T")
+        time = time.split(".")[0]
+        return f"{date} at {time}"
+
+
+class DictRow:
+    """Turn a row into a dictionary (for dot notation)"""
+
+    def __init__(self, cursor, row):
+        self._keys = []
+        for idx, col in enumerate(cursor.description):
+            setattr(self, col[0], row[idx])
+
+    def __repr__(self):
+        vals = [f"{k}: {getattr(self,k)}" for k in self._keys]
+        return "DictRow(" + " | ".join(vals) + ")"
+
+    def __getitem__(self, key):
+        return getattr(self, key, None)
+
+    def __setitem__(self, key, value):
+        self._keys.append(key)
+        setattr(self, key, value)
+
+
+class ContextDB:
+    """Sqlite DB for use with context libs"""
+
+    def __init__(self, dbfile, setup_filename, readonly=False):
+        self.readonly = readonly
+        self.filename = dbfile
+        if not self.filename:
+            raise ValueError("No database to open")
+        self.setup_filename = setup_filename
+        self.conn = None
+
+    def setup(self):
+        """setup the voice database"""
+        script = calc_path(self.setup_filename)
+        with open(script, "r", encoding="utf-8") as fp:
+            sql_script = fp.read()
+
+        with self as db:
+            db.executescript(sql_script)
+
+    def open(self):
+        """Open a connection to the database and return a cursor"""
+        self.conn = (
+            connect(f"file:{self.filename}?mode=ro", uri=True)
+            if self.readonly
+            else connect(self.filename)
+        )
+        self.conn.row_factory = DictRow
+        return self.conn.cursor()
+
+    def close(self):
+        """Close connection to the database"""
+        if not self.readonly:
+            self.conn.commit()
+        return self.conn.close()
+
+    def __enter__(self):
+        return self.open()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+        return exc_type is None

@@ -1,29 +1,33 @@
 """Instagram and TikTok downloader"""
 import logging
-import re
 from asyncio import create_subprocess_shell, subprocess
-from os import stat, rename, remove
+from os import remove, rename, stat
 from shutil import which
 from uuid import uuid4
-from pathlib import Path
-
-from more_itertools import ichunked
 
 from discord import File
-from discord.ext.commands import Cog
 from discord.ext import bridge
+from discord.ext.commands import Cog
+from more_itertools import ichunked
 
 logger = logging.getLogger(__name__)
 
 MAX_FILE = 25000000
+
 
 def setup(bot):
     """Setup the Insta Downloader Cogs"""
     cog_insta = InstaDownCog(bot)
     bot.add_cog(cog_insta)
 
+
+class ExternalCommands(Exception):
+    """Missing shell commands"""
+
+
 class InstaDownCog(Cog):
     """Insta Down Cog"""
+
     scales = ["1", "4/5", "3/4", "3/5", "1/2", "2/5", "1/4", "1/5"]
 
     def __init__(self, bot):
@@ -39,25 +43,35 @@ class InstaDownCog(Cog):
         self.f_sm.mkdir(exist_ok=True)
 
         self.ytdl = which("yt-dlp")
-        self.ffmpeg = which("ffmpeg")
-        if self.ytdl is None or self.ffmpeg is None:
-            raise Exception("Missing external commands")
+        if self.ytdl is None:
+            raise ExternalCommands("Missing yt-dlp")
 
-    def _bad_msg(self, msg):
+        self.ffmpeg = which("ffmpeg")
+        if self.ffmpeg is None:
+            raise ExternalCommands("Missing ffmpeg")
+
+    @staticmethod
+    def _bad_msg(msg):
         if "instagram.com/reel" in msg:
             return False
         if "tiktok.com" in msg and ("video" in msg or "/t/" in msg):
             return False
+        if "youtube.com/shorts/" in msg:
+            return False
         return True
 
     @bridge.bridge_command()
+    # pylint: disable=invalid-name
     async def dl(self, ctx):
         """process incoming messages"""
         msg = ctx.message.content
         chnl = ctx.channel
         gld = ctx.guild
         # have this loaded from file and add a reload command
-        if not (chnl.id in (1034220450793934960, 722988880273342485, 1120438914986024981) or gld.id in (1090020461682901113,)) or self._bad_msg(msg):
+        if not (
+            chnl.id in (1034220450793934960, 722988880273342485, 1120438914986024981)
+            or gld.id in (1090020461682901113,)
+        ) or self._bad_msg(msg):
             return
 
         logger.debug("downloading msg: %s", msg)
@@ -84,6 +98,7 @@ class InstaDownCog(Cog):
                 pass
 
     async def download(self, req, res, errs):
+        """Dowload the videos requested in the string"""
         try:
             name, url = req.rsplit(" ", 1)
         except ValueError as e:
@@ -115,8 +130,8 @@ class InstaDownCog(Cog):
         errs.append(f"{name} | ffmpg unable to scale small enough")
         return res, errs
 
-
     async def ytdlp(self, url, name):
+        """Run youtube-dl and return if successful"""
         yt_proc = await create_subprocess_shell(
             f"{self.ytdl} '{url}' -o {name}",
             stdout=subprocess.PIPE,
@@ -130,11 +145,20 @@ class InstaDownCog(Cog):
             return False
         return True
 
+    # TODO: combine res and errs into a NamedTuple?
+    # pylint: disable=too-many-arguments
     async def resize(self, tmp, sm_name, scale, res, errs):
+        """
+        Process the video with ffmpg to try and get
+        it within the filesize upload limit
+        """
         # ffmpeg -i gamerrage.mp4 -filter:v scale=270:-1 -c:a copy gamerrage-sm.mp4
         logger.debug("running ffmpg")
         ff_proc = await create_subprocess_shell(
-            f"{self.ffmpeg} -hide_banner -loglevel error -i {tmp} -filter:v scale=iw*{scale}:-1 -c:a copy {sm_name}",
+            (
+                f"{self.ffmpeg} -hide_banner -loglevel error -i {tmp} "
+                f"-filter:v scale=iw*{scale}:-1 -c:a copy {sm_name}"
+            ),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
@@ -157,18 +181,3 @@ class InstaDownCog(Cog):
         except FileNotFoundError:
             pass
         return res, errs, cont
-
-if __name__ == "__main__":
-    from sys import argv
-    from asyncio import run
-    storage = Path(argv[1]).resolve()
-    request = argv[2]
-
-    class DummyBot:
-        def __init__(self):
-            self.storage = storage
-
-    cog = InstaDownCog(DummyBot())
-    res, err = run(cog.download(request, [], []))
-    print(res)
-    print(err)

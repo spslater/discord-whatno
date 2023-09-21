@@ -1,21 +1,19 @@
 """Stats Bot for Voice and Messages"""
 import logging
 import re
-from csv import reader
 from collections import namedtuple
-from json import dump, dumps, load
-from pathlib import Path
-from sqlite3 import Connection, Row, connect
+from json import dumps
 
 from discord import ChannelType, HTTPException, NotFound
+from discord.ext.bridge import bridge_command, bridge_group
 from discord.ext.commands import Cog, is_owner
 from discord.ext.tasks import loop
-from discord.ext.bridge import bridge_command, bridge_group
 from discord.utils import escape_markdown
 
-from .helpers import TimeTravel, calc_path, sec_to_human
+from .helpers import ContextDB, TimeTravel, sec_to_human
 
 logger = logging.getLogger(__name__)
+
 
 def setup(bot):
     """Setup the DoA Cogs"""
@@ -43,231 +41,64 @@ TEXT_CHANNELS = (
 
 ROLLING = (90,)
 
-MAX_TIME = 10 * 3600
 
-PATS = [
-    (re.compile(r"(?P<user>.*?) joined (?P<channel>.*)"), "join"),
-    (re.compile(r"(?P<user>.*?) left (?P<channel>.*)"), "left"),
-    (re.compile(r"(?P<user>.*?) moved from (?P<ch1>.*?) to (?P<ch2>.*)"), "move"),
-    (re.compile(r"(?P<user>.*?) (deafen|defeat)ed"), "deaf_on"),
-    (re.compile(r"(?P<user>.*?) un(deafen|defeat)ed"), "deaf_off"),
-    (re.compile(r"(?P<user>.*?) turned on video"), "video_on"),
-    (re.compile(r"(?P<user>.*?) turned off video"), "video_off"),
-    (re.compile(r"(?P<user>.*?) started (stream|scream)ing"), "stream_on"),
-    (re.compile(r"(?P<user>.*?) stopped (stream|scream)ing"), "stream_off"),
-]
+class Message:
+    """Hold message data for easy access"""
 
+    def __init__(self):
+        self.mid = None
+        self.aid = None
 
-async def _get_history(bot, start, stop):
-    kuibot = 639324610772467714
-    vctcccc = 620013384049623080
-    start = f"{start.strip()} 00:00:00"
-    after = TimeTravel.fromstr(start)
-    stop = f"{stop.strip()} 00:00:00"
-    before = TimeTravel.fromstr(stop)
-    return await bot.get_history(
-        vctcccc,
-        user_id=kuibot,
-        after=after,
-        before=before,
-    )
+        self.gid = None
+        self.cid = None
+        self.tstp = None
+        self.event = None
+        self.text = None
+        self.attach = None
+        self.embed = None
+        self.ref = None
+        self.hist = None
+        self.tsc = None
 
+    def delete(self):
+        """Get values minus the mid and aid as a tuple"""
+        return (
+            self.gid,
+            self.cid,
+            self.tstp,
+            self.event,
+            self.text,
+            self.attach,
+            self.embed,
+            self.ref,
+            self.hist,
+            self.tsc,
+        )
 
-async def get_acts(bot, start, stop):
-    """get the actions listed by kuibot in voice chat"""
-    acts = []
-    async for msg in await _get_history(bot, start, stop):
-        for pat, act in PATS:
-            if match := pat.match(msg.content):
-                user = match.group("user")
-                timestamp = msg.created_at.timestamp()
-                data = (user, timestamp, act)
-                if act in ("join", "left"):
-                    data = (*data, match.group("channel"))
-                elif act == "move":
-                    data = (*data, match.group("ch1"), match.group("ch2"))
-                logger.debug(data)
-                acts.append(data)
-    return acts
-
-
-def _spec():
-    with open(calc_path("../historic.json")) as fp:
-        data = load(fp)
-
-    spec = {}
-    for entry in data:
-        name = entry[0]
-        if name not in spec:
-            spec[name] = []
-        spec[name].append(entry)
-    return spec
+    def to_tuple(self):
+        """Get values as a tuple"""
+        return (
+            self.mid,
+            self.aid,
+            self.gid,
+            self.cid,
+            self.tstp,
+            self.event,
+            self.text,
+            self.attach,
+            self.embed,
+            self.ref,
+            self.hist,
+            self.tsc,
+        )
 
 
-def _combos():
-    combos = []
-    with open(calc_path("users.txt"), "r") as fp:
-        for row in reader(fp, delimiter=","):
-            combos.append(row)
-    return combos
-
-
-def _full(spec, combos):
-    full = {}
-    for combo in combos:
-        uid = int(combo[0])
-        names = combo[1:]
-        events = []
-        for name in names:
-            events.extend(spec[name])
-        full[uid] = events
-    return full
-
-
-def _get_cid(guild, name):
-    gv1 = 248732519204126721
-    channel = [vc.id for vc in guild.voice_channels if vc.name == name]
-    return channel[0] if channel else gv1
-
-
-def get_data(guild):
-    """generate data to save to database"""
-    gid = guild.id
-    full = _full(_spec(), _combos())
-    tsdata = {}
-
-    cid = None
-    join = None
-    deaf = None
-    video = None
-    stream = None
-    for user, events in full.items():
-        info = []
-        for event in sorted(events, key=lambda x: x[1]):
-            ets = event[1]
-            act = event[2]
-
-            if act == "move":
-                cid = _get_cid(guild, event[3])
-                if join is not None:
-                    cid = _get_cid(guild, event[3])
-                    diff = min(ets - join, MAX_TIME)
-                    info.append((cid, "voice", join, diff))
-                    if deaf:
-                        info.append((cid, "deaf", join, diff))
-                        deaf = None
-                    if video:
-                        info.append((cid, "video", join, diff))
-                        video = None
-                    if stream:
-                        info.append((cid, "stream", join, diff))
-                        stream = None
-                join = event[1]
-                continue
-
-            if act in ("join", "left"):
-                cid = _get_cid(guild, event[3])
-                if act == "join":
-                    join = event[1]
-                elif join is not None and act == "left":
-                    diff = min(ets - join, MAX_TIME)
-                    info.append((cid, "voice", join, diff))
-                    if deaf:
-                        info.append((cid, "deaf", join, diff))
-                        deaf = None
-                    if video:
-                        info.append((cid, "video", join, diff))
-                        video = None
-                    if stream:
-                        info.append((cid, "stream", join, diff))
-                        stream = None
-                    join = None
-                continue
-
-            if act in ("deaf_on", "deaf_off"):
-                if join is None:
-                    deaf = None
-                elif act == "deaf_on":
-                    deaf = ets
-                elif deaf is not None and act == "deaf_off":
-                    diff = min(ets - deaf, MAX_TIME)
-                    info.append((cid, "deaf", deaf, diff))
-                    deaf = None
-                continue
-
-            if act in ("video_on", "video_off"):
-                if join is None:
-                    video = None
-                elif act == "video_on":
-                    video = ets
-                elif video is not None and act == "video_off":
-                    diff = min(ets - video, MAX_TIME)
-                    info.append((cid, "video", video, diff))
-                    video = None
-                continue
-
-            if act in ("stream_on", "stream_off"):
-                if join is None:
-                    stream = None
-                elif stream is None and act == "stream_on":
-                    stream = ets
-                elif stream is not None and act == "stream_off":
-                    diff = min(ets - stream, MAX_TIME)
-                    info.append((cid, "stream", stream, diff))
-                    stream = None
-                continue
-        tsdata[user] = info
-    return tsdata, gid
-
-
-
-
-
-class StatDB:
+# pylint: disable=too-few-public-methods
+class StatDB(ContextDB):
     """Voice DB Interface"""
 
     def __init__(self, dbfile, readonly=False):
-        self.readonly = readonly
-        self.filename: Path = dbfile
-        if not self.filename:
-            raise ValueError("No database to pull comic info from provided")
-        self.conn = None
-
-    def setup(self):
-        """setup the voice database"""
-        logger.debug("running setup on the comic database")
-        script = calc_path("./stats_db.sql")
-        with open(script, "r", encoding="utf-8") as fp:
-            sql_script = fp.read()
-
-        with self as db:
-            db.executescript(sql_script)
-
-    def open(self):
-        """Open a connection to the database and return a cursor"""
-        self.conn: Connection = (
-            connect(f"file:{self.filename}?mode=ro", uri=True)
-            if self.readonly
-            else connect(self.filename)
-        )
-        self.conn.row_factory = Row
-        return self.conn.cursor()
-
-    def close(self):
-        """Close connection to the database"""
-        if not self.readonly:
-            self.conn.commit()
-        return self.conn.close()
-
-    def __enter__(self):
-        return self.open()
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.close()
-        return exc_type is None
-
-
-
+        super().__init__(dbfile, "./stats_db.sql", readonly)
 
 
 class StatsCog(Cog):
@@ -398,6 +229,7 @@ class StatsCog(Cog):
             ).fetchone()
         return bool(states)
 
+    # pylint: disable=too-many-branches
     def _update_state(self, id_, before, after, now):
         diff = self._diff_state(before, after, now)
 
@@ -594,7 +426,16 @@ class StatsCog(Cog):
             val += f"{s} sec{'s' if s != 1 else ''}"
         return val
 
-    async def _generate_voice_output(self, results, early, stats, in_voice, user, guild):
+    # pylint: disable=too-many-arguments
+    async def _generate_voice_output(
+        self,
+        results,
+        early,
+        stats,
+        in_voice,
+        user,
+        guild,
+    ):
         member = await guild.fetch_member(user)
         e_time = f" - past {ROLLING[0]} days"
         if early:
@@ -655,7 +496,14 @@ class StatsCog(Cog):
                 stats = value
                 break
 
-        return await self._generate_voice_output(results, early, stats, in_voice, user, guild)
+        return await self._generate_voice_output(
+            results,
+            early,
+            stats,
+            in_voice,
+            user,
+            guild,
+        )
 
     @bridge_group(name="vc")
     async def voice_stat(self, ctx):
@@ -703,6 +551,25 @@ class StatsCog(Cog):
         output = await self._user_stat(user_id, ctx.channel.guild)
         await ctx.send(output)
 
+    async def _generate_top_output(self, all_, early, users, guild):
+        """Generate the discord message to display the top users"""
+        output = "```\n"
+        if not all_:
+            output += f"Last {ROLLING[0]} days\n"
+        else:
+            output += f"Since {TimeTravel.pretty_ts(early)}\n"
+        for idx, (user, value) in enumerate(users):
+            try:
+                member = await guild.fetch_member(user)
+            except NotFound:
+                name = f"(user left) {user}"
+            else:
+                name = member.nick or member.name
+            val = self._display_duration(value)
+            output += f"{idx+1}. {name}: {val}\n"
+        output += "```"
+        return output
+
     @voice_stat.bridge_command(name="top")
     async def voice_top(self, ctx, all_=None):
         """Get top 10 users from each guild"""
@@ -721,7 +588,7 @@ class StatsCog(Cog):
                         GROUP BY starttime
                         LIMIT 1
                         """
-                    ).fetchone()['early']
+                    ).fetchone()["early"]
                     rows = db.execute(
                         """
                         SELECT user, sum(duration) as total
@@ -731,7 +598,7 @@ class StatsCog(Cog):
                         ORDER BY total DESC
                         LIMIT 10
                         """,
-                        (guild.id,)
+                        (guild.id,),
                     ).fetchall()
                 else:
                     rows = db.execute(
@@ -743,24 +610,10 @@ class StatsCog(Cog):
                         ORDER BY total DESC
                         LIMIT 10
                         """,
-                        (guild.id,since,),
+                        (guild.id, since),
                     ).fetchall()
             users = [(r["user"], r["total"]) for r in rows]
-            output = "```\n"
-            if not all_:
-                output += f"Last {ROLLING[0]} days\n"
-            else:
-                output += f"Since {TimeTravel.pretty_ts(early)}\n"
-            for idx, (user, value) in enumerate(users):
-                try:
-                    member = await guild.fetch_member(user)
-                except NotFound:
-                    name = f"(user left) {user}"
-                else:
-                    name = member.nick or member.name
-                val = self._display_duration(value)
-                output += f"{idx+1}. {name}: {val}\n"
-            output += "```"
+            output = await self._generate_top_output(all_, early, users, guild)
             await ctx.send(output)
 
     @voice_stat.bridge_group("hist")
@@ -768,56 +621,6 @@ class StatsCog(Cog):
         """Collect and add historic data"""
         if ctx.invoked_subcommand:
             return
-
-    async def _get_kuibot_history(self, start, stop):
-        kuibot = 639324610772467714
-        vctcccc = 620013384049623080
-        start = f"{start.strip()} 00:00:00"
-        after = TimeTravel.fromstr(start)
-        stop = f"{stop.strip()} 00:00:00"
-        before = TimeTravel.fromstr(stop)
-        return await self.bot.get_history(
-            vctcccc,
-            user_id=kuibot,
-            after=after,
-            before=before,
-        )
-
-    @is_owner()
-    @historic_data.bridge_command(name="collect")
-    async def download_kuibot_history(self, ctx, start="2019-11-30", stop="2022-01-15"):
-        """Download historical kuibot messages"""
-        logger.info("collecting kuibot messages")
-        acts = await get_acts(self.bot, start, stop)
-        with open(calc_path("../historic.json"), "w+") as fp:
-            dump(acts, fp)
-
-        logger.info("done dumping")
-        await ctx.message.add_reaction("👍")
-
-    @is_owner()
-    @historic_data.bridge_command(name="add")
-    async def add_kuibot_history(self, ctx):
-        """Load historical data into the database"""
-        logger.info("adding historic data")
-        tsdata, gid = get_data(ctx.channel.guild)
-
-        entries = []
-        for user, data in tsdata.items():
-            logger.info("%s: #data %s", user, len(data))
-            user_entries = []
-            for sin in data:
-                tsc = TimeTravel.sqlts(sin[-1])
-                entry = (user, gid, *sin, True, tsc)
-                user_entries.append(entry)
-            logger.debug("num entries: %s", len(user_entries))
-            entries.extend(user_entries)
-
-        logger.info("adding %s to db", len(entries))
-        with self._database() as db:
-            db.executemany("INSERT INTO History VALUES (?,?,?,?,?,?,?,?)", entries)
-
-        await ctx.message.add_reaction("👍")
 
     def _compress_database(self):
         with self._database() as db:
@@ -853,7 +656,7 @@ class StatsCog(Cog):
                 deletes,
             )
 
-    @loop(hours=(7 * 24))
+    @loop(hours=7 * 24)
     async def periodic_compress(self):
         """periodically compress that database of duplicate data"""
         await self.bot.wait_until_ready()
@@ -889,78 +692,59 @@ class StatsCog(Cog):
         return None
 
     @staticmethod
-    def _get_message_data(message):
-        text = None
-        attach = None
-        embed = None
-        ref = None
+    def _set_message_data(msg, message):
         if message.content:
-            text = escape_markdown(message.content)
+            msg.text = escape_markdown(message.content)
         if message.attachments:
-            attach = dumps([a.url for a in message.attachments])
+            msg.attach = dumps([a.url for a in message.attachments])
         if message.embeds:
-            embed = dumps([e.to_dict() for e in message.embeds])
+            msg.embed = dumps([e.to_dict() for e in message.embeds])
         if message.reference:
-            ref = message.reference.message_id
-
-        return text, attach, embed, ref
+            msg.ref = message.reference.message_id
 
     @staticmethod
-    def _get_paylaod_data(msgdict):
-        text = None
-        attach = None
-        embed = None
-        ref = None
+    def _set_payload_data(msg, msgdict):
         if msgdict.get("content"):
-            text = escape_markdown(msgdict["content"])
+            msg.text = escape_markdown(msgdict["content"])
         if msgdict.get("attachments"):
-            attach = dumps([a["url"] for a in msgdict["attachments"]])
+            msg.attach = dumps([a["url"] for a in msgdict["attachments"]])
         if msgdict.get("embeds"):
-            embed = dumps(msgdict["embeds"])
+            msg.embed = dumps(msgdict["embeds"])
         if msgdict.get("referenced_message"):
-            ref = msgdict["referenced_message"]["id"]
+            msg.ref = msgdict["referenced_message"]["id"]
 
-        return text, attach, embed, ref
-
+    # pylint: disable=too-many-arguments
     async def _proc_message(self, tstp, event, message=None, payload=None, hist=False):
-        mid = None
-        aid = None
-        gid = None
-        cid = None
-        # tstp
-        # event
-        text = None
-        attach = None
-        embed = None
-        ref = None
-        # hist
-        tsc = None
+        msg = Message()
+        msg.tstp = tstp
+        msg.event = event
+        msg.hist = hist
 
         if message:
-            mid = message.id
-            gid = message.guild.id
-            cid = message.channel.id
+            msg.mid = message.id
+            msg.gid = message.guild.id
+            msg.cid = message.channel.id
         else:
             try:
-                mid = payload.message_id
+                msg.mid = payload.message_id
             except AttributeError:
                 pass
-            gid = payload.guild_id
-            cid = payload.channel_id
+            msg.gid = payload.guild_id
+            msg.cid = payload.channel_id
 
         if event == "create":
-            aid = message.author.id
-            text, attach, embed, ref = self._get_message_data(message)
-            tstp = message.created_at.timestamp()
+            msg.aid = message.author.id
+            self._set_message_data(msg, message)
+            msg.tstp = message.created_at.timestamp()
 
         if event == "edit":
             message = message or await (
-                await self.bot.fetch_channel(cid)
-            ).fetch_message(mid)
+                await self.bot.fetch_channel(msg.cid)
+            ).fetch_message(msg.mid)
             if message:
-                aid = message.author.id
-                text, attach, embed, ref = self._get_message_data(message)
-                tstp = (
+                msg.aid = message.author.id
+                self._set_message_data(msg, message)
+                msg.tstp = (
                     message.edited_at.timestamp()
                     if message.edited_at
                     else (
@@ -968,51 +752,36 @@ class StatsCog(Cog):
                     )
                 )
             else:
-                aid = self._get_message_author(mid)
-                text, attach, embed, ref = self._get_payload_data(payload.data)
+                msg.aid = self._get_message_author(msg.mid)
+                self._set_payload_data(msg, payload.data)
                 if payload.data.get("edited_timestamp"):
-                    tstp = TimeTravel.tsfromdiscord(
+                    msg.tstp = TimeTravel.tsfromdiscord(
                         payload.data.get("edited_timestamp")
                     )
 
-        tsc = TimeTravel.sqlts(tstp)
+        msg.tsc = TimeTravel.sqlts(msg.tstp)
 
         if event == "delete":
-            if mid is None:
+            if msg.mid is None:
                 mids = {}
                 for tmid in payload.message_ids:
                     cached = [
-                        msg.author.id
-                        for msg in payload.cached_messages
-                        if msg.id == tmid
+                        cmsg.author.id
+                        for cmsg in payload.cached_messages
+                        if cmsg.id == tmid
                     ]
                     mids[tmid] = cached[0] if cached else self._get_message_author(tmid)
                 entries = []
                 for tmid, taid in mids.items():
-                    entries.append(
-                        (
-                            tmid,
-                            taid,
-                            gid,
-                            cid,
-                            tstp,
-                            event,
-                            text,
-                            attach,
-                            embed,
-                            ref,
-                            hist,
-                            tsc,
-                        )
-                    )
+                    entries.append((tmid, taid, *msg.delete()))
                 return entries
-            aid = (
+            msg.aid = (
                 payload.cached_message.author.id
                 if payload.cached_message
-                else self._get_message_author(mid)
+                else self._get_message_author(msg.mid)
             )
 
-        return (mid, aid, gid, cid, tstp, event, text, attach, embed, ref, hist, tsc)
+        return msg.to_tuple()
 
     @Cog.listener("on_message")
     async def process_on_message(self, message):

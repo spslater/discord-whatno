@@ -2,7 +2,6 @@
 import logging
 import logging.config
 from argparse import ArgumentParser
-from os import getenv
 
 from environs import Env
 
@@ -48,12 +47,11 @@ def build_parser():
 
 args = build_parser().parse_args()
 env = Env()
-env.read_env(args.envfile, False) # do not recurse up directories to find a .env file
+env.read_env(args.envfile, False)  # do not recurse up directories to find a .env file
 
 with env.prefixed("DISCORD_"):
     logging_config = env("LOGGING_CONFIG")
     token = args.token or env("TOKEN")
-
 
     if logging_config:
         logging.config.fileConfig(logging_config)

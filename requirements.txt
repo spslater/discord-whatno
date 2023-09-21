@@ -1,18 +1,18 @@
 # whatno
 py-cord==2.4.1
-environs==9.5.0
+environs>=9.5
 
 # instadown
-yt-dlp==2023.1.6
-more-itertools==10.1.0
+yt-dlp>=2023
+more-itertools>=10.1
 
 # snaplookup
-Pillow==9.4.0
-tinydb==4.7.1
+Pillow>=10.0
+tinydb>=4.8
 
 # doa, stats
-pytz==2021.3
+pytz>=2023
 
 # comicsdl
-beautifulsoup4==4.9.3
-PyYAML==5.4.1
+beautifulsoup4>=4.12
+PyYAML>=6.0

@@ -5,14 +5,15 @@ commands from different cogs
 :class WhatnoBot: Discord Bot
 """
 import logging
-from pathlib import Path
 from sys import exc_info
 from traceback import format_tb
 
+from discord import Intents
+from discord.ext.commands import Bot, when_mentioned_or
 from environs import Env
 
-from discord import ExtensionFailed, Intents, NoEntryPointError
-from discord.ext.commands import Bot, when_mentioned_or
+from .extension import (doacomic, instadown, snaplookup, stats, wnmessage,
+                        wntest)
 
 logger = logging.getLogger(__name__)
 
@@ -34,34 +35,19 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
             case_insensitive=True,
             intents=Intents.all(),
         )
-        self.load_extensions()
+        self.load_cogs()
 
-    @staticmethod
-    def get_available_extensions():
-        """Get list of available extensions in extension folder"""
-        root = "whatno/extension"
-        module = root.replace("/", ".")
-        root = Path(root).resolve()
-        available = set()
-        for filename in root.glob("cog_*.py"):
-            src = Path(filename).resolve()
-            available.add(".".join([module, src.relative_to(root).stem]))
-        return available
-
-    def load_extensions(self):
-        """Load the extensions found in the extension folder"""
-        for module in self.get_available_extensions():
-            logger.info("loading: %s", module)
-            try:
-                self.load_extension(module)
-            except (
-                NoEntryPointError,
-                ExtensionFailed,
-            ) as e:
-                _, _, err_traceback = exc_info()
-                tb_list = "\n".join(format_tb(err_traceback))
-                tb_str = " | ".join(tb_list.splitlines())
-                logger.error("load %s: %s | %s", module, e, tb_str)
+    def load_cogs(self):
+        """Load the cogs found in the extension folder"""
+        logger.info(
+            "loading cogs: doacomic, instadown, snaplookup, stats, wnmessage, wntest"
+        )
+        wntest(self)
+        wnmessage(self)
+        instadown(self)
+        snaplookup(self)
+        doacomic(self)
+        stats(self)
 
     # pylint: disable=too-many-arguments
     async def get_history(

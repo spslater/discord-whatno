@@ -2,22 +2,24 @@
 import logging
 import re
 from asyncio import TaskGroup
-from json import dump, dumps, load
+from collections import namedtuple
 from math import floor
 from textwrap import fill
 
 from aiohttp import ClientSession
-from discord import ChannelType, HTTPException, NotFound, File
-from discord.ext.commands import Cog, command, group, is_owner
+from discord import File
+from discord.ext.commands import Cog
 from discord.ext.tasks import loop
 from more_itertools import ichunked
 from PIL import Image, ImageDraw, ImageFont
 from tinydb.table import Document
 
 if __name__ != "__main__":
-    from .helpers import calc_path, strim, PrettyStringDB, aget_json, CleanHTML
+    from .helpers import CleanHTML, PrettyStringDB, aget_json, calc_path, strim
 
 logger = logging.getLogger(__name__)
+
+Combos = namedtuple("Combos", ["width", "height", "text", "mult"])
 
 
 def setup(bot):
@@ -27,10 +29,15 @@ def setup(bot):
 
 
 class SnapData:
+    """Manage data from snap.fan api"""
+
     CARDS_URL = "https://snap.fan/api/cards/"
     LOCS_URL = "https://snap.fan/api/locations/"
 
-    AGENT = { "User-Agent": "Snaplook/1.0 Whatno Discord Bot (Sean Slater)" }
+    CARD_COMBO = Combos(615, 615, 27, 1.25)
+    LOC_COMBO = Combos(512, 512, 20, 1.35)
+
+    AGENT = {"User-Agent": "Snaplook/1.0 Whatno Discord Bot (Sean Slater)"}
 
     def __init__(self, snapdir, combo, db):
         self.database = db
@@ -41,18 +48,19 @@ class SnapData:
         self.card_tbl = self.database.table("cards")
         self.loc_tbl = self.database.table("locations")
 
-
     @staticmethod
     def should_update(old, new):
+        """Check if the new info differs enough to be recombined"""
         return (
-            old.get("description") != new.get("description") or
-            old.get("power") != new.get("power") or
-            old.get("cost") != new.get("cost") or
-            old.get("displayImageUrl") != new.get("displayImageUrl")
+            old.get("description") != new.get("description")
+            or old.get("power") != new.get("power")
+            or old.get("cost") != new.get("cost")
+            or old.get("displayImageUrl") != new.get("displayImageUrl")
         )
 
-    async def process(self, dl=False):
-        if dl:
+    async def process(self, dnld=False):
+        """Get info on the cards and download them"""
+        if dnld:
             logger.debug("Downloading the cards and locations")
             async with ClientSession(headers=self.AGENT) as session:
                 cards = await self.gather_cards(session)
@@ -60,45 +68,44 @@ class SnapData:
 
                 await self.insert(cards, locs, session)
 
-        cw, ch, ct = 615, 615, 27
-        lw, lh, lt = 512, 512, 20
-
         logger.debug("Combining the card images with their text")
-        async with TaskGroup() as tg:
+        async with TaskGroup() as t_group:
             for card in self.card_tbl.all():
-                tg.create_task(self.img_combo(card, cw, ch, ct, 1.25), name=card["key"])
+                comboed = self.img_combo(card, self.CARD_COMBO)
+                t_group.create_task(comboed, name=card["key"])
 
             for loc in self.loc_tbl.all():
-                tg.create_task(self.img_combo(loc, lw, lh, lt, 1.35), name=loc["key"])
-
+                comboed = self.img_combo(loc, self.LOC_COMBO)
+                t_group.create_task(comboed, name=loc["key"])
 
     async def gather_cards(self, session):
-        pg = await aget_json(session, self.CARDS_URL)
+        """Make http requests to get json info on the cards"""
+        page = await aget_json(session, self.CARDS_URL)
         nxt = None
         res = []
-        while nxt := pg.get("next"):
-            res.extend(pg.get("results", []))
-            pg = await aget_json(session, nxt)
+        while nxt := page.get("next"):
+            res.extend(page.get("results", []))
+            page = await aget_json(session, nxt)
 
         dic = {}
-        for c in res:
-            c["description"] = CleanHTML().process(c["description"])
-            key = c["key"].lower()
-            dic[key] = c
+        for val in res:
+            val["description"] = CleanHTML().process(val["description"])
+            key = val["key"].lower()
+            dic[key] = val
         return dic
-
 
     async def gather_locs(self, session):
-        pg = await aget_json(session, self.LOCS_URL)
+        """Make http requests to get json info on the locations"""
+        page = await aget_json(session, self.LOCS_URL)
         dic = {}
-        for l in pg.get("data", []):
-            l["description"] = CleanHTML().process(l["description"])
-            key = l["key"].lower()
-            dic[key] = l
+        for loc in page.get("data", []):
+            loc["description"] = CleanHTML().process(loc["description"])
+            key = loc["key"].lower()
+            dic[key] = loc
         return dic
 
-
     async def insert(self, cards, locs, session):
+        """Insert card and location info into the database"""
         for key, new in cards.items():
             url = new["displayImageUrl"]
             if old := self.card_tbl.get(doc_id=key):
@@ -112,13 +119,18 @@ class SnapData:
             url = new["displayImageUrl"]
             if old := self.loc_tbl.get(doc_id=key):
                 if self.should_update(old, new):
-                    new["localImage"] = await self.getimg(url, "locations", key, session)
+                    new["localImage"] = await self.getimg(
+                        url,
+                        "locations",
+                        key,
+                        session,
+                    )
             else:
                 new["localImage"] = await self.getimg(url, "locations", key, session)
             self.loc_tbl.upsert(Document(new, doc_id=key))
 
-
     async def getimg(self, url, loc, name, session):
+        """Download and save the image for a card or location"""
         filename = f"{loc}/{name}.webp"
         location = self.snapdir / filename
         with open(location, "wb") as fp:
@@ -127,12 +139,12 @@ class SnapData:
                     fp.write(chunk)
         return filename
 
+    async def img_combo(self, card, cmbd):
+        """Combine the text and image of cards"""
+        cnw, cnh = cmbd.width, floor(cmbd.height * cmbd.mult)
 
-    async def img_combo(self, card, cw, ch, tt, mult):
-        cnw, cnh = cw, floor(ch * mult)
-
-        imgPath = self.snapdir / card["localImage"]
-        crd = Image.open(imgPath)
+        img_path = self.snapdir / card["localImage"]
+        crd = Image.open(img_path)
 
         img = Image.new("RGBA", (cnw, cnh))
 
@@ -140,14 +152,14 @@ class SnapData:
         img1.rectangle([(0, 0), (cnw, cnh)], fill=(0, 0, 0))
         img.paste(crd, (0, 0))
 
-        mf = ImageFont.truetype(str(calc_path("monofur.ttf")), 36)
-        txt = fill(card["description"], width=tt)
-        _, _, tw, _ = img1.textbbox((0, 0), txt, font=mf)
-        img1.text((((cw - tw) / 2), ch + 10), txt, font=mf, fill=(255, 255, 255))
+        mono = ImageFont.truetype(str(calc_path("monofur.ttf")), 36)
+        txt = fill(card["description"], width=cmbd.text)
+        _, _, t_width, _ = img1.textbbox((0, 0), txt, font=mono)
+        dims = (((cmbd.width - t_width) / 2), cmbd.height + 10)
+        img1.text(dims, txt, font=mono, fill=(255, 255, 255))
 
-        comboPath = self.combo / card['localImage']
-        img.save(comboPath, "webp")
-
+        combo_path = self.combo / card["localImage"]
+        img.save(combo_path, "webp")
 
 
 class SnapCog(Cog):
@@ -169,7 +181,10 @@ class SnapCog(Cog):
         (self.combo / "cards").mkdir(exist_ok=True)
         (self.combo / "locations").mkdir(exist_ok=True)
 
-        self.database_file = self.snapdir / self.bot.env.path("SNAPLOOKUP_DATABASE", "snapdata.db")
+        self.database_file = self.snapdir / self.bot.env.path(
+            "SNAPLOOKUP_DATABASE",
+            "snapdata.db",
+        )
         self.info = PrettyStringDB(self.database_file)
         self.cards = self.info.table("cards")
         self.locs = self.info.table("locations")
@@ -189,9 +204,10 @@ class SnapCog(Cog):
         """periodically get the new cards"""
         await self.bot.wait_until_ready()
         logger.info("updating the card information")
-        await SnapData(self.snapdir, self.combo, self.info).process(dl=True)
+        await SnapData(self.snapdir, self.combo, self.info).process(dnld=True)
 
     def get_requests(self, matches, message):
+        """Pull card / location requests from the message"""
         reqs = []
         for match in matches:
             reqs.extend([strim(m) for m in match[2:-2].split("|")])
@@ -199,7 +215,7 @@ class SnapCog(Cog):
         for req in reqs:
             doc = self.cards.get(doc_id=req) or self.locs.get(doc_id=req)
             if doc:
-                res.append(self.combo / doc['localImage'])
+                res.append(self.combo / doc["localImage"])
                 self.requests.upsert(
                     Document(
                         {
@@ -218,7 +234,7 @@ class SnapCog(Cog):
     async def process_on_message(self, message):
         """process incoming messages"""
         msg = message.content
-        matches = re.findall("\{\{.*?\}\}", msg, flags=re.IGNORECASE)
+        matches = re.findall(r"\{\{.*?\}\}", msg, flags=re.IGNORECASE)
         if not matches:
             return
 
@@ -238,59 +254,3 @@ class SnapCog(Cog):
                 logger.debug("cards: %s", fnames)
                 fps = [File(f) for f in fnames]
                 await chnl.send(files=fps)
-
-
-if __name__ == "__main__":
-    from asyncio import run
-    from datetime import datetime
-    from os import environ
-    from pathlib import Path
-    from sys import argv
-
-    from helpers import calc_path, strim, PrettyStringDB, aget_json, CleanHTML
-
-    storage = Path(argv[1]).resolve()
-    matches = re.findall("\{\{.*?\}\}", argv[2], flags=re.IGNORECASE)
-    if not matches:
-        print("no matches")
-        exit(1)
-
-    class Guild:
-        def __init__(self):
-            self.id = "gid"
-    class Channel:
-        def __init__(self):
-            self.id = "cid"
-    class Author:
-        def __init__(self):
-            self.id = "aid"
-    class DummyMessage:
-        def __init__(self):
-            self.guild = Guild()
-            self.channel = Channel()
-            self.id = "mid"
-            self.author = Author()
-            self.created_at = datetime.now()
-
-    class DummyEnv:
-        def __init__(self):
-            pass
-
-        @staticmethod
-        def path(name, default):
-            return Path(environ.get("DISCORD_SNAPLOOKUP_" + name, default))
-
-    class DummyBot:
-        def __init__(self):
-            self.storage = storage
-            self.env = DummyEnv()
-
-    cog = SnapCog(DummyBot())
-    res = cog.get_requests(matches, DummyMessage())
-    print(res)
-
-    # snapdir = storage / "snaplookup"
-    # combo = snapdir / "combo"
-    # info = DummyEnv.path("DISCORD_SNAPDB", "data.db")
-    # database = PrettyStringDB(info)
-    # run(SnapData(snapdir, combo, database).process(dl=True))

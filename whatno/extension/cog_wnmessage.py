@@ -27,7 +27,7 @@ class WNMessageCog(Cog, name="Manage Messages"):
         msg = (
             "```\n"
             "reload(cid, *mids): reload multiple messages in "
-            "the given channel by \"editing\" them\n"
+            'the given channel by "editing" them\n'
             "delete(cid, *mids): delete multiple messages from the given channel\n"
             "edit(cid, mid, content): edit message to display new content, "
             "need to quote value to get full message\n"
@@ -145,4 +145,6 @@ class WNMessageCog(Cog, name="Manage Messages"):
             files=attachments,
         )
         await ctx.message.add_reaction("\N{OK HAND SIGN}")
-        await ctx.send(f"https://discord.com/channels/{msg.guild.id}/{msg.channel.id}/{msg.id}")
+        await ctx.send(
+            f"https://discord.com/channels/{msg.guild.id}/{msg.channel.id}/{msg.id}"
+        )
