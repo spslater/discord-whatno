@@ -14,7 +14,7 @@ from textwrap import fill
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
 from discord import Colour, Embed, Forbidden, HTTPException, NotFound
-from discord.ext import bridge
+from discord.ext.bridge import bridge_command
 from discord.ext.commands import Cog, is_owner
 from discord.ext.tasks import loop
 from PIL import Image, ImageDraw, ImageFont
@@ -263,8 +263,11 @@ class ComicInfo:
         """Get information for comic reread"""
         with self._schedule() as schedule:
             date_string = date or TimeTravel.datestr()
-            days = tuple(schedule["days"][date_string])
+            days = tuple(schedule["days"].get(date_string, []))
             logger.debug("Getting comics on following days: %s", days)
+
+        if not days:
+            return []
 
         entries = []
         comics = self.released_on(days)
@@ -425,10 +428,10 @@ class DoaComicCog(Cog, name="DoA Comic"):
             return
         logger.info("Saving the reacts for the previous days comic")
         after = datetime.now() - timedelta(days=1, hours=12)
-        await self._process_comic(after)
+        await self.bot.blocker(self._process_comic, after)
 
     @is_owner()
-    @bridge.bridge_command()
+    @bridge_command()
     async def latest(self, ctx, after_str, before_str=None):
         """Save info about the comic from date provided"""
         logger.info(
@@ -443,31 +446,10 @@ class DoaComicCog(Cog, name="DoA Comic"):
         if before_str:
             before_str = f"{before_str.strip()} 00:00:00"
             before = TimeTravel.fromstr(before_str) + timedelta(hours=6)
-        await self._process_comic(after, before)
+        await self.bot.blocker(self._process_comic, after, before)
         await ctx.send(
             f"Saved comics after {after} and before {before} \N{OK HAND SIGN}"
         )
-
-    async def _setup_connection(self):
-        given_channels = []
-        for given_channel in self.channels:
-            channel_id = channel_name = None
-            try:
-                channel_id = int(given_channel)
-            except (TypeError, ValueError):
-                channel_name = given_channel
-
-            if channel_id is None:
-                channels = self.bot.get_all_channels()
-
-                for channel in channels:
-                    if channel.name == channel_name:
-                        channel_id = int(channel.id)
-                        break
-                if channel_id is None:
-                    raise RuntimeError("Provided channel is not an available channels")
-            given_channels.append(channel_id)
-        self.channels = given_channels
 
     @staticmethod
     def build_comic_embed(entry):
@@ -497,7 +479,7 @@ class DoaComicCog(Cog, name="DoA Comic"):
     async def schedule_comics(self):
         """Schedule the comics to auto publish"""
         await self.bot.wait_until_ready()
-        await self.send_comic()
+        await self.bot.blocker(self.send_comic)
         logger.info(
             "Publishing next batch of comics at %s",
             # function transformed by the @loop annotation
@@ -512,7 +494,7 @@ class DoaComicCog(Cog, name="DoA Comic"):
 
         prev_cur = self.download.cur
         self.download.cur = True
-        await self.download.process(self.download.home)
+        await self.bot.blocker(self.download.process, self.download.home)
         self.download.cur = prev_cur
         logger.info(
             "Downloading todays comic info, checking tomorrow at %s",
@@ -587,7 +569,8 @@ class DoaComicCog(Cog, name="DoA Comic"):
                 )
         return False
 
-    @bridge.bridge_command()
+    @is_owner()
+    @bridge_command()
     async def refresh(self, ctx, *date):
         """Refresh the comic to get the embed working"""
         logger.info("refreshing dates: %s", date)
@@ -619,7 +602,8 @@ class DoaComicCog(Cog, name="DoA Comic"):
                     await self.refresh_embed(msg, embed)
         await ctx.message.add_reaction("\N{OK HAND SIGN}")
 
-    @bridge.bridge_command()
+    @is_owner()
+    @bridge_command()
     async def publish(self, ctx, date=None):
         """Publish the days comics, date (YYYY-MM-DD)
         is provided will publish comics for those days"""
@@ -627,16 +611,17 @@ class DoaComicCog(Cog, name="DoA Comic"):
             date = TimeTravel.datestr()
         logger.info("manually publishing comics for date %s", date)
         await ctx.send("\N{OK HAND SIGN} Sendings Comics")
-        await self.send_comic(date, [ctx.message.channel.id])
+        await self.bot.blocker(self.send_comic, date, [ctx.message.channel.id])
 
-    @bridge.bridge_command()
-    async def process(self, ctx, start):
+    @is_owner()
+    @bridge_command()
+    async def comicfrom(self, ctx, start):
         """Save info for comic starting from given url"""
         logger.info("downloading comic info from %s", start)
         await ctx.defer()
         prev_cur = self.download.cur
         self.download.cur = False
-        await self.download.process(start)
+        await self.bot.blocker(self.download.process, start)
         self.download.cur = prev_cur
         await ctx.send("\N{OK HAND SIGN}")
 
@@ -803,7 +788,7 @@ class DumbingOfAge:
             logger.info('No need to convert image "%s"', output_filename)
             input_filename.rename(output_filename)
 
-    def download_and_save(self, img_soup, final_filename, raw_filename):
+    async def download_and_save(self, img_soup, final_filename, raw_filename):
         """Get comic and save it"""
         logger.info('Downloading and saving "%s"', final_filename)
         image_url = img_soup["src"]
@@ -811,11 +796,11 @@ class DumbingOfAge:
         alt_text = self._get_alt(img_soup)
         if alt_text:
             logger.debug("Saving with alt text")
-            self._download(image_url, raw_filename)
+            await self._download(image_url, raw_filename)
             self._save_image_with_alt(raw_filename, final_filename, alt_text)
         else:
             logger.debug("Saving with no alt")
-            self._download(image_url, raw_filename)
+            await self._download(image_url, raw_filename)
             self._convert_to_png(raw_filename, final_filename)
 
     async def save_to_archive(self, archive, filename, cur_img_dir):
@@ -1047,7 +1032,7 @@ class DumbingOfAge:
             tags = self._get_tags(soup)
             self.add_tags(comic_row, tags)
 
-            self.download_and_save(img_soup, ni.final, ni.raw)
+            await self.download_and_save(img_soup, ni.final, ni.raw)
             await self.save_to_archive(self.name, ni.final, ni.imgdir)
             await self.save_to_archive(f"{self.name} - {ni.book}", ni.final, ni.imgdir)
 

@@ -14,8 +14,7 @@ from more_itertools import ichunked
 from PIL import Image, ImageDraw, ImageFont
 from tinydb.table import Document
 
-if __name__ != "__main__":
-    from .helpers import CleanHTML, PrettyStringDB, aget_json, calc_path, strim
+from .helpers import CleanHTML, PrettyStringDB, aget_json, calc_path, strim
 
 logger = logging.getLogger(__name__)
 
@@ -194,7 +193,7 @@ class SnapCog(Cog):
         # pylint: disable=no-member
         self.periodic_check.start()
 
-    def cog_unload(self):
+        # def cog_unload(self):
         # function transformed by the @loop annotation
         # pylint: disable=no-member
         self.periodic_check.cancel()
@@ -204,7 +203,8 @@ class SnapCog(Cog):
         """periodically get the new cards"""
         await self.bot.wait_until_ready()
         logger.info("updating the card information")
-        await SnapData(self.snapdir, self.combo, self.info).process(dnld=True)
+        snapdata = SnapData(self.snapdir, self.combo, self.info)
+        await self.bot.blocker(snapdata.process, dnld=True)
 
     def get_requests(self, matches, message):
         """Pull card / location requests from the message"""

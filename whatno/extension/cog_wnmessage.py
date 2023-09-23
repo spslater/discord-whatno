@@ -1,7 +1,8 @@
 """Test and general functions Cog"""
 import logging
 
-from discord.ext.commands import Cog, group, is_owner
+from discord.ext.bridge import bridge_group
+from discord.ext.commands import Cog, is_owner
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,7 @@ class WNMessageCog(Cog, name="Manage Messages"):
         self.bot = bot
 
     @is_owner()
-    @group(name="msg")
+    @bridge_group()
     async def msg(self, ctx):
         """Manage bot about extensions"""
         if ctx.invoked_subcommand:
@@ -37,7 +38,7 @@ class WNMessageCog(Cog, name="Manage Messages"):
         await ctx.send(msg)
 
     @is_owner()
-    @msg.command(name="reload")
+    @msg.command()
     async def reload(self, ctx, cid, *mids):
         """reload a message"""
         try:
@@ -70,7 +71,7 @@ class WNMessageCog(Cog, name="Manage Messages"):
             await ctx.message.add_reaction("\N{OK HAND SIGN}")
 
     @is_owner()
-    @msg.command(name="delete")
+    @msg.command()
     async def delete(self, ctx, cid, *mids):
         """delete a message"""
         try:
@@ -99,7 +100,7 @@ class WNMessageCog(Cog, name="Manage Messages"):
             await ctx.message.add_reaction("\N{OK HAND SIGN}")
 
     @is_owner()
-    @msg.command(name="edit")
+    @msg.command()
     async def edit(self, ctx, cid, mid, content):
         """edit a message"""
         try:
@@ -122,7 +123,7 @@ class WNMessageCog(Cog, name="Manage Messages"):
         await ctx.message.add_reaction("\N{OK HAND SIGN}")
 
     @is_owner()
-    @msg.command(name="send")
+    @msg.command()
     async def send(self, ctx, cid, content):
         """send a new message"""
         try:
@@ -131,8 +132,8 @@ class WNMessageCog(Cog, name="Manage Messages"):
             await ctx.send(f"\N{ANGRY FACE} invalid channel: {cid}")
             return
 
-        print("embeds", ctx.message.embeds)
-        print("attachments", ctx.message.attachments)
+        logger.debug("embeds: %s", ctx.message.embeds)
+        logger.debug("attachments: %s", ctx.message.attachments)
 
         attachments = [
             await attach.to_file(spoiler=attach.is_spoiler())

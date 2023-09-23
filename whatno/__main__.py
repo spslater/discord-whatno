@@ -56,7 +56,7 @@ with env.prefixed("DISCORD_"):
     if logging_config:
         logging.config.fileConfig(logging_config)
 
-    if args.devmode:
+    if args.devmode or env.bool("DEVMODE"):
         whatno = WhatnoBot(token, env=env, prefix="~")
     else:
         whatno = WhatnoBot(token, env=env)

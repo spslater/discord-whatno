@@ -6,7 +6,7 @@ from shutil import which
 from uuid import uuid4
 
 from discord import File
-from discord.ext import bridge
+from discord.ext.bridge import bridge_command
 from discord.ext.commands import Cog
 from more_itertools import ichunked
 
@@ -60,14 +60,15 @@ class InstaDownCog(Cog):
             return False
         return True
 
-    @bridge.bridge_command()
+    @bridge_command()
+    # function name is used as command name
     # pylint: disable=invalid-name
     async def dl(self, ctx):
         """process incoming messages"""
         msg = ctx.message.content
         chnl = ctx.channel
         gld = ctx.guild
-        # have this loaded from file and add a reload command
+        # TODO: have the ids loaded from file and add a reload command
         if not (
             chnl.id in (1034220450793934960, 722988880273342485, 1120438914986024981)
             or gld.id in (1090020461682901113,)
@@ -75,12 +76,16 @@ class InstaDownCog(Cog):
             return
 
         logger.debug("downloading msg: %s", msg)
-        ctx.defer()
+        await ctx.defer()
         reqs = msg.split("\n")
         res = []
         errs = []
         for req in reqs:
-            res, errs = await self.download(req, res, errs)
+            try:
+                res, errs = await self.bot.blocker(self.download, req, res, errs)
+            except Exception as e:
+                logger.debug("Unknown Awaitable: %s", e)
+                raise e
 
         for fnames in ichunked(res, 10):
             logger.debug("videos: %s", fnames)

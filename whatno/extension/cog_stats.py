@@ -3,6 +3,7 @@ import logging
 import re
 from collections import namedtuple
 from json import dumps
+from time import localtime, time
 
 from discord import ChannelType, HTTPException, NotFound
 from discord.ext.bridge import bridge_command, bridge_group
@@ -505,8 +506,10 @@ class StatsCog(Cog):
             guild,
         )
 
-    @bridge_group(name="vc")
-    async def voice_stat(self, ctx):
+    @bridge_group()
+    # function name is used as command name
+    # pylint: disable=invalid-name
+    async def vc(self, ctx):
         """get info about the user"""
         if ctx.invoked_subcommand:
             return
@@ -524,15 +527,15 @@ class StatsCog(Cog):
                 return member.id
         return None
 
-    @voice_stat.bridge_command(name="all")
-    async def voice_stat_user_all(self, ctx):
+    @vc.command()
+    async def all(self, ctx):
         """get info about any user by id"""
         logger.info("geting specific user vc data for all time")
         output = await self._user_stat(ctx.author.id, ctx.channel.guild, alltime=True)
         await ctx.send(output)
 
-    @voice_stat.bridge_command(name="user")
-    async def voice_stat_user(self, ctx, user, *extra):
+    @vc.command()
+    async def user(self, ctx, user, *extra):
         """get info about any user by id"""
         logger.info("geting specific user vc data")
         user_id = None
@@ -570,13 +573,14 @@ class StatsCog(Cog):
         output += "```"
         return output
 
-    @voice_stat.bridge_command(name="top")
-    async def voice_top(self, ctx, all_=None):
+    @vc.command()
+    async def top(self, ctx, all_=None):
         """Get top 10 users from each guild"""
         logger.info("getting top users for guild")
         async with ctx.typing():
             guild = ctx.channel.guild
 
+            early = None
             rows = []
             since = TimeTravel.tsinpast(*ROLLING)
             with self._database() as db:
@@ -616,13 +620,10 @@ class StatsCog(Cog):
             output = await self._generate_top_output(all_, early, users, guild)
             await ctx.send(output)
 
-    @voice_stat.bridge_group("hist")
-    async def historic_data(self, ctx):
-        """Collect and add historic data"""
-        if ctx.invoked_subcommand:
-            return
-
     def _compress_database(self):
+        start = time()
+        logger.debug("Starting db compression: %s", localtime(start))
+        deletes = []
         with self._database() as db:
             max_durs = db.execute(
                 """
@@ -631,18 +632,16 @@ class StatsCog(Cog):
                 GROUP BY user, channel, voicestate, h_time
                 """
             )
-        deletes = []
-        for max_dur in max_durs:
-            deletes.append(
-                (
-                    max_dur["user"],
-                    max_dur["channel"],
-                    max_dur["voicestate"],
-                    max_dur["h_time"],
-                    max_dur["maxdur"],
+            for max_dur in max_durs:
+                deletes.append(
+                    (
+                        max_dur["user"],
+                        max_dur["channel"],
+                        max_dur["voicestate"],
+                        max_dur["h_time"],
+                        max_dur["maxdur"],
+                    )
                 )
-            )
-        with self._database() as db:
             db.executemany(
                 """
                 DELETE FROM History
@@ -655,12 +654,16 @@ class StatsCog(Cog):
                 """,
                 deletes,
             )
+        end = time()
+        logger.debug(
+            "Completed db compression in %s seconds: %s", start - end, localtime(end)
+        )
 
     @loop(hours=7 * 24)
     async def periodic_compress(self):
         """periodically compress that database of duplicate data"""
         await self.bot.wait_until_ready()
-        self._compress_database()
+        await self.bot.blocker(self._compress_database)
         logger.debug(
             "periodically compress that database of duplicate data, next at %s",
             # function transformed by the @loop annotation
@@ -669,11 +672,11 @@ class StatsCog(Cog):
         )
 
     @is_owner()
-    @historic_data.bridge_command("compress")
-    async def compress_duplicates(self, ctx):
+    @vc.command()
+    async def compress(self, ctx):
         """Remove duplicate duration entries"""
         logger.info("removing duplicate duration entries")
-        self._compress_database()
+        await self.bot.blocker(self._compress_database)
         await ctx.message.add_reaction("👍")
 
     #########################
@@ -838,14 +841,16 @@ class StatsCog(Cog):
         with self._database() as db:
             db.executemany(MSG_INSERT, entries)
 
-    @bridge_group(name="txt")
-    async def message_stat(self, ctx):
+    @bridge_group()
+    async def txt(self, ctx):
         """get info about the user message"""
         if ctx.invoked_subcommand:
             return
 
-    @message_stat.bridge_command("ch")
-    async def get_past_messages_channel(self, ctx, channel):
+    @txt.command()
+    # function name is used as command name
+    # pylint: disable=invalid-name
+    async def ch(self, ctx, channel):
         """gather previous messages"""
         tstp = TimeTravel.timestamp()
         try:
@@ -887,8 +892,10 @@ class StatsCog(Cog):
 
         await msg.edit(f"{ckch.name}: updated {len(entries)}")
 
-    @message_stat.bridge_command("gd")
-    async def get_past_messages_guild(self, ctx, guild):
+    @txt.command()
+    # function name is used as command name
+    # pylint: disable=invalid-name
+    async def gd(self, ctx, guild):
         """gather messages from guild text channels"""
         try:
             ckgd = await self.bot.fetch_guild(int(guild))
@@ -901,6 +908,6 @@ class StatsCog(Cog):
 
         for ckch in await ckgd.fetch_channels():
             if ckch.type in TEXT_CHANNELS:
-                await self.get_past_messages_channel(ctx, ckch.id)
+                await self.ch(ctx, ckch.id)
 
         await ctx.send(f"all downloaded for guild {ckgd.name}")

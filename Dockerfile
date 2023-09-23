@@ -1,17 +1,18 @@
 FROM python:3.11.4-slim-bookworm
 
 RUN apt update -y
-RUN apt install -y git
+RUN apt install -y ffmpeg
 
 WORKDIR /app
 ENV PYTHONPATH /app
 
-RUN mkdir extension
 RUN mkdir logs
+RUN mkdir storage
 
 ADD whatno whatno
 ADD requirements.txt .
 ADD logging.conf .
+# ADD external.txt .
 
 RUN python -m ensurepip --upgrade
 RUN python -m pip install --upgrade pip

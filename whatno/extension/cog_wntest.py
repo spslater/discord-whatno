@@ -1,7 +1,8 @@
 """Test and general functions Cog"""
 import logging
 
-from discord.ext.commands import Cog, command
+from discord.ext.bridge import bridge_command
+from discord.ext.commands import Cog
 from discord.ui import Button, View
 
 logger = logging.getLogger(__name__)
@@ -19,17 +20,17 @@ class WNTestCog(Cog, name="General"):
         super().__init__()
         self.bot = bot
 
-    @command()
+    @bridge_command()
     async def ping(self, ctx):
         """ping"""
         return await ctx.send("pong")
 
-    @command()
+    @bridge_command()
     async def pong(self, ctx):
         """pong"""
         return await ctx.send("ping")
 
-    @command()
+    @bridge_command()
     async def test(self, ctx):
         """Send a message to test this command is working
 
@@ -37,7 +38,7 @@ class WNTestCog(Cog, name="General"):
         """
         return await ctx.send("Test recieved! :D")
 
-    @command()
+    @bridge_command()
     async def source(self, ctx):
         """Get link to source code"""
         await ctx.send(
@@ -54,6 +55,6 @@ class SourceLink(View):
         self.add_item(
             Button(
                 label="Source Code",
-                url="https://git.whatno.io/discord/whatno",
+                url="https://fcgh.dev/sean/discord-whatno",
             )
         )

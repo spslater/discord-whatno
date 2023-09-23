@@ -5,15 +5,17 @@ commands from different cogs
 :class WhatnoBot: Discord Bot
 """
 import logging
+from functools import partial
 from sys import exc_info
 from traceback import format_tb
+from types import CoroutineType
 
 from discord import Intents
-from discord.ext.commands import Bot, when_mentioned_or
+from discord.ext.bridge import Bot
+from discord.ext.commands import when_mentioned_or
 from environs import Env
 
-from .extension import (doacomic, instadown, snaplookup, stats, wnmessage,
-                        wntest)
+from .extension import doacomic, instadown, snaplookup, stats, wnmessage, wntest
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +38,16 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
             intents=Intents.all(),
         )
         self.load_cogs()
+
+    async def blocker(self, b_func, *args, **kwargs):
+        """Send long running tasks to the loop so they don't block"""
+        func = partial(b_func, *args, **kwargs)
+        future = await self.loop.run_in_executor(None, func)
+        while isinstance(future, CoroutineType):
+            logger.debug("waitin on: %s", future)
+            future = await future
+        logger.debug("func return: %s", future)
+        return future
 
     def load_cogs(self):
         """Load the cogs found in the extension folder"""

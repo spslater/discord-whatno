@@ -1,6 +1,10 @@
 """Helper methods for the Whatno Cogs"""
 import re
+
+# from asyncio import to_thread
 from datetime import datetime, timedelta
+
+# from functools import wraps, partial
 from html.parser import HTMLParser
 from io import StringIO, UnsupportedOperation
 from json import dumps
@@ -279,3 +283,13 @@ class ContextDB:
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
         return exc_type is None
+
+
+# # https://stackoverflow.com/a/65882269
+# def threadable(func):
+#     """decorator to run long functions as a thread to prevent blocking"""
+#     @wraps(func)
+#     async def wrapper(*args, **kwargs):
+#         return await to_thread(func, *args, **kwargs)
+
+#     return wrapper
