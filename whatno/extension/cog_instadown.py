@@ -68,11 +68,7 @@ class InstaDownCog(Cog):
         msg = ctx.message.content
         chnl = ctx.channel
         gld = ctx.guild
-        # TODO: have the ids loaded from file and add a reload command
-        if not (
-            chnl.id in (1034220450793934960, 722988880273342485, 1120438914986024981)
-            or gld.id in (1090020461682901113,)
-        ) or self._bad_msg(msg):
+        if self._bad_msg(msg):
             return
 
         logger.debug("downloading msg: %s", msg)
