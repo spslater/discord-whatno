@@ -78,14 +78,14 @@ class InstaDownCog(Cog):
         errs = []
         for req in reqs:
             try:
-                res, errs = await self.bot.blocker(self.download, req, res, errs)
+                res, errs = await self.bot.blocker(self.download, ctx, req, res, errs)
             except Exception as e:
                 logger.debug("Unknown Awaitable: %s", e)
                 raise e
 
         for fnames in ichunked(res, 10):
-            logger.debug("videos: %s", fnames)
             fps = [File(f) for f in fnames]
+            logger.debug("videos: %s", fps)
             await chnl.send(files=fps)
 
         if errs:
@@ -98,10 +98,11 @@ class InstaDownCog(Cog):
             except FileNotFoundError:
                 pass
 
-    async def download(self, req, res, errs):
+    async def download(self, ctx, req, res, errs):
         """Dowload the videos requested in the string"""
         try:
             name, url = req.rsplit(" ", 1)
+            name = str(uuid4())[0:8] + " " + name
         except ValueError as e:
             if req.startswith("http"):
                 name = str(uuid4())
@@ -110,7 +111,9 @@ class InstaDownCog(Cog):
                 logger.debug("invalid url: does not begin with http")
                 errs.append(str(e))
                 return res, errs
+        name = name.replace("%dl ", "", 1)
 
+        msg = await ctx.send("downloading " + name)
         name = name.replace(" ", "_") + ".mp4"
         tmp = self.f_tmp / name
         logger.debug("downloading %s as %s", url, tmp)
@@ -122,13 +125,16 @@ class InstaDownCog(Cog):
 
         for scale in self.scales:
             logger.debug("too big :( trying %s", scale)
+            await msg.edit("scaling the image: " + scale)
             sm_name = self.f_sm / name
             res, errs, cont = await self.resize(tmp, sm_name, scale, res, errs)
             if cont:
+                await msg.edit("scaling worked! will upload shortly (deleting message soon)", delete_after=30)
                 return res, errs
 
         logger.debug("too big :( still too big, giving up, very sad")
         errs.append(f"{name} | ffmpg unable to scale small enough")
+        await msg.edit("unable to scale video to small enough, not able to upload")
         return res, errs
 
     async def ytdlp(self, url, name):
