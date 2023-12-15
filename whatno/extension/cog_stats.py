@@ -29,7 +29,7 @@ VoiceState = namedtuple("VoiceState", ["state", "time"])
 VoiceDiff = namedtuple("VoiceDiff", ["voice", "mute", "deaf", "stream", "video"])
 Voice = namedtuple("Voice", ["voice", "mute", "deaf", "stream", "video"])
 
-MSG_INSERT = "INSERT OR IGNORE INTO Message VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
+MSG_INSERT = "INSERT INTO Message VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
 TEXT_CHANNELS = (
     ChannelType.text,
     ChannelType.private,
@@ -109,7 +109,10 @@ class StatsCog(Cog):
         super().__init__()
         self.bot = bot
 
-        self.database_file = self.bot.env.path("STATS_DATABASE")
+        self.statdir = self.bot.storage / "stats"
+
+        self.database_file = self.statdir / self.bot.env.path("STATS_DATABASE")
+        # self.database_file = self.bot.env.path("STATS_DATABASE")
         self._database().setup()
 
         self.current = {}

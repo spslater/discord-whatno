@@ -244,6 +244,8 @@ class DictRow:
 class ContextDB:
     """Sqlite DB for use with context libs"""
 
+    SQL_TIMEOUT = 30.0
+
     def __init__(self, dbfile, setup_filename, readonly=False):
         self.readonly = readonly
         self.filename = dbfile
@@ -264,9 +266,9 @@ class ContextDB:
     def open(self):
         """Open a connection to the database and return a cursor"""
         self.conn = (
-            connect(f"file:{self.filename}?mode=ro", uri=True)
+            connect(f"file:{self.filename}?mode=ro", uri=True, timeout=self.SQL_TIMEOUT)
             if self.readonly
-            else connect(self.filename)
+            else connect(self.filename, timeout=self.SQL_TIMEOUT)
         )
         self.conn.row_factory = DictRow
         return self.conn.cursor()

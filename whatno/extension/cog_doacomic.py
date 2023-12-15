@@ -339,12 +339,14 @@ class DoaComicCog(Cog, name="DoA Comic"):
         # function transformed by the @loop annotation
         # pylint: disable=no-member
         self.schedule_comics.start()
+        self.process_comic.start()
         logger.info("Completed DoA Reread setup! :D")
 
     def cog_unload(self):
         # function transformed by the @loop annotation
         # pylint: disable=no-member
         self.schedule_comics.cancel()
+        self.process_comic.cancel()
 
     async def fetch_message(self, channel_id, message_id):
         """Get message from channel and message ids"""
@@ -656,7 +658,7 @@ class DumbingOfAge:
         self.cur_count = 0
         self.exception_wait = 2
 
-    def _database(self, readonly=True):
+    def _database(self, readonly=False):
         return ComicDB(self.database_file, readonly)
 
     async def exception_sleep(self, current, retries):
@@ -685,7 +687,8 @@ class DumbingOfAge:
                             continue
                         async for chunk in res.content.iter_chunked(1024):
                             fp.write(chunk)
-                            break
+                        break
+                fp.flush()
 
     @staticmethod
     def _search_soup(soup, path, value=None):
@@ -757,12 +760,13 @@ class DumbingOfAge:
         comic = Image.open(input_filename).convert("RGBA")
         c_width, c_height = comic.size
 
-        font = ImageFont.truetype(calc_path("ubuntu.ttf"), 16)
+        font = ImageFont.truetype(str(calc_path("ubuntu.ttf")), 16)
         draw_font = ImageDraw.Draw(
             Image.new("RGB", (c_width, c_height * 2), (255, 255, 255))
         )
         alt = fill(alt_raw, width=int((c_width - 20) / 11))
-        _, alt_height = draw_font.textsize(alt, font=font)
+        _, alt_top, _, alt_bottom = draw_font.multiline_textbbox((0,0), alt, font=font)
+        alt_height = alt_bottom - alt_top
 
         height = c_height + 10 + alt_height + 10
         output = Image.new("RGBA", (c_width, height), RGBA(224, 238, 239, 255))
@@ -882,7 +886,7 @@ class DumbingOfAge:
     def add_arc(self, image_filename, arc_name):
         """Add arc to the database"""
         logger.debug("Checking if arc needs to be added to database")
-        data = image_filename.split("_")
+        data = image_filename.name.split("_")
         num = data[1]
         name = data[2]
         book = int(num[0:2])
@@ -904,7 +908,7 @@ class DumbingOfAge:
     def add_comic(self, image_filename, arc_row, comic_title, url):
         """Add comic to the database"""
         logger.debug("Checking if comic needs to be added to database")
-        title_release = image_filename.split("_")[3]
+        title_release = image_filename.name.split("_")[3]
         release = "-".join(title_release.split("-")[0:3])
 
         with self._database() as database:
@@ -915,7 +919,7 @@ class DumbingOfAge:
                 logger.info('Inserting new comic: "%s"', comic_title)
                 database.execute(
                     "INSERT INTO Comic VALUES (?,?,?,?,?)",
-                    (release, comic_title, image_filename, url, arc_row[0]),
+                    (release, comic_title, str(image_filename), url, arc_row["number"]),
                 )
                 database.execute("SELECT * FROM Comic WHERE release = ?", (release,))
                 row = database.fetchone()
@@ -927,13 +931,13 @@ class DumbingOfAge:
         logger.debug("Checking if alt text needs to be added to database")
 
         with self._database() as database:
-            database.execute("SELECT * FROM Alt WHERE comicId = ?", (comic[0],))
+            database.execute("SELECT * FROM Alt WHERE comicId = ?", (comic["release"],))
             row = database.fetchone()
 
             if not row:
-                logger.debug('Inserting new alt: "%s"', comic[0])
-                database.execute("INSERT INTO Alt VALUES (?,?)", (comic[0], alt))
-                database.execute("SELECT * FROM Alt WHERE comicId = ?", (comic[0],))
+                logger.debug('Inserting new alt: "%s"', comic["release"])
+                database.execute("INSERT INTO Alt VALUES (?,?)", (comic["release"], alt))
+                database.execute("SELECT * FROM Alt WHERE comicId = ?", (comic["release"],))
                 row = database.fetchone()
 
         return row
@@ -945,19 +949,19 @@ class DumbingOfAge:
         with self._database() as database:
             for tag in tags:
                 database.execute(
-                    "SELECT * FROM Tag WHERE comicId = ? AND tag = ?", (comic[0], tag)
+                    "SELECT * FROM Tag WHERE comicId = ? AND tag = ?", (comic["release"], tag)
                 )
                 row = database.fetchone()
 
                 if not row:
-                    database.execute("INSERT INTO Tag VALUES (?,?)", (comic[0], tag))
+                    database.execute("INSERT INTO Tag VALUES (?,?)", (comic["release"], tag))
                     database.execute(
                         "SELECT * FROM Tag WHERE comicId = ? AND tag = ?",
-                        (comic[0], tag),
+                        (comic["release"], tag),
                     )
                     row = database.fetchone()
                     added_tags.append(row)
-        logger.debug("Inserted new tags: %s", [tag[1] for tag in added_tags])
+        logger.debug("Inserted new tags: %s", [tag["tag"] for tag in added_tags])
         return added_tags
 
     async def _naming_parts(self, soup, name, ext):
@@ -977,7 +981,7 @@ class DumbingOfAge:
         return book_arc, img_filename
 
     async def _naming_info(self, soup, image_url):
-        raw_name = image_url.split("/")[-1]
+        raw_name = Path(image_url.split("/")[-1])
         ext = raw_name.suffix.lower()
         basename = raw_name.stem
 
@@ -1005,10 +1009,11 @@ class DumbingOfAge:
 
     async def process(self, url=None):
         """Get the current comic and add it to the database"""
-        url = url or self.url
+        if url:
+            self.url = url
         while True:
             logger.info("Getting soup for %s", self.url)
-            soup = await self.get_soup(url)
+            soup = await self.get_soup(self.url)
 
             img_soup = self.get_image(soup)
             skip_comic, ni = await self._naming_info(soup, img_soup["src"])
