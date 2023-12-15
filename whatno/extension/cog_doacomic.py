@@ -539,7 +539,6 @@ class DoaComicCog(Cog, name="DoA Comic"):
         """Save reacts to the database"""
         logger.debug("reaction: %s", payload.emoji)
         if payload.emoji != "🔁":
-            logger.debug("skipping???")
             return
         msg = await self.fetch_message(payload.channel_id, payload.message_id)
         reply = msg.reference and msg.content == "%refresh"

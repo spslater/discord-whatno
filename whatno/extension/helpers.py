@@ -220,6 +220,14 @@ class TimeTravel:
         time = time.split(".")[0]
         return f"{date} at {time}"
 
+    @classmethod
+    def strptime(cls, date):
+        try:
+            ts = datetime.strptime(date, "%Y-%m-%d")
+        except ValueError:
+            ts = datetime.strptime(date, "%Y-%m-%d %H:%M")
+        return ts
+
 
 class DictRow:
     """Turn a row into a dictionary (for dot notation)"""

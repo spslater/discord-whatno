@@ -5,7 +5,7 @@ from collections import namedtuple
 from json import dumps
 from time import localtime, time
 
-from discord import ChannelType, HTTPException, NotFound
+from discord import ChannelType, HTTPException, NotFound, Forbidden
 from discord.ext.bridge import bridge_command, bridge_group
 from discord.ext.commands import Cog, is_owner
 from discord.ext.tasks import loop
@@ -29,7 +29,7 @@ VoiceState = namedtuple("VoiceState", ["state", "time"])
 VoiceDiff = namedtuple("VoiceDiff", ["voice", "mute", "deaf", "stream", "video"])
 Voice = namedtuple("Voice", ["voice", "mute", "deaf", "stream", "video"])
 
-MSG_INSERT = "INSERT INTO Message VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
+MSG_INSERT = "INSERT OR IGNORE INTO Message VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
 TEXT_CHANNELS = (
     ChannelType.text,
     ChannelType.private,
@@ -851,25 +851,19 @@ class StatsCog(Cog):
         if ctx.invoked_subcommand:
             return
 
-    @txt.command()
-    # function name is used as command name
-    # pylint: disable=invalid-name
-    async def ch(self, ctx, channel):
-        """gather previous messages"""
-        tstp = TimeTravel.timestamp()
+    async def _ch(self, ctx, tstp, ckch, sincestr="2010-11-12"):
         try:
-            ckch = await self.bot.fetch_channel(int(channel))
-        except HTTPException:
-            await ctx.send(f"unable to access channel with id {channel}")
+            _ = await ckch.history(limit=10).flatten()
+        except Forbidden:
+            logger.debug("don't have permissions for %s, continuing", ckch.name)
             return
+
+        since = TimeTravel.strptime(sincestr)
+        logger.debug("downloading messages for channel %s since %s", ckch.name, sincestr)
         entries = []
-        if ckch is None:
-            await ctx.send(f"unable to find channel with id {channel}")
-            return
-        logger.debug("downloading messages for channel %s", ckch.name)
         total = 0
         msg = await ctx.send(f"{ckch.name}: downloaded {total}")
-        async for message in ckch.history(limit=None, oldest_first=True):
+        async for message in ckch.history(limit=None, oldest_first=True, after=since):
             if message.created_at:
                 data = await self._proc_message(
                     tstp,
@@ -896,11 +890,29 @@ class StatsCog(Cog):
 
         await msg.edit(f"{ckch.name}: updated {len(entries)}")
 
+
     @txt.command()
     # function name is used as command name
     # pylint: disable=invalid-name
-    async def gd(self, ctx, guild):
+    async def ch(self, ctx, channel, sincestr="2010-11-12"):
+        """gather previous messages"""
+        tstp = TimeTravel.timestamp()
+        try:
+            ckch = await self.bot.fetch_channel(int(channel))
+        except HTTPException:
+            await ctx.send(f"unable to access channel with id {channel}")
+            return
+        if ckch is None:
+            await ctx.send(f"unable to find channel with id {channel}")
+            return
+        await self._ch(ctx, tstp, ckch, sincestr)
+
+    @txt.command()
+    # function name is used as command name
+    # pylint: disable=invalid-name
+    async def gd(self, ctx, guild, sincestr="2010-11-12"):
         """gather messages from guild text channels"""
+        tstp = TimeTravel.timestamp()
         try:
             ckgd = await self.bot.fetch_guild(int(guild))
         except HTTPException:
@@ -912,6 +924,7 @@ class StatsCog(Cog):
 
         for ckch in await ckgd.fetch_channels():
             if ckch.type in TEXT_CHANNELS:
-                await self.ch(ctx, ckch.id)
+                # await self.ch(ctx, ckch.id, sincestr)
+                await self._ch(ctx, tstp, ckch, sincestr)
 
         await ctx.send(f"all downloaded for guild {ckgd.name}")
