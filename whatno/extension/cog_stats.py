@@ -747,13 +747,14 @@ class StatsCog(Cog):
             if message:
                 msg.aid = message.author.id
                 self._set_message_data(msg, message)
-                msg.tstp = (
+                tmp_tstp = tstp
+                if message.edited_at:
                     message.edited_at.timestamp()
-                    if message.edited_at
-                    else (
-                        payload.data.get("edited_timestamp", tstp) if payload else tstp
-                    )
-                )
+                elif payload:
+                    ets = payload.data.get("edited_timestamp")
+                    if ets:
+                        tmp_tstp = ets
+                msg.tstp = tmp_tstp
             else:
                 msg.aid = self._get_message_author(msg.mid)
                 self._set_payload_data(msg, payload.data)
