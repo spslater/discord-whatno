@@ -851,35 +851,81 @@ class StatsCog(Cog):
         if ctx.invoked_subcommand:
             return
 
-    async def _ch(self, ctx, tstp, ckch, sincestr="2010-11-12"):
+    async def _hist_message(self, tstp, message):
+        entries = []
+        if message.created_at:
+            data = await self._proc_message(
+                tstp,
+                "create",
+                message=message,
+                hist=True,
+            )
+            entries.append(data)
+        if message.edited_at:
+            data = await self._proc_message(
+                tstp,
+                "edit",
+                message=message,
+                hist=True,
+            )
+            entries.append(data)
+        return entries
+
+    async def _td(self, ctx, tstp, ckch, since):
+        for thread in ckch.threads:
+            entries = []
+            total = 0
+            msg = await ctx.send(f"{thread.name}: downloaded {total}")
+            async for message in thread.history(limit=None, oldest_first=True, after=since):
+                cur_entries = await self._hist_message(tstp, message)
+                entries.extend(cur_entries)
+                total += 1
+                if not total % 100:
+                    await msg.edit(f"{thread.name}: downloaded {total}")
+
+            logger.debug("hist for %s: %s", ckch.name, len(entries))
+            with self._database() as db:
+                db.executemany(MSG_INSERT, entries)
+
+            await msg.edit(f"{thread.name}: updated {len(entries)}")
+
+        try:
+            archived_threads = ckch.archived_threads(private=False, joined=False, limit=None)
+        except (Forbidden, HTTPException):
+            pass
+        else:
+            async for thread in archived_threads:
+                entries = []
+                total = 0
+                msg = await ctx.send(f"{thread.name}: downloaded {total}")
+                async for message in thread.history(limit=None, oldest_first=True, after=since):
+                    cur_entries = await self._hist_message(tstp, message)
+                    entries.extend(cur_entries)
+                    total += 1
+                    if not total % 100:
+                        await msg.edit(f"{thread.name}: downloaded {total}")
+
+                logger.debug("hist for %s: %s", thread.name, len(entries))
+                with self._database() as db:
+                    db.executemany(MSG_INSERT, entries)
+
+                await msg.edit(f"{thread.name}: updated {len(entries)}")
+
+
+    async def _ch(self, ctx, tstp, ckch, since):
         try:
             _ = await ckch.history(limit=10).flatten()
         except Forbidden:
             logger.debug("don't have permissions for %s, continuing", ckch.name)
             return
 
-        since = TimeTravel.strptime(sincestr)
-        logger.debug("downloading messages for channel %s since %s", ckch.name, sincestr)
+        logger.debug("downloading messages for channel %s since %s", ckch.name, since)
         entries = []
         total = 0
         msg = await ctx.send(f"{ckch.name}: downloaded {total}")
         async for message in ckch.history(limit=None, oldest_first=True, after=since):
-            if message.created_at:
-                data = await self._proc_message(
-                    tstp,
-                    "create",
-                    message=message,
-                    hist=True,
-                )
-                entries.append(data)
-            if message.edited_at:
-                data = await self._proc_message(
-                    tstp,
-                    "edit",
-                    message=message,
-                    hist=True,
-                )
-                entries.append(data)
+            cur_entries = await self._hist_message(tstp, message)
+            entries.extend(cur_entries)
             total += 1
             if not total % 100:
                 await msg.edit(f"{ckch.name}: downloaded {total}")
@@ -889,6 +935,7 @@ class StatsCog(Cog):
             db.executemany(MSG_INSERT, entries)
 
         await msg.edit(f"{ckch.name}: updated {len(entries)}")
+        await self._td(ctx, tstp, ckch, since)
 
 
     @txt.command()
@@ -905,7 +952,8 @@ class StatsCog(Cog):
         if ckch is None:
             await ctx.send(f"unable to find channel with id {channel}")
             return
-        await self._ch(ctx, tstp, ckch, sincestr)
+        since = TimeTravel.strptime(sincestr)
+        await self._ch(ctx, tstp, ckch, since)
 
     @txt.command()
     # function name is used as command name
@@ -922,9 +970,28 @@ class StatsCog(Cog):
             await ctx.send(f"unable to find guild with id {guild}")
             return
 
+        since = TimeTravel.strptime(sincestr)
         for ckch in await ckgd.fetch_channels():
             if ckch.type in TEXT_CHANNELS:
-                # await self.ch(ctx, ckch.id, sincestr)
-                await self._ch(ctx, tstp, ckch, sincestr)
+                await self._ch(ctx, tstp, ckch, since)
 
         await ctx.send(f"all downloaded for guild {ckgd.name}")
+
+
+    @txt.command()
+    # function name is used as command name
+    # pylint: disable=invalid-name
+    async def td(self, ctx, channel, sincestr="2010-11-12"):
+        """gather messages from threads in a text channel"""
+        tstp = TimeTravel.timestamp()
+        try:
+            ckch = await self.bot.fetch_channel(int(channel))
+        except HTTPException:
+            await ctx.send(f"unable to access channel with id {channel}")
+            return
+        if ckch is None:
+            await ctx.send(f"unable to find channel with id {channel}")
+            return
+
+        since = TimeTravel.strptime(sincestr)
+        await self._td(ctx, tstp, ckch, since)
