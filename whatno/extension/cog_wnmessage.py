@@ -1,4 +1,5 @@
 """Test and general functions Cog"""
+
 import logging
 
 from discord.ext.bridge import bridge_group
@@ -136,8 +137,7 @@ class WNMessageCog(Cog, name="Manage Messages"):
         logger.debug("attachments: %s", ctx.message.attachments)
 
         attachments = [
-            await attach.to_file(spoiler=attach.is_spoiler())
-            for attach in ctx.message.attachments
+            await attach.to_file(spoiler=attach.is_spoiler()) for attach in ctx.message.attachments
         ]
 
         msg = await channel.send(
@@ -146,6 +146,4 @@ class WNMessageCog(Cog, name="Manage Messages"):
             files=attachments,
         )
         await ctx.message.add_reaction("\N{OK HAND SIGN}")
-        await ctx.send(
-            f"https://discord.com/channels/{msg.guild.id}/{msg.channel.id}/{msg.id}"
-        )
+        await ctx.send(f"https://discord.com/channels/{msg.guild.id}/{msg.channel.id}/{msg.id}")

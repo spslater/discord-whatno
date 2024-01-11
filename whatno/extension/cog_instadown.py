@@ -1,4 +1,5 @@
 """Instagram and TikTok downloader"""
+
 import logging
 from asyncio import create_subprocess_shell, subprocess
 from os import remove, rename, stat
@@ -129,7 +130,10 @@ class InstaDownCog(Cog):
             sm_name = self.f_sm / name
             res, errs, cont = await self.resize(tmp, sm_name, scale, res, errs)
             if cont:
-                await msg.edit("scaling worked! will upload shortly (deleting message soon)", delete_after=30)
+                await msg.edit(
+                    "scaling worked! will upload shortly (deleting message soon)",
+                    delete_after=30,
+                )
                 return res, errs
 
         logger.debug("too big :( still too big, giving up, very sad")

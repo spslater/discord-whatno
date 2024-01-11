@@ -1,4 +1,5 @@
 """Test and general functions Cog"""
+
 import logging
 
 from discord.ext.bridge import bridge_command

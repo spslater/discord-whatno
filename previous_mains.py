@@ -21,11 +21,11 @@ if __name__ == "__main__":
     print(errors)
 
 
-
 # Snaplookup
 # TODO: Move mains into a test module
 if __name__ == "__main__":
     import sys
+
     # pylint: disable=ungrouped-imports
     from asyncio import run
     from datetime import datetime
@@ -43,24 +43,28 @@ if __name__ == "__main__":
     # pylint: disable=too-few-public-methods,invalid-name
     class DummyGuild:
         """Mock the Guild class for testing purposes"""
+
         def __init__(self):
             self.id = "gid"
 
     # pylint: disable=too-few-public-methods,invalid-name
     class DummyChannel:
         """Mock the Channel class for testing purposes"""
+
         def __init__(self):
             self.id = "cid"
 
     # pylint: disable=too-few-public-methods,invalid-name
     class DummyAuthor:
         """Mock the Author class for testing purposes"""
+
         def __init__(self):
             self.id = "aid"
 
     # pylint: disable=too-few-public-methods
     class DummyMessage:
         """Mock the Message class for testing purposes"""
+
         def __init__(self):
             self.guild = DummyGuild()
             self.channel = DummyChannel()
@@ -71,6 +75,7 @@ if __name__ == "__main__":
     # pylint: disable=too-few-public-methods
     class DummyEnv:
         """Mock the Env class for testing purposes"""
+
         def __init__(self):
             pass
 
@@ -82,6 +87,7 @@ if __name__ == "__main__":
     # pylint: disable=too-few-public-methods
     class DummyBot:
         """Mock the Bot class for testing purposes"""
+
         def __init__(self):
             self.storage = storage
             self.env = DummyEnv()

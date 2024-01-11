@@ -13,3 +13,4 @@ storage/
 *.svg
 *.cbz
 *.gif
+ruff.toml

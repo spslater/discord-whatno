@@ -1,4 +1,5 @@
 """DoA Comic Reread Bot"""
+
 # pylint: disable=too-many-lines
 import logging
 import re
@@ -231,9 +232,7 @@ class ComicInfo:
                         ORDER BY reaction ASC"""
                 ).fetchall()
                 if reacts:
-                    result["reacts"] = [
-                        (react["reaction"], react["num"]) for react in reacts
-                    ]
+                    result["reacts"] = [(react["reaction"], react["num"]) for react in reacts]
                 print(result)
         print(results)
         return results
@@ -280,17 +279,15 @@ class ComicInfo:
                 for tag in self._get_tags(release)
             ]
 
-            entries.append(
-                {
-                    "title": comic["title"],
-                    "url": comic["url"],
-                    "alt": f"||{comic['alt']}||",
-                    "tags": ", ".join(tags) or "no tags today",
-                    "image": f"https://www.dumbingofage.com/comics/{image}",
-                    "release": release,
-                    "reacts": comic["reacts"],
-                }
-            )
+            entries.append({
+                "title": comic["title"],
+                "url": comic["url"],
+                "alt": f"||{comic['alt']}||",
+                "tags": ", ".join(tags) or "no tags today",
+                "image": f"https://www.dumbingofage.com/comics/{image}",
+                "release": release,
+                "reacts": comic["reacts"],
+            })
         return entries
 
     def update_schedule(self):
@@ -449,9 +446,7 @@ class DoaComicCog(Cog, name="DoA Comic"):
             before_str = f"{before_str.strip()} 00:00:00"
             before = TimeTravel.fromstr(before_str) + timedelta(hours=6)
         await self.bot.blocker(self._process_comic, after, before)
-        await ctx.send(
-            f"Saved comics after {after} and before {before} \N{OK HAND SIGN}"
-        )
+        await ctx.send(f"Saved comics after {after} and before {before} \N{OK HAND SIGN}")
 
     @staticmethod
     def build_comic_embed(entry):
@@ -513,8 +508,7 @@ class DoaComicCog(Cog, name="DoA Comic"):
         )
         channels = self.channels if channel_id else channel_id
         comics = [
-            (e["release"], self.build_comic_embed(e))
-            for e in self.comics.todays_reread(date)
+            (e["release"], self.build_comic_embed(e)) for e in self.comics.todays_reread(date)
         ]
         self.embeds.load()
         for cid in channels:
@@ -585,9 +579,7 @@ class DoaComicCog(Cog, name="DoA Comic"):
             return
         ref = ctx.message.reference
         message_ids = (
-            [ref.message_id]
-            if ref
-            else [self.embeds.get(ctx.guild.id, {}).get(d) for d in date]
+            [ref.message_id] if ref else [self.embeds.get(ctx.guild.id, {}).get(d) for d in date]
         )
         logger.debug("refresh message ids: %s", message_ids)
         msg = None
@@ -760,11 +752,9 @@ class DumbingOfAge:
         c_width, c_height = comic.size
 
         font = ImageFont.truetype(str(calc_path("ubuntu.ttf")), 16)
-        draw_font = ImageDraw.Draw(
-            Image.new("RGB", (c_width, c_height * 2), (255, 255, 255))
-        )
+        draw_font = ImageDraw.Draw(Image.new("RGB", (c_width, c_height * 2), (255, 255, 255)))
         alt = fill(alt_raw, width=int((c_width - 20) / 11))
-        _, alt_top, _, alt_bottom = draw_font.multiline_textbbox((0,0), alt, font=font)
+        _, alt_top, _, alt_bottom = draw_font.multiline_textbbox((0, 0), alt, font=font)
         alt_height = alt_bottom - alt_top
 
         height = c_height + 10 + alt_height + 10
@@ -821,9 +811,7 @@ class DumbingOfAge:
 
     def get_name_info(self, img_name, dir_name):
         """calcluate names to store the images in"""
-        logger.debug(
-            'Getting name info for image "%s" and directory "%s"', img_name, dir_name
-        )
+        logger.debug('Getting name info for image "%s" and directory "%s"', img_name, dir_name)
         current_image_directory = self.archive / dir_name
         current_image_directory.mkdir(parents=True, exist_ok=True)
 
@@ -865,9 +853,7 @@ class DumbingOfAge:
     def get_title(self, soup):
         """Search soup for the title"""
         logger.debug("Getting title of current comic")
-        title_tag = self._search_soup(
-            soup, [{"tag": "h2", "class": "post-title"}, {"tag": "a"}]
-        )
+        title_tag = self._search_soup(soup, [{"tag": "h2", "class": "post-title"}, {"tag": "a"}])
         if title_tag:
             return title_tag.text
         return None
@@ -875,9 +861,7 @@ class DumbingOfAge:
     def get_arc_name(self, soup):
         """Search soup for the arc"""
         logger.debug("Getting current arc name")
-        arc_tag = self._search_soup(
-            soup, [{"tag": "li", "class": "storyline-root"}, {"tag": "a"}]
-        )
+        arc_tag = self._search_soup(soup, [{"tag": "li", "class": "storyline-root"}, {"tag": "a"}])
         if arc_tag:
             return arc_tag.text[5:]
         return None

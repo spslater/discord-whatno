@@ -4,6 +4,7 @@ commands from different cogs
 
 :class WhatnoBot: Discord Bot
 """
+
 import logging
 from functools import partial
 from sys import exc_info
@@ -51,9 +52,7 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
 
     def load_cogs(self):
         """Load the cogs found in the extension folder"""
-        logger.info(
-            "loading cogs: doacomic, instadown, snaplookup, stats, wnmessage, wntest"
-        )
+        logger.info("loading cogs: doacomic, instadown, snaplookup, stats, wnmessage, wntest")
         wntest(self)
         wnmessage(self)
         instadown(self)

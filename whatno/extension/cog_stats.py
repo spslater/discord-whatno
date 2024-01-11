@@ -1,4 +1,5 @@
 """Stats Bot for Voice and Messages"""
+
 import logging
 import re
 from collections import namedtuple
@@ -447,11 +448,7 @@ class StatsCog(Cog):
         output = f"```\n{member.nick or member.name}{e_time}\n"
         for state, value in results.items():
             val = self._display_duration(value)
-            green = (
-                " 🟢"
-                if in_voice and (getattr(stats, state, False) or state == "voice")
-                else ""
-            )
+            green = " 🟢" if in_voice and (getattr(stats, state, False) or state == "voice") else ""
             output += f"{state}{green}: {val}\n"
         output += "```"
         return output
@@ -636,15 +633,13 @@ class StatsCog(Cog):
                 """
             )
             for max_dur in max_durs:
-                deletes.append(
-                    (
-                        max_dur["user"],
-                        max_dur["channel"],
-                        max_dur["voicestate"],
-                        max_dur["h_time"],
-                        max_dur["maxdur"],
-                    )
-                )
+                deletes.append((
+                    max_dur["user"],
+                    max_dur["channel"],
+                    max_dur["voicestate"],
+                    max_dur["h_time"],
+                    max_dur["maxdur"],
+                ))
             db.executemany(
                 """
                 DELETE FROM History
@@ -658,9 +653,7 @@ class StatsCog(Cog):
                 deletes,
             )
         end = time()
-        logger.debug(
-            "Completed db compression in %s seconds: %s", start - end, localtime(end)
-        )
+        logger.debug("Completed db compression in %s seconds: %s", start - end, localtime(end))
 
     @loop(hours=7 * 24)
     async def periodic_compress(self):
@@ -689,9 +682,7 @@ class StatsCog(Cog):
     def _get_message_author(self, mid):
         if mid:
             with self._database() as db:
-                rows = db.execute(
-                    """SELECT user FROM Message WHERE message = ? LIMIT 1;""", (mid,)
-                )
+                rows = db.execute("""SELECT user FROM Message WHERE message = ? LIMIT 1;""", (mid,))
                 res = rows.fetchone()
                 if res:
                     return int(res["user"])
@@ -744,9 +735,9 @@ class StatsCog(Cog):
             msg.tstp = message.created_at.timestamp()
 
         if event == "edit":
-            message = message or await (
-                await self.bot.fetch_channel(msg.cid)
-            ).fetch_message(msg.mid)
+            message = message or await (await self.bot.fetch_channel(msg.cid)).fetch_message(
+                msg.mid
+            )
             if message:
                 msg.aid = message.author.id
                 self._set_message_data(msg, message)
@@ -762,9 +753,7 @@ class StatsCog(Cog):
                 msg.aid = self._get_message_author(msg.mid)
                 self._set_payload_data(msg, payload.data)
                 if payload.data.get("edited_timestamp"):
-                    msg.tstp = TimeTravel.tsfromdiscord(
-                        payload.data.get("edited_timestamp")
-                    )
+                    msg.tstp = TimeTravel.tsfromdiscord(payload.data.get("edited_timestamp"))
 
         msg.tsc = TimeTravel.sqlts(msg.tstp)
 
@@ -772,11 +761,7 @@ class StatsCog(Cog):
             if msg.mid is None:
                 mids = {}
                 for tmid in payload.message_ids:
-                    cached = [
-                        cmsg.author.id
-                        for cmsg in payload.cached_messages
-                        if cmsg.id == tmid
-                    ]
+                    cached = [cmsg.author.id for cmsg in payload.cached_messages if cmsg.id == tmid]
                     mids[tmid] = cached[0] if cached else self._get_message_author(tmid)
                 entries = []
                 for tmid, taid in mids.items():
@@ -911,7 +896,6 @@ class StatsCog(Cog):
 
                 await msg.edit(f"{thread.name}: updated {len(entries)}")
 
-
     async def _ch(self, ctx, tstp, ckch, since):
         try:
             _ = await ckch.history(limit=10).flatten()
@@ -936,7 +920,6 @@ class StatsCog(Cog):
 
         await msg.edit(f"{ckch.name}: updated {len(entries)}")
         await self._td(ctx, tstp, ckch, since)
-
 
     @txt.command()
     # function name is used as command name
@@ -976,7 +959,6 @@ class StatsCog(Cog):
                 await self._ch(ctx, tstp, ckch, since)
 
         await ctx.send(f"all downloaded for guild {ckgd.name}")
-
 
     @txt.command()
     # function name is used as command name

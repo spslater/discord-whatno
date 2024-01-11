@@ -1,4 +1,5 @@
 """Helper methods for the Whatno Cogs"""
+
 import re
 
 # from asyncio import to_thread
@@ -42,9 +43,7 @@ class PrettyJSONStorage(JSONStorage):
         try:
             self._handle.write(serialized)
         except UnsupportedOperation as e:
-            raise IOError(
-                f'Cannot write to the database. Access mode is "{self._mode}"'
-            ) from e
+            raise IOError(f'Cannot write to the database. Access mode is "{self._mode}"') from e
 
         self._handle.flush()
         fsync(self._handle.fileno())
@@ -196,9 +195,7 @@ class TimeTravel:
         """Convert timestamp to sqlite database time string check"""
         if isinstance(ts, datetime):
             ts = ts.timestamp()
-        return datetime.fromtimestamp(ts, tz=cls.tz).strftime("%Y-%m-%dT%H:%M:%S.%f")[
-            :-3
-        ]
+        return datetime.fromtimestamp(ts, tz=cls.tz).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
 
     @staticmethod
     def tsfromdiscord(ts):
