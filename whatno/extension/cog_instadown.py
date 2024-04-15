@@ -51,16 +51,6 @@ class InstaDownCog(Cog):
         if self.ffmpeg is None:
             raise ExternalCommands("Missing ffmpeg")
 
-    @staticmethod
-    def _bad_msg(msg):
-        if "instagram.com/reel" in msg:
-            return False
-        if "tiktok.com" in msg and ("video" in msg or "/t/" in msg):
-            return False
-        if "youtube.com/shorts/" in msg:
-            return False
-        return True
-
     @bridge_command()
     # function name is used as command name
     # pylint: disable=invalid-name
@@ -69,8 +59,6 @@ class InstaDownCog(Cog):
         msg = ctx.message.content
         chnl = ctx.channel
         gld = ctx.guild
-        if self._bad_msg(msg):
-            return
 
         logger.debug("downloading msg: %s", msg)
         await ctx.defer()
