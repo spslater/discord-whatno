@@ -42,6 +42,7 @@ TEXT_CHANNELS = (
 
 
 ROLLING = (90,)
+COMPRESS_WAIT = 7*24
 
 
 class Message:
@@ -220,7 +221,7 @@ class StatsCog(Cog):
         )
 
     def _check_entry(self, uid, cid, state, tss):
-        with self._database() as db:
+        with self._database(readonly=True) as db:
             states = db.execute(
                 """
                 SELECT *
@@ -457,7 +458,7 @@ class StatsCog(Cog):
         rows = None
         logger.debug("get all time stats: %s", alltime)
         since = TimeTravel.tsinpast(*ROLLING)
-        with self._database() as db:
+        with self._database(readonly=True) as db:
             if alltime:
                 rows = db.execute(
                     """
@@ -583,7 +584,7 @@ class StatsCog(Cog):
             early = None
             rows = []
             since = TimeTravel.tsinpast(*ROLLING)
-            with self._database() as db:
+            with self._database(readonly=True) as db:
                 if all_:
                     early = db.execute(
                         """
@@ -622,9 +623,17 @@ class StatsCog(Cog):
 
     def _compress_database(self):
         start = time()
+        with self._database(readonly=True) as db:
+            last = db.execute("""SELECT ts FROM Timestamps WHERE name = 'compress'""").fetchone()
+            since_last = start - (COMPRESS_WAIT * 3600) # hours  * seconds / hr
+            if last is not None and since_last <= last["ts"]:
+                logger.debug("No need to compress, compressed less than a week ago: %s", localtime(last))
+                return
+
         logger.debug("Starting db compression: %s", localtime(start))
         deletes = []
-        with self._database() as db:
+        max_durs = None
+        with self._database(readonly=True) as db:
             max_durs = db.execute(
                 """
                 SELECT user, channel, voicestate, h_time, max(duration) as maxdur
@@ -632,14 +641,15 @@ class StatsCog(Cog):
                 GROUP BY user, channel, voicestate, h_time
                 """
             )
-            for max_dur in max_durs:
-                deletes.append((
-                    max_dur["user"],
-                    max_dur["channel"],
-                    max_dur["voicestate"],
-                    max_dur["h_time"],
-                    max_dur["maxdur"],
-                ))
+        for max_dur in max_durs:
+            deletes.append((
+                max_dur["user"],
+                max_dur["channel"],
+                max_dur["voicestate"],
+                max_dur["h_time"],
+                max_dur["maxdur"],
+            ))
+        with self._database() as db:
             db.executemany(
                 """
                 DELETE FROM History
@@ -652,10 +662,14 @@ class StatsCog(Cog):
                 """,
                 deletes,
             )
+            if last is None:
+                db.execute("""INSERT INTO Timestamps VALUES (compress, ?)""", (start,))
+            else:
+                db.execute("""UPDATE Timestamps SET ts = ? WHERE name = compress""", (start,))
         end = time()
-        logger.debug("Completed db compression in %s seconds: %s", start - end, localtime(end))
+        logger.debug("Completed db compression in %s seconds: %s", end - start, localtime(end))
 
-    @loop(hours=7 * 24)
+    @loop(hours=COMPRESS_WAIT)
     async def periodic_compress(self):
         """periodically compress that database of duplicate data"""
         await self.bot.wait_until_ready()
@@ -681,7 +695,7 @@ class StatsCog(Cog):
 
     def _get_message_author(self, mid):
         if mid:
-            with self._database() as db:
+            with self._database(readonly=True) as db:
                 rows = db.execute("""SELECT user FROM Message WHERE message = ? LIMIT 1;""", (mid,))
                 res = rows.fetchone()
                 if res:

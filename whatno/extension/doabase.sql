@@ -64,16 +64,3 @@ CREATE TABLE IF NOT EXISTS Discussion(
     attach TEXT,
     embed TEXT
 );
-
-CREATE TABLE IF NOT EXISTS History(
-    msg INTEGER PRIMARY KEY,
-    guild INTEGER NOT NULL,
-    channel INTEGER NOT NULL,
-    user INTEGER NOT NULL,
-    created INTEGER NOT NULL,
-    edited INTEGER,
-    reply INTEGER,
-    content TEXT,
-    embed TEXT,
-    isbot BOOLEAN
-);

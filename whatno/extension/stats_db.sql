@@ -34,3 +34,9 @@ CREATE TABLE IF NOT EXISTS Message(
     h_time TEXT,
     UNIQUE(message, event, timestamp)
 );
+
+CREATE TABLE IF NOT EXISTS Timestamps(
+    name TEXT,
+    ts REAL NOT NULL,
+    UNIQUE(name)
+);
