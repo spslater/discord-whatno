@@ -1,5 +1,5 @@
 # whatno
-py-cord==2.4.1
+py-cord[speed]~=2.6
 environs>=9.5
 
 # instadown

@@ -4,7 +4,7 @@ RUN apt update -y
 RUN apt install -y ffmpeg
 
 WORKDIR /app
-ENV PYTHONPATH /app
+ENV PYTHONPATH=/app
 
 RUN mkdir logs
 RUN mkdir storage
