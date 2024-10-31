@@ -88,7 +88,7 @@ class InstaDownCog(Cog):
                 pass
 
     async def download(self, ctx, req, res, errs):
-        """Dowload the videos requested in the string"""
+        """Download the videos requested in the string"""
         try:
             name, url = req.rsplit(" ", 1)
             name = str(uuid4())[0:8] + " " + name
@@ -100,6 +100,8 @@ class InstaDownCog(Cog):
                 logger.debug("invalid url: does not begin with http")
                 errs.append(str(e))
                 return res, errs
+        if url[-1] == "/":
+            url = url[:-1]
         name = name.replace("%dl ", "", 1)
 
         msg = await ctx.send("downloading " + name)
