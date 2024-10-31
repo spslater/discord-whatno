@@ -1,3 +1,5 @@
+PRAGMA journal_mode=WAL;
+
 CREATE TABLE IF NOT EXISTS History(
     user INTEGER NOT NULL,
     guild INTEGER NOT NULL,

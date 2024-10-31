@@ -249,7 +249,7 @@ class DictRow:
 class ContextDB:
     """Sqlite DB for use with context libs"""
 
-    SQL_TIMEOUT = 30.0
+    SQL_TIMEOUT = 60.0
 
     def __init__(self, dbfile, setup_filename, readonly=False):
         self.readonly = readonly
