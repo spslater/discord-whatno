@@ -507,6 +507,9 @@ class DoaComicCog(Cog, name="DoA Comic"):
             (date or TimeTravel.datestr()),
         )
         channels = self.channels if channel_id else channel_id
+        if channels is None:
+            logger.debug("No channels are scheduled to be published in.")
+            return
         comics = [
             (e["release"], self.build_comic_embed(e)) for e in self.comics.todays_reread(date)
         ]
