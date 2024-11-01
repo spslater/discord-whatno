@@ -632,7 +632,7 @@ class StatsCog(Cog):
 
         logger.debug("Starting db compression: %s", localtime(start))
         deletes = []
-        max_durs = None
+        max_durs = []
         with self._database(readonly=True) as db:
             max_durs = db.execute(
                 """
@@ -640,7 +640,7 @@ class StatsCog(Cog):
                 FROM History
                 GROUP BY user, channel, voicestate, h_time
                 """
-            )
+            ).fetchall()
         for max_dur in max_durs:
             deletes.append((
                 max_dur["user"],
