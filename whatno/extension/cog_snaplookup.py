@@ -7,6 +7,7 @@ from collections import namedtuple
 from math import floor
 from textwrap import fill
 
+import pytz
 from aiohttp import ClientSession
 from discord import File
 from discord.ext.commands import Cog
@@ -20,6 +21,13 @@ from .helpers import CleanHTML, PrettyStringDB, aget_json, calc_path, strim
 logger = logging.getLogger(__name__)
 
 Combos = namedtuple("Combos", ["width", "height", "text", "mult"])
+
+CARD_LOOP = [
+    datetime.time(3, 15, 0, tzinfo=pytz.timezone('US/Eastern')),
+    datetime.time(9, 15, 0, tzinfo=pytz.timezone('US/Eastern')),
+    datetime.time(15, 15, 0, tzinfo=pytz.timezone('US/Eastern')),
+    datetime.time(21, 15, 0, tzinfo=pytz.timezone('US/Eastern')),
+]
 
 
 def setup(bot):
@@ -194,12 +202,12 @@ class SnapCog(Cog):
         # pylint: disable=no-member
         self.periodic_check.start()
 
-        # def cog_unload(self):
+    def cog_unload(self):
         # function transformed by the @loop annotation
         # pylint: disable=no-member
         self.periodic_check.cancel()
 
-    @loop(hours=24)
+    @loop(time=CARD_LOOP)
     async def periodic_check(self):
         """periodically get the new cards"""
         await self.bot.wait_until_ready()
