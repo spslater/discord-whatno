@@ -1,11 +1,14 @@
 """Stats Bot for Voice and Messages"""
 
+import datetime
 import logging
 import re
 from collections import namedtuple
 from json import dumps
 from time import localtime, time
 
+
+import pytz
 from discord import ChannelType, HTTPException, NotFound, Forbidden
 from discord.ext.bridge import bridge_command, bridge_group
 from discord.ext.commands import Cog, is_owner
@@ -42,7 +45,8 @@ TEXT_CHANNELS = (
 
 
 ROLLING = (90,)
-COMPRESS_WAIT = 7*24
+COMPRESS_TIME = datetime.time(9, 30, 0, tzinfo=pytz.timezone('US/Eastern'))
+COMPRESS_WAIT = 7*24*3600*2 # *2 incase previous week was missed
 
 
 class Message:
@@ -392,7 +396,7 @@ class StatsCog(Cog):
                 self.current[id_] = data
         return bool(current)
 
-    @loop(seconds=5)
+    @loop(seconds=60)
     async def periodic_save(self):
         """periodically save the voice stats"""
         await self.bot.wait_until_ready()
@@ -625,7 +629,7 @@ class StatsCog(Cog):
         start = time()
         with self._database(readonly=True) as db:
             last = db.execute("""SELECT ts FROM Timestamps WHERE name = 'compress'""").fetchone()
-            since_last = start - (COMPRESS_WAIT * 3600) # hours  * seconds / hr
+            since_last = start - COMPRESS_WAIT
             if last is not None and since_last <= last["ts"]:
                 logger.debug("No need to compress, compressed less than a week ago: %s", localtime(last))
                 return
@@ -669,9 +673,11 @@ class StatsCog(Cog):
         end = time()
         logger.debug("Completed db compression in %s seconds: %s", end - start, localtime(end))
 
-    @loop(hours=COMPRESS_WAIT)
+    @loop(time=COMPRESS_TIME)
     async def periodic_compress(self):
         """periodically compress that database of duplicate data"""
+        if datetime.datetime.today().weekday() != 1:
+            return
         await self.bot.wait_until_ready()
         await self.bot.blocker(self._compress_database)
         logger.debug(
