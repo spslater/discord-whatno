@@ -160,7 +160,7 @@ class ComicInfo:
     def new_latest(self, mid, url):
         """Save latest comic published to latest channel"""
         with self._database(readonly=False) as database:
-            if url.endswith(".png"):
+            if url is not None and url.endswith(".png"):
                 img = f"%{url.split('/')[-1]}"
                 res = database.execute(
                     "SELECT url FROM Comic WHERE image LIKE ?",
@@ -354,20 +354,6 @@ class DoaComicCog(Cog, name="DoA Comic"):
         is_channel = message.channel.id == self.latest_channel
         is_bot = message.author.id == self.latest_bot
         return is_channel and is_bot
-
-    @Cog.listener()
-    async def on_raw_reaction_add(self, payload):
-        """Watch for reacts to things in the servers"""
-        msg = await self.fetch_message(payload.channel_id, payload.message_id)
-        if self._is_latest_react(msg):
-            logger.debug("react add %s | %s", payload.emoji, payload.user_id)
-
-    @Cog.listener()
-    async def on_raw_reaction_remove(self, payload):
-        """Watch for reacts to things in the servers"""
-        msg = await self.fetch_message(payload.channel_id, payload.message_id)
-        if self._is_latest_react(msg):
-            logger.debug("react remove %s | %s", payload.emoji, payload.user_id)
 
     async def _save_reacts(self, message):
         """Save react info to database"""
