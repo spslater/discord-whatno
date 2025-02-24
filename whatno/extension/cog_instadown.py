@@ -13,7 +13,7 @@ from more_itertools import ichunked
 
 logger = logging.getLogger(__name__)
 
-MAX_FILE = 25000000
+MAX_FILE = 10000000
 
 
 def setup(bot):
