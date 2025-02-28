@@ -48,7 +48,7 @@ def build_parser():
 
 args = build_parser().parse_args()
 env = Env()
-env.read_env(args.envfile, False)  # do not recurse up directories to find a .env file
+env.read_env(args.envfile, recurse=False)  # do not recurse up directories to find a .env file
 
 with env.prefixed("DISCORD_"):
     logging_config = env("LOGGING_CONFIG")

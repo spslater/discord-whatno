@@ -7,6 +7,7 @@ commands from different cogs
 
 import logging
 from functools import partial
+from pathlib import Path
 from sys import exc_info
 from traceback import format_tb
 from types import CoroutineType
@@ -30,7 +31,8 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
         self.env = env or Env()
         self.token = token
         self.prefix = prefix
-        self.storage = self.env.path("STORAGE", "storage").resolve()
+        print(self.env)
+        self.storage = self.env.path("STORAGE", Path("storage")).resolve()
 
         super().__init__(
             command_prefix=when_mentioned_or(prefix),
