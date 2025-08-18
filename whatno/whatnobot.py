@@ -17,7 +17,7 @@ from discord.ext.bridge import Bot
 from discord.ext.commands import when_mentioned_or
 from environs import Env
 
-from .extension import doacomic, instadown, snaplookup, stats, wnmessage, wntest
+from .extension import doacomic, instadown, snaplookup, stats, wnmessage, wntest, rssposter
 
 logger = logging.getLogger(__name__)
 
@@ -54,13 +54,14 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
 
     def load_cogs(self):
         """Load the cogs found in the extension folder"""
-        logger.info("loading cogs: doacomic, instadown, snaplookup, stats, wnmessage, wntest")
+        logger.info("loading cogs: doacomic, instadown, snaplookup, stats, wnmessage, wntest, rssposter")
         wntest(self)
         wnmessage(self)
         instadown(self)
         snaplookup(self)
         doacomic(self)
         stats(self)
+        rssposter(self)
 
     # pylint: disable=too-many-arguments
     async def get_history(

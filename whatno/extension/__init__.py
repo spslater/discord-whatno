@@ -6,3 +6,4 @@ from .cog_snaplookup import setup as snaplookup
 from .cog_stats import setup as stats
 from .cog_wnmessage import setup as wnmessage
 from .cog_wntest import setup as wntest
+from .cog_rssposter import setup as rssposter

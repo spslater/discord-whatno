@@ -1,18 +1,22 @@
 # whatno
 py-cord[speed]~=2.6
-environs>=9.5
+environs>=14
 
 # instadown
-yt-dlp>=2023
-more-itertools>=10.1
+yt-dlp>=2025
+more-itertools>=10.7
 
 # snaplookup
 Pillow>=10.0
 tinydb>=4.8
 
 # doa, stats
-pytz>=2023
+pytz>=2025
 
 # comicsdl
 beautifulsoup4>=4.12
 PyYAML>=6.0
+
+# rss post
+feedparser~=6.0.11
+dateparser~=1.2.2

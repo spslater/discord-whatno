@@ -41,6 +41,9 @@ Track voted scores and comic info to get tag stats and the like.
 ### Instadown
 Download short videos from Instagram, YouTube, and some other sites to share easier.
 
+### RSS Poster
+Post latest link from RSS feeds configurable via yaml file.
+
 ### Snap Lookup
 View Marvel Snap cards and locations and their text.
 
