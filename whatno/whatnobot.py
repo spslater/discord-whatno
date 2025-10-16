@@ -17,7 +17,7 @@ from discord.ext.bridge import Bot
 from discord.ext.commands import when_mentioned_or
 from environs import Env
 
-from .extension import doacomic, instadown, snaplookup, stats, wnmessage, wntest, rssposter
+from .extension import ALL_COGS, COG_DICT
 
 logger = logging.getLogger(__name__)
 
@@ -25,14 +25,14 @@ logger = logging.getLogger(__name__)
 class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
     """Bot to talk to discord"""
 
-    def __init__(self, token, env=None, prefix="%"):
+    def __init__(self, token, env=None, prefix="%", storage=None, cogs=None):
         if not token:
             raise RuntimeError("No api token provided")
         self.env = env or Env()
         self.token = token
         self.prefix = prefix
-        print(self.env)
-        self.storage = self.env.path("STORAGE", Path("storage")).resolve()
+        logger.debug("Environment: %s", self.env)
+        self.storage = Path(storage or self.env.path("STORAGE", "storage")).resolve()
 
         super().__init__(
             command_prefix=when_mentioned_or(prefix),
@@ -40,7 +40,7 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
             case_insensitive=True,
             intents=Intents.all(),
         )
-        self.load_cogs()
+        self.load_cogs(cogs or ALL_COGS)
 
     async def blocker(self, b_func, *args, **kwargs):
         """Send long running tasks to the loop so they don't block"""
@@ -52,16 +52,14 @@ class WhatnoBot(Bot):  # pylint: disable=too-many-ancestors
         logger.debug("func return: %s", future)
         return future
 
-    def load_cogs(self):
+    def load_cogs(self, cogs):
         """Load the cogs found in the extension folder"""
-        logger.info("loading cogs: doacomic, instadown, snaplookup, stats, wnmessage, wntest, rssposter")
-        wntest(self)
-        wnmessage(self)
-        instadown(self)
-        snaplookup(self)
-        doacomic(self)
-        stats(self)
-        rssposter(self)
+        logger.info("loading cogs: %s", cogs)
+        for cog in cogs:
+            if cog in COG_DICT:
+                COG_DICT[cog](self)
+            else:
+                logger.warning("cog '%s' not found in available cogs, check spelling", cog)
 
     # pylint: disable=too-many-arguments
     async def get_history(

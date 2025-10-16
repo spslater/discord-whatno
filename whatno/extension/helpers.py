@@ -225,6 +225,16 @@ class TimeTravel:
             ts = datetime.strptime(date, "%Y-%m-%d %H:%M")
         return ts
 
+    @staticmethod
+    def nearest(hour, mins, bhr, bmin):
+        rhr = bhr * round(hour/bhr)
+        rmin = bmin * round(mins/bmin)
+        return f"{rhr}:{rmin}"
+
+    @staticmethod
+    def parse_time(tstr):
+        return datetime.strptime(tstr, "%H:%M").time()
+
 
 class DictRow:
     """Turn a row into a dictionary (for dot notation)"""
