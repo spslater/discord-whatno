@@ -9,7 +9,8 @@ import feedparser
 import dateparser
 from yaml import Loader, load, dump, Dumper
 
-from discord.ext.commands import Cog
+from discord.ext.bridge import bridge_group
+from discord.ext.commands import Cog, is_owner
 from discord.ext.tasks import loop
 
 
@@ -107,3 +108,18 @@ class RssPosterCog(Cog, name="RSS Poster"):
             self.process_rss.next_iteration,
             ' | '.join([f'{u[0]} - {u[2]} to {u[1]}' for u in updates])
         )
+
+    @is_owner()
+    @bridge_group()
+    async def rss(self, ctx):
+        """rss sub commands"""
+        if ctx.invoked_subcommand:
+            return
+        msg = "```\ncheck(): process the list and check all feeds again```"
+        await ctx.send(msg)
+
+    @is_owner()
+    @rss.command()
+    async def check(self, ctx):
+        await self.process_rss()
+        await ctx.message.add_reaction("\N{OK HAND SIGN}")

@@ -10,7 +10,7 @@ from time import localtime, time
 
 import pytz
 from discord import ChannelType, HTTPException, NotFound, Forbidden
-from discord.ext.bridge import bridge_command, bridge_group
+from discord.ext.bridge import bridge_group
 from discord.ext.commands import Cog, is_owner
 from discord.ext.tasks import loop
 from discord.utils import escape_markdown
@@ -408,14 +408,6 @@ class StatsCog(Cog):
                 self.periodic_save.next_iteration,
             )
 
-    @is_owner()
-    @bridge_command()
-    async def save(self, ctx):
-        """test cog works"""
-        logger.info("saving all current users and resetting info")
-        self._save_current()
-        await ctx.send("saved :)")
-
     @staticmethod
     def _display_duration(value):
         d, h, m, s = sec_to_human(value)
@@ -511,6 +503,7 @@ class StatsCog(Cog):
             guild,
         )
 
+    @is_owner()
     @bridge_group()
     # function name is used as command name
     # pylint: disable=invalid-name
@@ -522,6 +515,14 @@ class StatsCog(Cog):
         output = await self._user_stat(ctx.author.id, ctx.channel.guild, alltime=False)
         await ctx.send(output)
 
+    @is_owner()
+    @vc.command()
+    async def save(self, ctx):
+        """test cog works"""
+        logger.info("saving all current users and resetting info")
+        self._save_current()
+        await ctx.send("saved :)")
+
     @staticmethod
     async def _get_member(guild, user):
         pat = re.compile(r".*?" + user + r".*?", flags=re.IGNORECASE)
@@ -532,6 +533,7 @@ class StatsCog(Cog):
                 return member.id
         return None
 
+    @is_owner()
     @vc.command()
     async def all(self, ctx):
         """get info about any user by id"""
@@ -539,6 +541,7 @@ class StatsCog(Cog):
         output = await self._user_stat(ctx.author.id, ctx.channel.guild, alltime=True)
         await ctx.send(output)
 
+    @is_owner()
     @vc.command()
     async def user(self, ctx, user, *extra):
         """get info about any user by id"""
@@ -578,6 +581,7 @@ class StatsCog(Cog):
         output += "```"
         return output
 
+    @is_owner()
     @vc.command()
     async def top(self, ctx, all_=None):
         """Get top 10 users from each guild"""
@@ -850,6 +854,7 @@ class StatsCog(Cog):
         with self._database() as db:
             db.executemany(MSG_INSERT, entries)
 
+    @is_owner()
     @bridge_group()
     async def txt(self, ctx):
         """get info about the user message"""
@@ -941,6 +946,7 @@ class StatsCog(Cog):
         await msg.edit(f"{ckch.name}: updated {len(entries)}")
         await self._td(ctx, tstp, ckch, since)
 
+    @is_owner()
     @txt.command()
     # function name is used as command name
     # pylint: disable=invalid-name
@@ -958,6 +964,7 @@ class StatsCog(Cog):
         since = TimeTravel.strptime(sincestr)
         await self._ch(ctx, tstp, ckch, since)
 
+    @is_owner()
     @txt.command()
     # function name is used as command name
     # pylint: disable=invalid-name
@@ -980,6 +987,7 @@ class StatsCog(Cog):
 
         await ctx.send(f"all downloaded for guild {ckgd.name}")
 
+    @is_owner()
     @txt.command()
     # function name is used as command name
     # pylint: disable=invalid-name

@@ -56,6 +56,6 @@ class SourceLink(View):
         self.add_item(
             Button(
                 label="Source Code",
-                url="https://fcgh.dev/sean/discord-whatno",
+                url="https://github.com/spslater/discord-whatno",
             )
         )

@@ -12,7 +12,7 @@ from textwrap import fill
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
 from discord import Colour, Embed, Forbidden, HTTPException, NotFound, File
-from discord.ext.bridge import bridge_command
+from discord.ext.bridge import bridge_group
 from discord.ext.commands import Cog, is_owner
 from discord.ext.tasks import loop
 from PIL import Image, ImageDraw, ImageFont
@@ -350,7 +350,24 @@ class RereadCog(Cog, name="General Reread"):
         return chnls
 
     @is_owner()
-    @bridge_command()
+    @bridge_group()
+    async def reread(self, ctx):
+        """reread sub commands"""
+        if ctx.invoked_subcommand:
+            return
+        msg = (
+            "```\n"
+            "refresh(*mids): refresh multiple messages in "
+            'the given channel by "editing" them\n'
+            "publish(date, time): publish the specified day and time rereads "
+            "if no day is given current day or no time is given use the closest"
+            "```"
+        )
+        await ctx.send(msg)
+
+
+    @is_owner()
+    @reread.command()
     async def refresh(self, ctx, *mids):
         """Refresh the reread to get the embed working"""
         logger.info("refreshing data: %s", mids)
@@ -391,7 +408,7 @@ class RereadCog(Cog, name="General Reread"):
         await ctx.message.add_reaction("\N{OK HAND SIGN}")
 
     @is_owner()
-    @bridge_command()
+    @reread.command()
     async def publish(self, ctx, date=None, time=None):
         """Publish the days rereads, date (YYYY-MM-DD)
         is provided will publish rereads for those days"""

@@ -15,7 +15,7 @@ from textwrap import fill
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
 from discord import Colour, Embed, Forbidden, HTTPException, NotFound
-from discord.ext.bridge import bridge_command
+from discord.ext.bridge import bridge_group
 from discord.ext.commands import Cog, is_owner
 from discord.ext.tasks import loop
 from PIL import Image, ImageDraw, ImageFont
@@ -415,8 +415,26 @@ class DoaComicCog(Cog, name="DoA Comic"):
         after = datetime.now() - timedelta(days=1, hours=12)
         await self.bot.blocker(self._process_comic, after)
 
+
     @is_owner()
-    @bridge_command()
+    @bridge_group()
+    async def doa(self, ctx):
+        """doa sub commands"""
+        if ctx.invoked_subcommand:
+            return
+        msg = (
+            "```\n"
+            "latest(after_str, before_str): save reacts from dates starting with after going up to "
+            "before, if no before is given then will collect up to present\n"
+            "refresh(*date): refresh the comics (based on publish dates) so the embed works\n"
+            "publish(date): publish the comics to be read on the reread for that date\n"
+            "comicfrom(start): download the comic from the website starting on that date\n"
+            "```"
+        )
+        await ctx.send(msg)
+
+    @is_owner()
+    @doa.command()
     async def latest(self, ctx, after_str, before_str=None):
         """Save info about the comic from date provided"""
         logger.info(
@@ -554,7 +572,7 @@ class DoaComicCog(Cog, name="DoA Comic"):
         return False
 
     @is_owner()
-    @bridge_command()
+    @doa.command()
     async def refresh(self, ctx, *date):
         """Refresh the comic to get the embed working"""
         logger.info("refreshing dates: %s", date)
@@ -585,7 +603,7 @@ class DoaComicCog(Cog, name="DoA Comic"):
         await ctx.message.add_reaction("\N{OK HAND SIGN}")
 
     @is_owner()
-    @bridge_command()
+    @doa.command()
     async def publish(self, ctx, date=None):
         """Publish the days comics, date (YYYY-MM-DD)
         is provided will publish comics for those days"""
@@ -596,7 +614,7 @@ class DoaComicCog(Cog, name="DoA Comic"):
         await self.bot.blocker(self.send_comic, date, [ctx.message.channel.id])
 
     @is_owner()
-    @bridge_command()
+    @doa.command()
     async def comicfrom(self, ctx, start):
         """Save info for comic starting from given url"""
         logger.info("downloading comic info from %s", start)
