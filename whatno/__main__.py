@@ -62,7 +62,7 @@ with env.prefixed("DISCORD_"):
     logging_config = env("LOGGING_CONFIG")
     token = args.token or env("TOKEN")
     storage = args.storage or env("STORAGE")
-    cogs = args.cogs or [c.strip() for c in env("COGS", "").split(",")]
+    cogs = args.cogs or [c.strip() for c in env("COGS", "").split(",") if c.strip()]
 
     if logging_config:
         logging.config.fileConfig(logging_config)
