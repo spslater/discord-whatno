@@ -222,18 +222,11 @@ class RereadCog(Cog, name="General Reread"):
         self.f_reread = self.bot.storage / "reread"
 
         with self.bot.env.prefixed("REREAD_"):
-            config = self.f_reread / self.bot.env.path("CONFIG")
-            files = self.f_reread / self.bot.env.path("FILES")
+            self.configfile = self.f_reread / self.bot.env.path("CONFIG")
+            self.files = self.f_reread / self.bot.env.path("FILES")
             embeds = self.f_reread / self.bot.env.path("EMBEDS")
 
-        with open(config, mode="r", encoding="utf-8") as yml:
-            self.configs = yml_load(yml.read(), Loader=Loader)
-
-        self.rereads = []
-        for _, conf in self.configs.items():
-            if conf["active"]:
-                self.rereads.append(RereadInfo(config=conf, files=files, storage=self.f_reread))
-
+        self._load_configs()
         self.embeds = RereadEmbeds(embeds)
         self.publish_rereads.start()
         logger.info("Completed General Reread setup! :D")
@@ -257,6 +250,16 @@ class RereadCog(Cog, name="General Reread"):
             embed.set_footer(text=release)
 
         return embed
+
+    def _load_configs(self):
+        with open(self.configfile, mode="r", encoding="utf-8") as yml:
+            configs = yml_load(yml.read(), Loader=Loader)
+
+        self.rereads = []
+        for _, conf in configs.items():
+            if conf["active"]:
+                self.rereads.append(RereadInfo(config=conf, files=self.files, storage=self.f_reread))
+
 
     @loop(time=EVERY_X)
     async def publish_rereads(self):
@@ -313,8 +316,8 @@ class RereadCog(Cog, name="General Reread"):
                         msg = await channel.send(file=file, embed=embeds)
                         if gid not in self.embeds:
                             self.embeds[gid] = {}
-                            if channel.id not in self.embeds[gid]:
-                                self.embeds[gid][channel.id] = []
+                        if channel.id not in self.embeds[gid]:
+                            self.embeds[gid][channel.id] = []
                         self.embeds[gid][channel.id].append(msg.id)
                     await sleep(1)
 
@@ -427,3 +430,10 @@ class RereadCog(Cog, name="General Reread"):
             channel_ids=[ctx.message.channel.id],
             increment=False,
         )
+
+    @is_owner()
+    @reread.command()
+    async def reload(self, ctx):
+        """Reload configs"""
+        self._load_configs()
+        await ctx.message.add_reaction("\N{OK HAND SIGN}")
