@@ -172,8 +172,8 @@ class RereadInfo:
         with self._schedule() as schedule:
             idx = schedule.get("next", -1)
             if date is not None:
-                start = TimeTravel.datestr(schedule.get("start"))
-                nxt = TimeTravel.datestr(date)
+                start = TimeTravel.strptime(schedule.get("start"))
+                nxt = TimeTravel.strptime(date)
                 idx = (nxt - start).days
 
             filedicts = schedule["rereads"][idx:idx+self.frequency]
@@ -277,6 +277,8 @@ class RereadCog(Cog, name="General Reread"):
             now = datetime.now()
             tstr = TimeTravel.nearest(now.hour, now.minute, 1, UPDATE_FREQUENCY)
             time = TimeTravel.parse_time(tstr)
+        elif isinstance(time, str):
+            time = TimeTravel.parse_time(time)
         logger.info(
             "Sending rereads for %s %s",
             (date or TimeTravel.datestr()),
@@ -419,15 +421,14 @@ class RereadCog(Cog, name="General Reread"):
             date = TimeTravel.datestr()
         if not time:
             now = datetime.now()
-            tstr = TimeTravel.nearest(now.hour, now.minute, 1, UPDATE_FREQUENCY)
-            time = TimeTravel.parse_time(tstr)
+            time = TimeTravel.nearest(now.hour, now.minute, 1, UPDATE_FREQUENCY)
+        time = TimeTravel.parse_time(time)
         logger.info("manually publishing rereads for date and time: %s %s", date, time)
         await ctx.send("\N{OK HAND SIGN} Sendings Rereads")
         await self.bot.blocker(
             self.send_reread,
             date=date,
             time=time,
-            channel_ids=[ctx.message.channel.id],
             increment=False,
         )
 
