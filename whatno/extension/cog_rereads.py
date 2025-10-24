@@ -85,51 +85,6 @@ class Schedule:
         return exc_type is None
 
 
-class RereadEmbeds:
-    """Embed information for when refreshing rereads"""
-
-    def __init__(self, embeds):
-        self.filename = embeds
-        if not self.filename:
-            raise ValueError("No embeds file for previously publish rereads provided")
-        self.data = None
-
-    def __getitem__(self, key):
-        if self.data is None:
-            self.load()
-        return self.data[str(key)]
-
-    def __setitem__(self, key, value):
-        if self.data is None:
-            self.load()
-        self.data[str(key)] = value
-
-    def __delitem__(self, key):
-        if self.data is None:
-            self.load()
-        del self.data[str(key)]
-
-    def __contains__(self, key):
-        if self.data is None:
-            self.load()
-        return str(key) in self.data
-
-    def get(self, key, default=None):
-        """Get value or default from data"""
-        return self.data.get(str(key), default=default)
-
-    def load(self):
-        """Load data from file"""
-        with open(self.filename, mode="r", encoding="utf-8") as fp:
-            self.data = json_load(fp)
-
-    def save(self):
-        """Save data to file"""
-        if self.data:
-            with open(self.filename, mode="w+", encoding="utf-8") as fp:
-                dump(self.data, fp, sort_keys=True, indent="\t")
-
-
 class RereadInfo:
     """Manage and get Reread information"""
 
@@ -142,9 +97,10 @@ class RereadInfo:
         self.publish = self._get_times(config.get("publish", "12:00"))
         self.frequency = config.get("frequency", 1)
         channels = config.get("channels", [])
-        if isinstance(channels, int):
+        if not isinstance(channels, list):
             channels = [channels]
-        self.channels = channels
+        self.channels = [int(c) for c in channels]
+
     @staticmethod
     def _get_times(times):
         if isinstance(times, str):
@@ -227,7 +183,6 @@ class RereadCog(Cog, name="General Reread"):
             embeds = self.f_reread / self.bot.env.path("EMBEDS")
 
         self._load_configs()
-        self.embeds = RereadEmbeds(embeds)
         self.publish_rereads.start()
         logger.info("Completed General Reread setup! :D")
 
@@ -256,9 +211,10 @@ class RereadCog(Cog, name="General Reread"):
             configs = yml_load(yml.read(), Loader=Loader)
 
         self.rereads = []
-        for _, conf in configs.items():
+        for conf in configs.values():
             if conf["active"]:
                 self.rereads.append(RereadInfo(config=conf, files=self.files, storage=self.f_reread))
+        logger.debug("rereads loaded: %s", self.rereads)
 
 
     @loop(time=EVERY_X)
@@ -266,10 +222,7 @@ class RereadCog(Cog, name="General Reread"):
         """Schedule the rereads to auto publish"""
         await self.bot.wait_until_ready()
         await self.bot.blocker(self.send_reread)
-        logger.info(
-            "Publishing next batch of rereads at %s",
-            self.publish_rereads.next_iteration,
-        )
+        logger.info("Publishing next batch of rereads at %s", self.publish_rereads.next_iteration)
 
     async def send_reread(self, date=None, time=None, channel_ids=None, increment=True):
         """Send the rereads for todays given to primary channel"""
@@ -277,15 +230,13 @@ class RereadCog(Cog, name="General Reread"):
             now = datetime.now()
             tstr = TimeTravel.nearest(now.hour, now.minute, 1, UPDATE_FREQUENCY)
             time = TimeTravel.parse_time(tstr)
+            logger.debug("no time given, closest calculated time: %s", time)
         elif isinstance(time, str):
             time = TimeTravel.parse_time(time)
-        logger.info(
-            "Sending rereads for %s %s",
-            (date or TimeTravel.datestr()),
-            (time or tstr)
-        )
+            logger.debug("time was a string, converted to: %s", time)
+        logger.info("Sending rereads for %s %s", (date or TimeTravel.datestr()), time)
 
-        self.embeds.load()
+        logger.debug("checking against all rereads: %s", self.rereads)
         for reread in self.rereads:
             logger.debug("checking %s if it's time to publish: %s", reread.title, reread.publish)
             if time not in reread.publish:
@@ -301,9 +252,7 @@ class RereadCog(Cog, name="General Reread"):
                     sendtos[guild] = []
                 sendtos[guild].append(channel)
 
-            rereads = [
-                (e["image"], self.build_embed(e)) for e in reread.todays_reread(date)
-            ]
+            rereads = [(e["image"], self.build_embed(e)) for e in reread.todays_reread(date)]
 
             logger.debug("sending %s rereads out", len(rereads))
             for image_name, embeds in rereads:
@@ -314,20 +263,13 @@ class RereadCog(Cog, name="General Reread"):
                     location = reread.files / image_name
                     file = File(location, filename=image_name)
                 for gid, channels in sendtos.items():
-                    sgid = str(gid)
                     for channel in channels:
-                        scid = str(channel.id)
-                        msg = await channel.send(file=file, embed=embeds)
-                        if sgid not in self.embeds:
-                            self.embeds[sgid] = {}
-                        if scid not in self.embeds[sgid]:
-                            self.embeds[sgid][scid] = []
-                        self.embeds[sgid][scid].append(msg.id)
+                        logger.debug("sending rereads: %s | %s", embeds, file)
+                        await channel.send(file=file, embed=embeds)
                     await sleep(1)
 
             if increment:
                 reread.increment()
-        self.embeds.save()
         logger.info("Publish complete! :)")
 
     async def refresh_embed(self, msg, embed) -> bool:
@@ -338,23 +280,9 @@ class RereadCog(Cog, name="General Reread"):
                 await msg.edit(embed=embed)
                 return True
             except (HTTPException, Forbidden) as e:
-                logger.warning(
-                    'Unable to refresh message "%s": %s',
-                    msg.id,
-                    e,
-                )
+                logger.warning('Unable to refresh message "%s": %s', msg.id, e)
         return False
 
-    def get_msg_channels(self, *mids):
-        chnls = {}
-        for channels in self.embeds.values():
-            for cid, sents in channels.items():
-                for mid in mids:
-                    if mid in sents:
-                        if cid not in chnls:
-                            chnls[cid] = []
-                        chnls[cid].append(mid)
-        return chnls
 
     @is_owner()
     @bridge_group()
@@ -377,15 +305,11 @@ class RereadCog(Cog, name="General Reread"):
     @reread.command()
     async def refresh(self, ctx, *mids):
         """Refresh the reread to get the embed working"""
-        logger.info("refreshing data: %s", mids)
         if not (ctx.message.reference or mids):
-            await ctx.send(
-                (
-                    "Need to reply to reread you want refreshed or "
-                    "send date it was released in format `YYYY-MM-DD`"
-                )
-            )
+            logger.debug("refreshing data: no data sent")
+            await ctx.send("Need to reply to reread you want refreshed or send message id")
             return
+        logger.info("refreshing data: %s | %s", ctx.message.reference, mids)
 
         msgs = []
         if ref := ctx.message.reference:
@@ -398,16 +322,13 @@ class RereadCog(Cog, name="General Reread"):
                 msgs.append(msg)
         else:
             logger.debug("refresh message ids: %s", mids)
-            channels = self.get_msg_channels(*mids)
-            for cid, pmids in channels.items():
-                channel = self.bot.get_channel(cid)
-                for mid in pmids:
-                    try:
-                        msg = await ctx.channel.fetch_message(mid)
-                    except (Forbidden, NotFound):
-                        pass
-                    else:
-                        msgs.append(msg)
+            for mid in mids:
+                try:
+                    msg = await self.bot.get_message(int(mid))
+                except (Forbidden, NotFound):
+                    continue
+                if msg is not None:
+                    msgs.append(msg)
         for msg in msgs:
             if embed := msg.embeds[0]:
                 logger.debug("Refreshing Embed: %s", embed.to_dict())
