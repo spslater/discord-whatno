@@ -314,13 +314,15 @@ class RereadCog(Cog, name="General Reread"):
                     location = reread.files / image_name
                     file = File(location, filename=image_name)
                 for gid, channels in sendtos.items():
+                    sgid = str(gid)
                     for channel in channels:
+                        scid = str(channel.id)
                         msg = await channel.send(file=file, embed=embeds)
-                        if gid not in self.embeds:
-                            self.embeds[gid] = {}
-                        if channel.id not in self.embeds[gid]:
-                            self.embeds[gid][channel.id] = []
-                        self.embeds[gid][channel.id].append(msg.id)
+                        if sgid not in self.embeds:
+                            self.embeds[sgid] = {}
+                        if scid not in self.embeds[sgid]:
+                            self.embeds[sgid][scid] = []
+                        self.embeds[sgid][scid].append(msg.id)
                     await sleep(1)
 
             if increment:
