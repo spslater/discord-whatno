@@ -130,7 +130,7 @@ class RereadInfo:
             if date is not None:
                 start = TimeTravel.strptime(schedule.get("start"))
                 nxt = TimeTravel.strptime(date)
-                idx = (nxt - start).days
+                idx = (nxt - start).days * self.frequency
 
             filedicts = schedule["rereads"][idx:idx+self.frequency]
         logger.debug("Getting following files: %s", filedicts)
@@ -337,7 +337,7 @@ class RereadCog(Cog, name="General Reread"):
 
     @is_owner()
     @reread.command()
-    async def publish(self, ctx, date=None, time=None):
+    async def publish(self, ctx, date=None, time=None, increment=None):
         """Publish the days rereads, date (YYYY-MM-DD)
         is provided will publish rereads for those days"""
         if not date:
@@ -352,7 +352,7 @@ class RereadCog(Cog, name="General Reread"):
             self.send_reread,
             date=date,
             time=time,
-            increment=False,
+            increment=(increment is not None),
         )
 
     @is_owner()
