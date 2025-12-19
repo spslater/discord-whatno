@@ -96,6 +96,7 @@ class RereadInfo:
         self.files = files / config.get("files")
         self.publish = self._get_times(config.get("publish", "12:00"))
         self.frequency = config.get("frequency", 1)
+        self.rate = config.get("rate", False)
         channels = config.get("channels", [])
         if not isinstance(channels, list):
             channels = [channels]
@@ -265,7 +266,13 @@ class RereadCog(Cog, name="General Reread"):
                 for gid, channels in sendtos.items():
                     for channel in channels:
                         logger.debug("sending rereads: %s | %s", embeds, file)
-                        await channel.send(file=file, embed=embeds)
+                        msg = await channel.send(file=file, embed=embeds)
+                        if reread.rate:
+                            await msg.add_reaction('1️⃣')
+                            await msg.add_reaction('2️⃣')
+                            await msg.add_reaction('3️⃣')
+                            await msg.add_reaction('4️⃣')
+                            await msg.add_reaction('5️⃣')
                     await sleep(1)
 
             if increment:
